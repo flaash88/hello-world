@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { ToastProvider } from '@/components/ui/toast'
 import { AppHeader } from '@/components/layout/app-header'
 import { BottomNav } from '@/components/layout/bottom-nav'
+import { navItemsFor } from '@/components/layout/nav-items'
 import { RealtimeProvider } from '@/components/realtime/realtime-provider'
 import { OfflineSync } from '@/components/offline/offline-sync'
 import { RunningTimerBar } from '@/components/tracker/running-timer-bar'
@@ -34,7 +35,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 payload: timer.payload,
               }))}
             />
-            <BottomNav />
+            <BottomNav
+              items={navItemsFor({
+                hasChild: ctx.children.length > 0,
+                hasPregnancy: Boolean(ctx.pregnancy),
+              })}
+            />
           </div>
           <OfflineSync />
         </RealtimeProvider>
