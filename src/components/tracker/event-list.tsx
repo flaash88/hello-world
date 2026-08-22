@@ -49,7 +49,7 @@ export function EventList({
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" data-testid="event-list">
         {[...days.entries()].map(([day, dayEvents]) => (
           <section key={day}>
             {showDayHeadings && (

@@ -38,3 +38,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Alles editierbar und löschbar mit „Rückgängig“; jede Änderung landet in `EventRevision`.
 - Beikost-Autocomplete aus bisherigen Einträgen; Stillseiten-Vorschlag aus dem letzten Mal.
 - Grün: lint, typecheck, 99 Unit-Tests, 21 E2E-Tests (inkl. Offline und Zwei-Personen-Sync), build.
+
+## Phase 3 – Schlaf-Algorithmus (abgeschlossen)
+
+- Wachfenster-Tabelle 0–3 Jahre mit Quellenangabe, altersinterpoliert (kein Sprung am Geburtstag).
+- Adaptives Modell: gleitender Median der letzten 14 Tage, IQR-gefiltert, gewichtet gegen die Tabelle.
+- Ehrlicher „Kalibriert noch“-Zustand unter fünf Messungen – keine erfundene Uhrzeit.
+- Vorhersage als Zeitfenster mit Konfidenz; Unterscheidung Nickerchen/Bettzeit aus gemessener Bettzeit.
+- Schlafdruck-Ring seit dem letzten Aufwachen, inkl. Übermüdungs-Überlauf.
+- 24h-Kreisuhr mit vier Ringen, geplantem Fenster als Schraffur, antippbar und wischbar.
+- Tagesziel: Gesamtschlaf und Nickerchenzahl gegen die Altersempfehlung.
+- Web Push (VAPID) mit Kategorien, Ruhezeiten, Probenachricht; optional ntfy; Cron-Sidecar.
+- Grün: lint, typecheck, 154 Unit-Tests (davon 55 zum Schlafmodell), 26 E2E-Tests, build.

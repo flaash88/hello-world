@@ -25,12 +25,12 @@ test('Änderungen erscheinen beim zweiten Elternteil ohne Neuladen', async ({ br
   await mama.getByRole('button', { name: /^Windel/ }).click()
   await mama.getByLabel('Notiz').fill('Von Mama eingetragen')
   await mama.getByRole('button', { name: 'Speichern' }).click()
-  await expect(mama.getByText('Von Mama eingetragen').first()).toBeVisible()
+  await expect(mama.getByTestId('event-list').getByText('Von Mama eingetragen').first()).toBeVisible()
 
   // Ohne Zutun von Papa erscheint der Eintrag auch bei ihm.
-  await expect(papa.getByText('Von Mama eingetragen').first()).toBeVisible({ timeout: 20_000 })
+  await expect(papa.getByTestId('event-list').getByText('Von Mama eingetragen').first()).toBeVisible({ timeout: 20_000 })
   // Und mit der Zuschreibung, wer ihn gemacht hat.
-  await expect(papa.getByTitle('Eingetragen von Mama').first()).toBeVisible()
+  await expect(papa.getByTestId('event-list').getByTitle('Eingetragen von Mama').first()).toBeVisible()
 
   await mamaContext.close()
   await papaContext.close()

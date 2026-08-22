@@ -53,7 +53,7 @@ test.describe('Offline', () => {
     await context.setOffline(false)
 
     // Der Eintrag landet am Server und die Warteanzeige verschwindet.
-    await expect(page.getByText('Im Funkloch eingetragen').first()).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByTestId('event-list').getByText('Im Funkloch eingetragen').first()).toBeVisible({ timeout: 20_000 })
     await expect(page.getByText(/Eintrag wartet|Einträge warten/)).toHaveCount(0)
   })
 })

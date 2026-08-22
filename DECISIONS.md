@@ -130,3 +130,50 @@ Lebensmittelliste, die ohnehin nie passt.
 Farbflecken. Nachts im Dunkeln ist „Senfgelb – typisch bei Muttermilch“
 brauchbarer als ein Farbfeld, und die auffälligen Varianten (rötlich, weißlich)
 tragen den Hinweis zur Abklärung direkt bei sich.
+
+## Phase 3 – Schlaf-Algorithmus
+
+**Wachfenster statt fixer Uhrzeiten.** Vorhergesagt wird nicht „13:40“, sondern
+„nach X Minuten wach“ – das ist die Größe, die sich beim Kind tatsächlich
+stabilisiert, und sie funktioniert auch, wenn der Tag völlig verschoben ist.
+
+**Gleitender Median statt Mittelwert, mit IQR-Filter.** Ein einzelnes
+Marathon-Wachfenster (Autofahrt, Arztbesuch) darf die Vorhersage nicht
+verbiegen. Der Test dazu prüft genau das: ein Ausreißer verschiebt das Ergebnis
+um höchstens fünf Minuten.
+
+**Ehrliche Kalibrierung statt Fake-Präzision.** Unter fünf gemessenen
+Wachfenstern gibt es keine Uhrzeit, sondern den Hinweis „Kalibriert noch“ samt
+Zählerstand. Zwischen 5 und 15 Messungen wächst das Gewicht der eigenen Daten
+linear – so kippt die Vorhersage nicht schlagartig bei der fünften Messung.
+
+**Konfidenz aus Datenmenge und Streuung.** Halb aus dem Gewicht der eigenen
+Daten, halb aus der Konsistenz (Interquartilsabstand relativ zum Erwartungswert).
+Ein Kind mit gleichmäßigem Rhythmus bekommt hohe Konfidenz, ein chaotisches eine
+niedrige – und das steht auch so in der UI.
+
+**Das Vorhersagefenster kommt aus der Streuung des Kindes**, nicht aus einem
+festen Zuschlag: Quartilsabstand halbiert, mindestens ±10 Minuten.
+
+**Messungen werden gefiltert.** Unter 10 Minuten ist kein Wachfenster (nur kurz
+aufgewacht), über dem Dreifachen des Erwartungswerts ist es ein vergessener
+Eintrag. Beides würde das Modell sonst systematisch verzerren.
+
+**Korrigiertes Alter bei Frühgeburt** bis zwei Jahre, ab zwei Wochen Differenz.
+Ohne das sind alle Erwartungen an ein Frühchen zu hoch angesetzt.
+
+**Nickerchen oder Nacht entscheidet die gemessene Bettzeit** (Median der
+Nachtschlaf-Beginne), nicht eine feste Uhrzeit. Der Median wird um Mitternacht
+herum korrekt gebildet, damit 23:50 und 00:10 nicht in der Mittagszeit landen.
+
+**Die Kreisuhr hat vier getrennte Ringe** statt eines überlagerten. Schlaf außen,
+dann Nahrung, dann Windeln, innen der Rest – so verdeckt ein zehnstündiger
+Nachtschlaf nicht sämtliche Fütterungen.
+
+**Erinnerungen laufen über einen Cron-Sidecar**, der alle fünf Minuten einen
+geschützten Endpunkt aufruft. Kein zusätzlicher Prozess im App-Container, und
+die Logik bleibt in der App statt in einem Shell-Skript.
+
+**ntfy ist ein zusätzlicher Weg, kein Ersatz.** Es läuft unabhängig von Web Push
+und schluckt eigene Fehler – wenn der ntfy-Server nicht erreichbar ist, kommt
+die Web-Push-Nachricht trotzdem an.
