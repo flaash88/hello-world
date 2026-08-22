@@ -50,3 +50,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Tagesziel: Gesamtschlaf und Nickerchenzahl gegen die Altersempfehlung.
 - Web Push (VAPID) mit Kategorien, Ruhezeiten, Probenachricht; optional ntfy; Cron-Sidecar.
 - Grün: lint, typecheck, 154 Unit-Tests (davon 55 zum Schlafmodell), 26 E2E-Tests, build.
+
+## Phase 4 – Statistiken, Wachstum, Export (abgeschlossen)
+
+- Echte WHO-LMS-Tabellen als JSON im Repo (0–5 Jahre, Tagesauflösung, 4 Indikatoren, beide Geschlechter).
+- Eigene LMS-Rechnung, gegen offizielle Referenzwerte getestet; Perzentilkurven P3–P97.
+- Wachstumsseite mit Kurven, eigenen Punkten, korrigiertem Alter bei Frühgeburt.
+- Statistiken für Tag/Woche/Monat: Schlaf, Fütterung, Windeln, Trendlinien, Tagesverteilung.
+- Schlaf-Heatmap über 30 Tage (Zeile = Tag, Spalte = Stunde).
+- Automatischer Wochenrückblick, beschreibend statt bewertend, für beide gleich.
+- Export: CSV je Kategorie (Semikolon, Dezimalkomma, BOM), JSON-Backup ohne Zugangsdaten, PDF-Wochenbericht.
+- Ein Locale-Fehler wurde durch die Tests gefunden: `de-AT` hängt bei Stunden " Uhr" an.
+- Grün: lint, typecheck, 259 Unit-Tests (95,6 % Coverage auf der Logik), 36 E2E-Tests, build.

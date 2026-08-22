@@ -28,5 +28,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|icons|fonts|favicon.ico|api/health).*)'],
+  // API-Routen bleiben aussen vor: Sie pruefen die Session selbst und
+  // antworten mit 401, statt einen Client auf die Anmeldeseite umzuleiten.
+  matcher: ['/((?!_next/static|_next/image|icons|fonts|favicon.ico|api/).*)'],
 }

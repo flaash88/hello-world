@@ -37,6 +37,8 @@ export default defineConfig({
     url: `${baseURL}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { NODE_ENV: 'production' },
+    // Der Testserver laeuft ueber http – ohne das Secure-Flag kommen die
+    // Session-Cookies auch bei API-Anfragen an.
+    env: { NODE_ENV: 'production', COOKIE_SECURE: 'false' },
   },
 })
