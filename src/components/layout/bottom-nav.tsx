@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BarChart3,
+  BookHeart,
   HeartHandshake,
   Home,
   LineChart,
@@ -18,6 +19,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   history: BarChart3,
   development: Sparkles,
   stats: LineChart,
+  journal: BookHeart,
   pregnancy: HeartHandshake,
   more: Settings2,
 }

@@ -74,3 +74,16 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - „Beim nächsten Termin ansprechen“ für überfällige Meilensteine mit Warngrenze.
 - Dynamische Tab-Leiste mit höchstens fünf Zielen, je nach Schwangerschaft und Kind.
 - Grün: lint, typecheck, 290 Unit-Tests, 43 E2E-Tests, build.
+
+## Phase 6 – Tagebuch, Fotos, Sounds (abgeschlossen)
+
+- Tagebuch mit Text, mehreren Fotos, Datum, Schlagwörtern und Stimmung; Zeitleiste mit Filtern.
+- Foto-Upload lokal auf Platte, Neukodierung nach WebP mit Thumbnail, EXIF vollständig entfernt.
+- Aufnahmedatum aus EXIF wird als Datumsvorschlag übernommen, bevor die Daten verworfen werden.
+- Bilder nur für angemeldete Mitglieder des Haushalts abrufbar (E2E-geprüft: 401 ohne Anmeldung).
+- Dateitypprüfung anhand des Inhalts; getarnte Nicht-Bilder werden abgelehnt.
+- Monatsfoto-Serie als Galerie mit Lücken für fehlende Monate.
+- Jahresrückblick mit Zahlen, Meilensteinen und Einträgen, druckbar über den Browser.
+- Neun Einschlafgeräusche, vollständig per Web Audio API erzeugt, mit Timer, Fade-Out,
+  Lautstärke, Favoriten und MediaSession für den Sperrbildschirm.
+- Grün: lint, typecheck, 296 Unit-Tests, 49 E2E-Tests, build.
