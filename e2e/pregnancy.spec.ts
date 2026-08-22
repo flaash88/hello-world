@@ -13,7 +13,11 @@ test.describe('Schwangerschaft', () => {
 
   test('zeigt SSW, Countdown und Wocheninhalt', async ({ page }) => {
     await expect(page.getByText(/SSW \d+\+\d/)).toBeVisible()
-    await expect(page.getByText(`noch ${DUE_IN_DAYS} Tage`)).toBeVisible()
+    // Der Countdown rechnet in Ortszeit, das Testdatum entsteht in UTC –
+    // je nach Uhrzeit unterscheidet sich das um einen Tag.
+    await expect(
+      page.getByText(new RegExp(`noch (${DUE_IN_DAYS}|${DUE_IN_DAYS - 1}) Tage`)),
+    ).toBeVisible()
 
     await page.goto('/schwangerschaft')
     await expect(page.getByRole('heading', { name: 'Diese Woche' })).toBeVisible()

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BellRing, ChevronRight, Download, LogOut, Moon, Ruler, UserPlus, Users } from 'lucide-react'
+import { BellRing, ChevronRight, Download, LineChart, LogOut, Moon, Ruler, Sparkles, UserPlus, Users } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { logoutAction } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,8 @@ const LINKS = [
   { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
   { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
   { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
+  { href: '/auswertung', label: 'Auswertung', icon: LineChart },
+  { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
   { href: '/mehr/export', label: 'Export & Backup', icon: Download },
 ]
 

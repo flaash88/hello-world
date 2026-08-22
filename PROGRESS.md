@@ -62,3 +62,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Export: CSV je Kategorie (Semikolon, Dezimalkomma, BOM), JSON-Backup ohne Zugangsdaten, PDF-Wochenbericht.
 - Ein Locale-Fehler wurde durch die Tests gefunden: `de-AT` hängt bei Stunden " Uhr" an.
 - Grün: lint, typecheck, 259 Unit-Tests (95,6 % Coverage auf der Logik), 36 E2E-Tests, build.
+
+## Phase 5 – Content und Entwicklung (abgeschlossen)
+
+- 77 Content-Einträge als Markdown: Woche 0–52 wöchentlich, danach monatsweise (Monat 13–36).
+- Je Eintrag acht Abschnitte: Körper, Motorik, Sprache, Sozial, Schlaf, Ernährung, Achtung, Elterntipp.
+- Sprungkalender mit zehn Fenstern, Anzeichen und Gewinnen – samt Einordnung der Datenlage.
+- 236 Entwicklungsübungen mit Ziel, Material, 3–5 Schritten und Dauer, lückenlos für Woche 0–156.
+- Übung des Tages, deterministisch aus Alter und Datum, überspringt bereits Gemachtes.
+- 69 kuratierte Meilensteine in sechs Kategorien, abhakbar, plus eigene Meilensteine.
+- „Beim nächsten Termin ansprechen“ für überfällige Meilensteine mit Warngrenze.
+- Dynamische Tab-Leiste mit höchstens fünf Zielen, je nach Schwangerschaft und Kind.
+- Grün: lint, typecheck, 290 Unit-Tests, 43 E2E-Tests, build.

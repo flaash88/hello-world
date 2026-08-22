@@ -226,3 +226,42 @@ Prisma-gebundene Module (`queries`, `service`, `analysis`, `push`, Actions) sind
 von der Messung ausgenommen und stattdessen durch die Playwright-Tests
 abgedeckt. Ein Prisma-Mock würde dort nur den Mock testen. Auf dem
 verbleibenden Teil liegt die Abdeckung bei rund 95 Prozent.
+
+## Phase 5 – Content, Sprünge, Übungen, Meilensteine
+
+**77 Content-Einträge statt 157 Dateien.** Der Prompt erlaubt ab Woche 53
+monatsweise Bündelung; genutzt wird sie konsequent. Wochen 0 bis 52 haben je
+einen eigenen Eintrag, danach deckt einer den Lebensmonat ab. Der Loader sucht
+zu jeder Woche den passenden Eintrag, und die UI schreibt dazu, für welchen
+Zeitraum er gilt – statt so zu tun, als wäre Woche 137 anders als Woche 138.
+
+**Content als Markdown mit Frontmatter, nicht als TypeScript.** Texte ändert
+man leichter, wenn sie nicht in Anführungszeichen stehen. Der Loader zerlegt
+an den `##`-Überschriften und ist damit unabhängig von der Abschnittsanzahl.
+
+**Sprünge werden mit ihrer eigenen Unsicherheit ausgeliefert.** Die feste
+Einteilung der Entwicklungssprünge ist wissenschaftlich umstritten – das steht
+direkt auf der Karte, nicht im Kleingedruckten. Als Erklärung für eine
+anstrengende Woche bleibt sie nützlich, als Prognose nicht.
+
+**Sprünge und Content rechnen mit dem korrigierten Alter.** Bei einem Frühchen
+wäre sonst alles um Wochen zu früh angesetzt.
+
+**236 Übungen, alle mit Alltagsmaterial.** Was gekauft werden muss, wird selten
+benutzt. Jede Übung hat Ziel, Material, drei bis fünf Schritte und eine Dauer;
+Tests prüfen genau das für jeden Eintrag, inklusive lückenloser Abdeckung jeder
+Woche von 0 bis 156.
+
+**Die Übung des Tages ist deterministisch** aus Alter und Datum berechnet –
+beide Elternteile sehen dieselbe, und sie wechselt täglich. Bereits gemachte
+Übungen werden bevorzugt übersprungen.
+
+**69 Meilensteine mit breiten Zeitfenstern.** Wo das Ausbleiben ein echtes
+Warnsignal wäre, trägt der Eintrag eine eigene Grenze (`concernAfterWeeks`) und
+landet dann in „Beim nächsten Termin ansprechen“ – formuliert als Erinnerung,
+nicht als Diagnose.
+
+**Die Tab-Leiste ist dynamisch und bleibt bei höchstens fünf Zielen.** Solange
+nur eine Schwangerschaft läuft, ist die SSW-Ansicht wichtiger als eine
+Auswertung ohne Daten. Übergeben werden nur serialisierbare Schlüssel; die
+Symbole ordnet die Client-Komponente zu.
