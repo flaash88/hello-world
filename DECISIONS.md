@@ -88,3 +88,45 @@ Avocado-Ketten) und alle Wochentexte selbst formuliert. Größen- und
 Gewichtsangaben sind gerundete Durchschnittswerte, bis SSW 20 als
 Scheitel-Steiß-Länge, danach als Scheitel-Ferse-Länge – der Sprung in der
 Tabelle ist deshalb korrekt und wird in der UI erklärt.
+
+## Phase 2 – Tracker
+
+**Ein polymorpher `Event`-Typ statt neun Tabellen.** Alle Tracker teilen sich
+Zeitraum, Zuschreibung, Notiz, Soft-Delete und Revisionen; nur die `payload`
+unterscheidet sich und wird per zod-Schema je `type` validiert. Eine neue
+Tracker-Art kostet damit ein Schema plus ein Formularstück, keine Migration.
+
+**Timer-Zustand liegt am Server, nicht im Browser.** `running`, `pausedAt` und
+`pausedSec` stehen in der Datenbank – ein Reload, ein App-Kill oder der Wechsel
+aufs andere Handy verlieren nichts, und beide sehen denselben laufenden Timer.
+
+**Schlaf, Stillen und Abpumpen starten mit einem Tap** (`instantStart`), die
+Details lassen sich danach nachtragen. Die Flasche braucht dagegen eine Menge –
+ohne Eingabeblatt wäre der Eintrag wertlos. Damit ist jede Schnellaktion in
+höchstens zwei Taps ab Startbildschirm erledigt.
+
+**Der Stillseiten-Vorschlag kommt aus dem letzten Eintrag** und wird beim
+Ein-Tap-Start direkt gesetzt (zuletzt links → jetzt rechts).
+
+**Jeder Schreibvorgang läuft über die IndexedDB-Queue**, auch online. Der
+Online-Fall ist dann nur ein sehr kurzer Zwischenstopp, aber es gibt exakt einen
+Schreibpfad statt zweier – die Offline-Variante kann so nicht verrotten.
+Idempotenz über `clientId` (unique in der DB): ein erneut gesendeter Eintrag
+legt nichts doppelt an.
+
+**Konfliktauflösung Last-Write-Wins auf Feldebene.** Die Queue schickt nur
+tatsächlich geänderte Felder; wer zuletzt schreibt, gewinnt für genau diese
+Felder. Bei zwei Personen und getrennten Geräten ist das die Auflösung, die
+niemanden überrascht.
+
+**Nichts wird wirklich gelöscht.** `deletedAt` plus `EventRevision` je Änderung.
+Der Toast bietet direkt „Rückgängig“ an.
+
+**Autocomplete für Beikost aus den eigenen Einträgen**, per SQL über
+`jsonb_array_elements_text` nach Häufigkeit sortiert – keine mitgelieferte
+Lebensmittelliste, die ohnehin nie passt.
+
+**Stuhlfarben und -konsistenzen mit Klartext-Beschreibung** statt bloßer
+Farbflecken. Nachts im Dunkeln ist „Senfgelb – typisch bei Muttermilch“
+brauchbarer als ein Farbfeld, und die auffälligen Varianten (rötlich, weißlich)
+tragen den Hinweis zur Abklärung direkt bei sich.

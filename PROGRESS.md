@@ -25,3 +25,16 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Kliniktasche: 46 Einträge in 6 Abschnitten, abhakbar mit Zuschreibung, erweiterbar.
 - Namensliste mit blindem Voting und Treffer-Ansicht.
 - Grün: lint, typecheck, 65 Unit-Tests, 11 E2E-Tests, build.
+
+## Phase 2 – Tracker (abgeschlossen)
+
+- Polymorpher Event-Typ mit zod-Schema je Art; neun Tracker (Schlaf, Stillen, Flasche,
+  Abpumpen, Beikost, Windel, Stimmung, Gesundheit, Sonstiges) inkl. aller Detailfelder.
+- Timer serverseitig: Start/Pause/Fortsetzen/Stopp überleben Reload, App-Kill und Gerätewechsel.
+- Sticky Timer-Leiste über der Tab-Navigation, sichtbar auf jeder Seite.
+- Schnellaktionen: Ein-Tap-Start für Schlaf/Stillen/Abpumpen, alles andere zwei Taps.
+- Offline: IndexedDB-Queue mit Idempotenz, Sammel-Endpunkt `/api/sync`, Statusleiste, Retry.
+- Realtime: Änderungen des Partners erscheinen ohne Neuladen (per E2E mit zwei Browsern geprüft).
+- Alles editierbar und löschbar mit „Rückgängig“; jede Änderung landet in `EventRevision`.
+- Beikost-Autocomplete aus bisherigen Einträgen; Stillseiten-Vorschlag aus dem letzten Mal.
+- Grün: lint, typecheck, 99 Unit-Tests, 21 E2E-Tests (inkl. Offline und Zwei-Personen-Sync), build.

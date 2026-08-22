@@ -1,22 +1,54 @@
 import Link from 'next/link'
-import { Baby, ChevronRight, HeartHandshake, Timer, UserPlus } from 'lucide-react'
+import { Baby, ChevronRight, HeartHandshake, Plus, Timer, UserPlus } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { gestationalAge } from '@/lib/pregnancy/weeks'
 import { pregnancyWeekContent } from '@/lib/pregnancy/content'
 import { formatAge, formatDateLong } from '@/lib/time'
+import {
+  knownFoods,
+  lastEventPerType,
+  lastNursingSide,
+  recentEvents,
+} from '@/lib/events/queries'
+import { EVENT_TYPES, type EventType } from '@/lib/events/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { QuickActions } from '@/components/tracker/quick-actions'
+import { LastEventsStrip } from '@/components/tracker/last-events-strip'
+import { EventList } from '@/components/tracker/event-list'
+import { AllActionsSheet } from '@/components/tracker/all-actions-sheet'
+
+const DEFAULT_QUICK_ACTIONS: EventType[] = ['sleep', 'nursing', 'bottle', 'diaper']
+
+function parseQuickActions(value: unknown): EventType[] {
+  if (!Array.isArray(value)) return DEFAULT_QUICK_ACTIONS
+  const filtered = value.filter(
+    (entry): entry is EventType => typeof entry === 'string' && (EVENT_TYPES as readonly string[]).includes(entry),
+  )
+  return filtered.length > 0 ? filtered : DEFAULT_QUICK_ACTIONS
+}
 
 export default async function HomePage() {
   const ctx = await getAppContext()
   const partnerMissing = ctx.members.length < 2
+  const child = ctx.activeChild
 
-  const age = ctx.pregnancy
-    ? gestationalAge(ctx.pregnancy.dueDate, new Date(), ctx.timezone)
-    : null
+  const age = ctx.pregnancy ? gestationalAge(ctx.pregnancy.dueDate, new Date(), ctx.timezone) : null
   const weekContent = age ? pregnancyWeekContent(age.week) : null
+
+  const [events, lastByType, foods, nursingSide] = child
+    ? await Promise.all([
+        recentEvents(child.id, ctx.members, 12),
+        lastEventPerType(child.id),
+        knownFoods(child.id),
+        lastNursingSide(child.id),
+      ])
+    : [[], new Map(), [], null]
+
+  const quickActions = parseQuickActions(ctx.household.settings?.quickActions)
+  const runningTypes = events.filter((e) => e.running).map((e) => e.type)
 
   return (
     <div className="flex flex-col gap-4">
@@ -25,7 +57,7 @@ export default async function HomePage() {
         <p className="text-muted-foreground">{ctx.household.name}</p>
       </div>
 
-      {!ctx.activeChild && !ctx.pregnancy && (
+      {!child && !ctx.pregnancy && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -43,6 +75,56 @@ export default async function HomePage() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {child && (
+        <>
+          <QuickActions
+            childId={child.id}
+            actions={quickActions}
+            runningTypes={runningTypes}
+            suggestions={foods}
+            lastNursingSide={nursingSide}
+          />
+          <AllActionsSheet
+            childId={child.id}
+            active={quickActions}
+            suggestions={foods}
+            lastNursingSide={nursingSide}
+          />
+
+          <section>
+            <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              Zuletzt
+            </h2>
+            <LastEventsStrip
+              lastByType={lastByType}
+              types={['sleep', 'nursing', 'bottle', 'pumping', 'solids', 'diaper']}
+            />
+          </section>
+
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                Heute
+              </h2>
+              <Link
+                href="/verlauf"
+                className="inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-primary"
+              >
+                Ganzer Verlauf
+                <ChevronRight className="size-4" aria-hidden />
+              </Link>
+            </div>
+            <EventList
+              events={events}
+              childId={child.id}
+              suggestions={foods}
+              showDayHeadings={false}
+              emptyHint="Tippe oben auf eine Schnellaktion – der erste Eintrag ist in zwei Sekunden erledigt."
+            />
+          </section>
+        </>
       )}
 
       {ctx.pregnancy && age && (
@@ -83,25 +165,29 @@ export default async function HomePage() {
             </Card>
           </Link>
 
-          <Button asChild size="lg" variant="outline" className="h-16">
-            <Link href="/schwangerschaft/wehen">
-              <Timer aria-hidden />
-              Wehen-Timer öffnen
-            </Link>
-          </Button>
+          {!child && (
+            <>
+              <Button asChild size="lg" variant="outline" className="h-16">
+                <Link href="/schwangerschaft/wehen">
+                  <Timer aria-hidden />
+                  Wehen-Timer öffnen
+                </Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link href="/onboarding">
+                  <Plus aria-hidden />
+                  Kind ist da – Profil anlegen
+                </Link>
+              </Button>
+            </>
+          )}
         </>
       )}
 
-      {ctx.activeChild?.birthDate && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{ctx.activeChild.name}</CardTitle>
-            <CardDescription>
-              {formatAge(ctx.activeChild.birthDate, new Date(), ctx.timezone)} · geboren am{' '}
-              {formatDateLong(ctx.activeChild.birthDate, ctx.timezone)}
-            </CardDescription>
-          </CardHeader>
-        </Card>
+      {child?.birthDate && (
+        <p className="text-center text-xs text-muted-foreground">
+          {child.name} · {formatAge(child.birthDate, new Date(), ctx.timezone)}
+        </p>
       )}
 
       {partnerMissing && (
