@@ -21,11 +21,22 @@ export type SessionUser = {
   householdId: string
 }
 
+/**
+ * Secure-Flag: in Produktion an, weil die App hinter HTTPS laeuft. Ueber
+ * COOKIE_SECURE=false abschaltbar – noetig fuer E2E-Tests ueber http und fuer
+ * Installationen, die nur im LAN ohne TLS erreichbar sind.
+ */
+export function cookiesAreSecure(): boolean {
+  if (process.env.COOKIE_SECURE === 'false') return false
+  if (process.env.COOKIE_SECURE === 'true') return true
+  return process.env.NODE_ENV === 'production'
+}
+
 function cookieOptions(maxAgeSeconds: number) {
   return {
     httpOnly: true,
     sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookiesAreSecure(),
     path: '/',
     maxAge: maxAgeSeconds,
   }

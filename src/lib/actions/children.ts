@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
-import { requireUser } from '@/lib/auth/session'
+import { cookiesAreSecure, requireUser } from '@/lib/auth/session'
 import { ACTIVE_CHILD_COOKIE, assertChildInHousehold } from '@/lib/household'
 
 export async function setActiveChildAction(childId: string): Promise<void> {
@@ -13,7 +13,7 @@ export async function setActiveChildAction(childId: string): Promise<void> {
   store.set(ACTIVE_CHILD_COOKIE, childId, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: cookiesAreSecure(),
     path: '/',
     maxAge: 365 * 86400,
   })

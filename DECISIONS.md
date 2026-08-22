@@ -177,3 +177,52 @@ die Logik bleibt in der App statt in einem Shell-Skript.
 **ntfy ist ein zusätzlicher Weg, kein Ersatz.** Es läuft unabhängig von Web Push
 und schluckt eigene Fehler – wenn der ntfy-Server nicht erreichbar ist, kommt
 die Web-Push-Nachricht trotzdem an.
+
+## Phase 4 – Statistiken, Wachstum, Export
+
+**Die echten WHO-LMS-Tabellen liegen als JSON im Repo** (330 kB, Tagesauflösung
+0–5 Jahre, vier Indikatoren × zwei Geschlechter), samt `NOTICE.md` mit Quelle
+und Lizenzlage. Die Rechnung (`lms.ts`) ist selbst implementiert – eine
+Näherung der Kurven wäre bei Babygewichten die falsche Sparsamkeit.
+
+**Der Sprung der Längenkurve mit 24 Monaten wird nicht geglättet.** Die WHO
+misst ab da im Stehen statt im Liegen, die Referenz fällt um rund 0,7 cm. Ein
+Test sichert genau diesen Sprung ab, und die UI erklärt ihn an der Stelle.
+
+**Perzentile werden wertfrei formuliert.** „Auf dem 50. Perzentil“, nie „zu
+leicht“ oder „zu schwer“. Der begleitende Hinweis sagt, dass der Verlauf zählt
+und nicht der einzelne Punkt.
+
+**CSV mit Semikolon und Dezimalkomma, mit BOM.** So öffnet Excel in deutscher
+Spracheinstellung die Datei direkt richtig, statt alles in eine Spalte zu
+kippen.
+
+**Das JSON-Backup enthält keine Passwort-Hashes, Sessions oder
+Einladungscodes.** Ein Export landet erfahrungsgemäß irgendwann in einer Cloud;
+Zugangsdaten haben darin nichts verloren. Ein E2E-Test prüft das.
+
+**Das private Elterntagebuch ist nur im eigenen Export enthalten**
+(`?privat=1`) – der einzige Bereich, den die andere Person nicht sieht, bleibt
+auch im Backup privat, solange man es nicht ausdrücklich will.
+
+**PDF mit pdf-lib und Standardschrift Helvetica.** Keine eingebettete Schrift,
+kein Rendern im Browser: Der Bericht entsteht serverseitig in ein paar
+Millisekunden. Zeichen außerhalb von WinAnsi werden vorher ersetzt.
+
+**Der Wochenrückblick beschreibt, statt zu bewerten.** Kein „zu wenig Schlaf“,
+sondern „im Schnitt X pro Tag, −Y gegenüber der Vorwoche“. Trends erst ab fünf
+Prozent Unterschied – darunter ist es Rauschen. Ein Test prüft, dass keine
+wertenden Formulierungen auftauchen.
+
+**API-Routen liegen außerhalb der Middleware.** Sie prüfen die Session selbst
+und antworten mit 401, statt einen API-Client auf die Anmeldeseite umzuleiten.
+
+**`COOKIE_SECURE` ist konfigurierbar.** Standard ist an (die App läuft hinter
+HTTPS), abschaltbar für Installationen ohne TLS im LAN – und für die
+E2E-Tests, die über http laufen.
+
+**Coverage-Grenze gilt für die Logik, nicht für die Datenbankschicht.**
+Prisma-gebundene Module (`queries`, `service`, `analysis`, `push`, Actions) sind
+von der Messung ausgenommen und stattdessen durch die Playwright-Tests
+abgedeckt. Ein Prisma-Mock würde dort nur den Mock testen. Auf dem
+verbleibenden Teil liegt die Abdeckung bei rund 95 Prozent.
