@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-const CODE = process.env.E2E_INVITE_CODE ?? 'WILLKOMMEN'
-const EMAIL = process.env.E2E_EMAIL ?? 'mama@example.org'
-const PASSWORD = 'ein-sicheres-passwort'
+import { createHouseholdInvite, PASSWORD, uniqueEmail } from './helpers'
+
+const EMAIL = uniqueEmail('auth')
+let CODE = ''
+
+test.beforeAll(async () => {
+  CODE = await createHouseholdInvite('Anmeldetest')
+})
 
 test.describe('Anmeldung', () => {
   test('ohne Session landet man auf der Anmeldeseite', async ({ page }) => {
@@ -45,7 +50,7 @@ test.describe('Anmeldung', () => {
     await page.goto('/register')
     await page.getByLabel('Einladungscode').fill(CODE)
     await page.getByLabel('Dein Name').fill('Papa')
-    await page.getByLabel('E-Mail').fill('papa-test@example.org')
+    await page.getByLabel('E-Mail').fill(uniqueEmail('papa'))
     await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD)
     await page.getByLabel('Passwort wiederholen').fill(PASSWORD)
     await page.getByRole('button', { name: 'Konto anlegen' }).click()

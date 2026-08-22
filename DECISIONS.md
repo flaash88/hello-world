@@ -54,3 +54,37 @@ der Praxis: nichts wird wirklich gelöscht, jede Änderung ist nachvollziehbar.
 **Backup als eigener Sidecar-Container.** `pg_dump | gzip` in ein Volume, ohne
 cron-Daemon (Shell-Schleife), Aufbewahrung standardmäßig 14 Tage. So bleibt das
 App-Image schlank und der Backup-Job läuft auch bei App-Neustarts weiter.
+
+## Phase 1 – Schwangerschaft
+
+**Schwangerschaftsalter aus dem ET, nicht aus der letzten Periode.** Der ET wird
+per Ultraschall korrigiert und ist die verlässlichere Größe; die letzte Periode
+ist optional. `lastPeriodFromDueDate()` rechnet intern zurück – so funktioniert
+alles auch ohne Periodendatum.
+
+**Vorbefüllte Listen werden beim ersten Seitenaufruf in die DB kopiert**
+(Kliniktasche, Mutter-Kind-Pass-Termine), nicht bei jedem Rendern aus dem
+Template gelesen. Nur so sind sie editierbar und beide sehen denselben Stand.
+Die Kopierfunktionen liegen in `lib/pregnancy/seed.ts`, nicht als Server Action:
+`revalidatePath` ist während des Renderns nicht erlaubt.
+
+**SSW-Bereiche der Termine werden serverseitig berechnet.** Die Umrechnung
+braucht die Zeitzone; im Browser verschiebt eine Zeitumstellung zwischen
+Fensterbeginn und Berechnung die Woche sonst um eins.
+
+**4-1-1 wird in drei Teilbedingungen zerlegt** (Abstand, Dauer, Dauerhaftigkeit)
+statt als einzelnes Ja/Nein. So sieht man, was noch fehlt, statt nur „nein“.
+Die Toleranzen sind bewusst mild (5 statt 4 Minuten, 45 statt 60 Sekunden) –
+lieber einmal zu früh anrufen.
+
+**Wehenabstand von Beginn zu Beginn**, wie in der Geburtshilfe üblich – nicht
+vom Ende der einen zum Beginn der nächsten.
+
+**Namensvoting blind.** Man sieht die Bewertung der anderen Person erst, wenn
+man selbst abgestimmt hat. Ein Treffer entsteht nur bei beidseitigem Ja.
+
+**Vergleichsobst mitteleuropäisch** (Melanzani, Karfiol, Kohlrabi statt
+Avocado-Ketten) und alle Wochentexte selbst formuliert. Größen- und
+Gewichtsangaben sind gerundete Durchschnittswerte, bis SSW 20 als
+Scheitel-Steiß-Länge, danach als Scheitel-Ferse-Länge – der Sprung in der
+Tabelle ist deshalb korrekt und wird in der UI erklärt.

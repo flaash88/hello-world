@@ -1,13 +1,22 @@
 import Link from 'next/link'
-import { Baby, HeartHandshake, UserPlus } from 'lucide-react'
+import { Baby, ChevronRight, HeartHandshake, Timer, UserPlus } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { gestationalAge } from '@/lib/pregnancy/weeks'
+import { pregnancyWeekContent } from '@/lib/pregnancy/content'
 import { formatAge, formatDateLong } from '@/lib/time'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 export default async function HomePage() {
   const ctx = await getAppContext()
   const partnerMissing = ctx.members.length < 2
+
+  const age = ctx.pregnancy
+    ? gestationalAge(ctx.pregnancy.dueDate, new Date(), ctx.timezone)
+    : null
+  const weekContent = age ? pregnancyWeekContent(age.week) : null
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,7 +33,7 @@ export default async function HomePage() {
               Los geht&apos;s
             </CardTitle>
             <CardDescription>
-              Lege zuerst eure Schwangerschaft oder euer Kind an – danach steht der Rest der App
+              Legt zuerst eure Schwangerschaft oder euer Kind an – danach steht der Rest der App
               bereit.
             </CardDescription>
           </CardHeader>
@@ -36,18 +45,51 @@ export default async function HomePage() {
         </Card>
       )}
 
-      {ctx.pregnancy && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HeartHandshake className="size-5 text-primary" aria-hidden />
-              {ctx.pregnancy.label}
-            </CardTitle>
-            <CardDescription>
-              Errechneter Termin: {formatDateLong(ctx.pregnancy.dueDate, ctx.timezone)}
-            </CardDescription>
-          </CardHeader>
-        </Card>
+      {ctx.pregnancy && age && (
+        <>
+          <Link href="/schwangerschaft" className="block">
+            <Card className="transition-colors hover:border-primary">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <HeartHandshake className="size-5 text-primary" aria-hidden />
+                    {ctx.pregnancy.label}
+                  </CardTitle>
+                  <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                </div>
+                <CardDescription>
+                  ET am {formatDateLong(ctx.pregnancy.dueDate, ctx.timezone)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-display text-3xl font-bold tabular">SSW {age.label}</span>
+                  <Badge variant="secondary">
+                    {age.overdue
+                      ? `${Math.abs(age.daysToDue)} Tage drüber`
+                      : `noch ${age.daysToDue} Tage`}
+                  </Badge>
+                </div>
+                <Progress
+                  value={Math.round(age.progress * 100)}
+                  aria-label={`${Math.round(age.progress * 100)} Prozent der Schwangerschaft`}
+                />
+                {weekContent && (
+                  <p className="text-sm text-muted-foreground">
+                    Etwa so groß wie {weekContent.comparison.toLowerCase()}.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Button asChild size="lg" variant="outline" className="h-16">
+            <Link href="/schwangerschaft/wehen">
+              <Timer aria-hidden />
+              Wehen-Timer öffnen
+            </Link>
+          </Button>
+        </>
       )}
 
       {ctx.activeChild?.birthDate && (
