@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sproessling
+          POSTGRES_PASSWORD: sproessling
+          POSTGRES_DB: sproessling
+        options: >-
+          --health-cmd "pg_isready -U sproessling"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+        ports: ['5432:5432']
+    env:
+      DATABASE_URL: postgresql://sproessling:sproessling@localhost:5432/sproessling?schema=public
+      SESSION_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+      BOOTSTRAP_INVITE_CODE: CI-CODE
+      TZ: Europe/Vienna
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build
