@@ -12,3 +12,16 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Nachtmodus als eigenes Token-Set (`data-theme="night"`), automatisch 20:00–06:00.
 - Betrieb: Multi-Stage-Dockerfile, docker-compose (app + postgres + backup), Healthcheck, CI.
 - Grün: `lint`, `typecheck`, 31 Unit-Tests, 4 E2E-Tests (Registrierung/Anmeldung), `build`.
+
+## Phase 1 – Schwangerschaft (abgeschlossen)
+
+- SSW-Rechnung aus dem ET (Nägele), Trimester, Fortschritt – DST-sicher, 22 Unit-Tests.
+- Wochencontent SSW 4–42, selbst formuliert: Größe/Gewicht, Vergleichsobst, Baby, Mama, Partnertipp.
+- Übersicht mit Countdown-Ring (reines SVG, kein Chart-Paket) und Wochen-Browser.
+- Wehen-Timer mit 4-1-1-Auswertung in drei Teilbedingungen, Verlauf, Löschen.
+- 10-Bewegungen-Zählung mit Sitzungslogik (2-Stunden-Fenster) und Historie.
+- Mutter-Werte: Gewicht, Blutdruck, Puls, Symptomauswahl, Notiz, zwei Verlaufsdiagramme.
+- Mutter-Kind-Pass: 15 Termine mit SSW-Fenster vorbelegt, eigene Termine ergänzbar.
+- Kliniktasche: 46 Einträge in 6 Abschnitten, abhakbar mit Zuschreibung, erweiterbar.
+- Namensliste mit blindem Voting und Treffer-Ansicht.
+- Grün: lint, typecheck, 65 Unit-Tests, 11 E2E-Tests, build.
