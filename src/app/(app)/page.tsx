@@ -15,6 +15,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { analyseSleep, persistForecast } from '@/lib/sleep/analysis'
+import { buildDayClockData } from '@/lib/actions/dashboard'
+import { DayClockSection } from '@/components/dashboard/day-clock-section'
+import { SleepForecastCard } from '@/components/dashboard/sleep-forecast-card'
+import { DayGoalCard } from '@/components/dashboard/day-goal-card'
 import { QuickActions } from '@/components/tracker/quick-actions'
 import { LastEventsStrip } from '@/components/tracker/last-events-strip'
 import { EventList } from '@/components/tracker/event-list'
@@ -38,14 +43,21 @@ export default async function HomePage() {
   const age = ctx.pregnancy ? gestationalAge(ctx.pregnancy.dueDate, new Date(), ctx.timezone) : null
   const weekContent = age ? pregnancyWeekContent(age.week) : null
 
-  const [events, lastByType, foods, nursingSide] = child
+  const [events, lastByType, foods, nursingSide, analysis, clock] = child
     ? await Promise.all([
         recentEvents(child.id, ctx.members, 12),
         lastEventPerType(child.id),
         knownFoods(child.id),
         lastNursingSide(child.id),
+        analyseSleep(child, ctx.timezone),
+        buildDayClockData(child.id, ctx.timezone, 0),
       ])
-    : [[], new Map(), [], null]
+    : ([[], new Map(), [], null, null, null] as const)
+
+  // Die aktuelle Vorhersage festhalten – daraus entsteht die Push-Erinnerung.
+  if (child && analysis) {
+    await persistForecast(child.id, analysis.forecast, analysis.model)
+  }
 
   const quickActions = parseQuickActions(ctx.household.settings?.quickActions)
   const runningTypes = events.filter((e) => e.running).map((e) => e.type)
@@ -77,8 +89,10 @@ export default async function HomePage() {
         </Card>
       )}
 
-      {child && (
+      {child && analysis && clock && (
         <>
+          <SleepForecastCard analysis={analysis} timezone={ctx.timezone} />
+
           <QuickActions
             childId={child.id}
             actions={quickActions}
@@ -92,6 +106,21 @@ export default async function HomePage() {
             suggestions={foods}
             lastNursingSide={nursingSide}
           />
+
+          <section>
+            <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+              Der Tag im Kreis
+            </h2>
+            <DayClockSection
+              childId={child.id}
+              initialSegments={clock.segments}
+              initialPlanned={clock.planned}
+              initialNowMinutes={clock.nowMinutes}
+              initialLabel={clock.label}
+            />
+          </section>
+
+          <DayGoalCard analysis={analysis} />
 
           <section>
             <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">

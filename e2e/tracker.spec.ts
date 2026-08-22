@@ -38,7 +38,7 @@ test.describe('Tracker', () => {
     await page.getByRole('button', { name: /^Windel/ }).click()
     await page.getByRole('button', { name: 'Speichern' }).click()
 
-    await expect(page.getByText('Windel · Nass').first()).toBeVisible()
+    await expect(page.getByTestId('event-list').getByText('Windel · Nass').first()).toBeVisible()
   })
 
   test('Windel mit Stuhlangaben zeigt Farbe und Konsistenz', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('Tracker', () => {
     await page.getByRole('button', { name: /Körnig/ }).click()
     await page.getByRole('button', { name: 'Speichern' }).click()
 
-    await expect(page.getByText('Senfgelb · Körnig').first()).toBeVisible()
+    await expect(page.getByTestId('event-list').getByText('Senfgelb · Körnig').first()).toBeVisible()
   })
 
   test('Beikost merkt sich Lebensmittel als Vorschlag', async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe('Tracker', () => {
     await page.getByLabel('Lebensmittel').fill('Pastinake')
     await page.getByRole('button', { name: 'Hinzu' }).click()
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Pastinake').first()).toBeVisible()
+    await expect(page.getByTestId('event-list').getByText('Pastinake').first()).toBeVisible()
 
     // Beim nächsten Mal steht das Lebensmittel als Vorschlag bereit.
     await page.getByRole('button', { name: 'Etwas anderes eintragen' }).click()
@@ -73,12 +73,12 @@ test.describe('Tracker', () => {
     await page.getByRole('button', { name: /Windel · Nass/ }).first().click()
     await page.getByLabel('Notiz').fill('Vor dem Schlafen')
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Vor dem Schlafen').first()).toBeVisible()
+    await expect(page.getByTestId('event-list').getByText('Vor dem Schlafen').first()).toBeVisible()
 
     await page.getByRole('button', { name: /Windel · Nass/ }).first().click()
     await page.getByRole('button', { name: 'Eintrag löschen' }).click()
     await expect(page.getByText('Gelöscht')).toBeVisible()
-    await expect(page.locator('main').getByText('Vor dem Schlafen')).toHaveCount(0)
+    await expect(page.getByTestId('event-list').getByText('Vor dem Schlafen')).toHaveCount(0)
   })
 
   test('Ende vor Beginn wird abgelehnt', async ({ page }) => {
@@ -99,6 +99,6 @@ test.describe('Tracker', () => {
     await expect(page.getByText('Für Schlaf gibt es noch keine Einträge.')).toBeVisible()
 
     await page.goto('/verlauf?typ=diaper')
-    await expect(page.getByText('Windel · Nass').first()).toBeVisible()
+    await expect(page.getByTestId('event-list').getByText('Windel · Nass').first()).toBeVisible()
   })
 })

@@ -17,6 +17,7 @@ services:
       NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${NEXT_PUBLIC_VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@example.org}
+      CRON_SECRET: ${CRON_SECRET:-}
       UPLOAD_DIR: /data/uploads
       TZ: ${TZ:-Europe/Vienna}
     volumes:
@@ -46,6 +47,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  cron:
+    image: alpine:3.20
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      CRON_SECRET: ${CRON_SECRET:-}
+      APP_INTERNAL_URL: http://app:3000
+      CRON_INTERVAL_SEC: ${CRON_INTERVAL_SEC:-300}
+      TZ: ${TZ:-Europe/Vienna}
+    volumes:
+      - ./docker/cron.sh:/usr/local/bin/cron.sh:ro
+    entrypoint: ['/bin/sh', '/usr/local/bin/cron.sh']
 
   backup:
     image: postgres:16-alpine
