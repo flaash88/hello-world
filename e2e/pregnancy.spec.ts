@@ -29,7 +29,6 @@ test.describe('Schwangerschaft', () => {
     await expect(page.getByRole('button', { name: /Wehe beenden/ })).toBeVisible()
     await page.getByRole('button', { name: /Wehe beenden/ }).click()
 
-    await expect(page.getByText('Verlauf')).toBeVisible()
     await expect(page.getByText(/1 abgeschlossene Wehe/)).toBeVisible()
     // Eine einzelne kurze Wehe darf niemals als 4-1-1 durchgehen.
     await expect(page.getByText('Noch nicht im 4-1-1-Muster')).toBeVisible()

@@ -4,7 +4,7 @@ const PORT = Number(process.env.E2E_PORT ?? 3100)
 const baseURL = `http://127.0.0.1:${PORT}`
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: process.env.E2E_DIR ?? './e2e',
   globalSetup: './e2e/reset-db.ts',
   timeout: 60_000,
   expect: { timeout: 10_000 },
