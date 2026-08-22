@@ -38,6 +38,8 @@ export default defineConfig({
         'src/lib/export/backup.ts',
         'src/lib/export/weekly-report.ts',
         'src/lib/pregnancy/seed.ts',
+        'src/lib/media/storage.ts',
+        'src/lib/sounds/player.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 75, statements: 80 },
     },

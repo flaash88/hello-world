@@ -3,7 +3,14 @@
  * bekommt ihre Ziele vom Server. Symbole werden dort anhand des Schlüssels
  * zugeordnet.
  */
-export type NavIconKey = 'home' | 'history' | 'development' | 'stats' | 'pregnancy' | 'more'
+export type NavIconKey =
+  | 'home'
+  | 'history'
+  | 'development'
+  | 'stats'
+  | 'journal'
+  | 'pregnancy'
+  | 'more'
 export type NavItem = { href: string; label: string; icon: NavIconKey }
 
 /**
@@ -30,11 +37,11 @@ export function navItemsFor({
     home,
     { href: '/verlauf', label: 'Verlauf', icon: 'history' },
     { href: '/entwicklung', label: 'Entwicklung', icon: 'development' },
-    { href: '/auswertung', label: 'Auswertung', icon: 'stats' },
+    { href: '/tagebuch', label: 'Tagebuch', icon: 'journal' },
     more,
   ]
   // Läuft parallel noch eine Schwangerschaft (Geschwisterkind), verdrängt sie
-  // die Auswertung – die ist einen Tap weiter unter "Mehr" erreichbar.
+  // das Tagebuch – das ist einen Tap weiter unter "Mehr" erreichbar.
   if (hasPregnancy) items.splice(3, 1, pregnancy)
   return items
 }

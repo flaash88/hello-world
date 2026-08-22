@@ -265,3 +265,45 @@ nicht als Diagnose.
 nur eine Schwangerschaft läuft, ist die SSW-Ansicht wichtiger als eine
 Auswertung ohne Daten. Übergeben werden nur serialisierbare Schlüssel; die
 Symbole ordnet die Client-Komponente zu.
+
+## Phase 6 – Tagebuch, Fotos, Sounds
+
+**Bilder werden immer neu kodiert, nie kopiert.** Das entfernt sämtliche
+EXIF-Daten inklusive GPS-Koordinaten und stellt sicher, dass keine als Bild
+getarnte Datei ausgeliefert wird. Das Aufnahmedatum wird vorher ausgelesen und
+als Vorschlag für den Eintrag angeboten. Ein E2E-Test prüft, dass das
+EXIF-Datum im ausgelieferten Bild nicht mehr auftaucht.
+
+**Der Dateityp kommt aus dem Inhalt, nicht aus dem MIME-Type.** Beides ist
+frei wählbar; `sharp` entscheidet anhand der tatsächlichen Bytes. Eine
+Textdatei mit der Endung `.jpg` wird abgelehnt – auch das ist getestet.
+
+**Uploads liegen außerhalb von `public` und werden über eine Route
+ausgeliefert**, die Session und Haushaltszugehörigkeit prüft. Ein Bild ist ohne
+Anmeldung nicht abrufbar, selbst wenn man den Pfad kennt (E2E-geprüft, 401).
+Der Pfad wird gegen Ausbruch aus dem Upload-Verzeichnis abgesichert.
+
+**WebP statt Original.** Ein 4-MB-Handyfoto wird zu etwa 300 kB, bei zwei
+Größen (2048 px und 480 px Thumbnail). Über Jahre summiert sich das zu einem
+Unterschied, den ein Proxmox-Volume merkt.
+
+**Sounds werden synthetisiert, nicht ausgeliefert.** Weißes, rosa und braunes
+Rauschen entstehen im Browser, alles andere ist gefiltertes Rauschen plus
+langsame Modulation. Kein Download, keine Lizenzfragen, keine hörbare Schleife
+und unbegrenzte Laufzeit – bei wenigen Kilobyte Code.
+
+**Rosa Rauschen nach dem Verfahren von Paul Kellet**, weil eine Kaskade von
+Tiefpassfiltern den 1/f-Verlauf deutlich genauer trifft als das naive
+Verfahren, und das hört man.
+
+**Der Timer blendet aus, statt zu stoppen.** Ein abrupter Abbruch weckt
+zuverlässiger als jedes Geräusch. Ausgeblendet wird über zehn Prozent der
+eingestellten Laufzeit, mindestens zehn und höchstens sechzig Sekunden.
+
+**MediaSession-Anbindung**, damit die Wiedergabe auf dem Sperrbildschirm
+sichtbar und steuerbar bleibt – und iOS den Ton bei gesperrtem Display eher am
+Leben lässt.
+
+**Der Jahresrückblick ist eine druckbare Seite, kein PDF-Export.** Der Browser
+macht daraus mit zwei Taps ein PDF, und die Seite bleibt dabei durchsuchbar
+und kopierbar. Eigene Druckregeln blenden Navigation und Statusleisten aus.

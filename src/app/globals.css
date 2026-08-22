@@ -140,3 +140,23 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Der Jahresrückblick soll sich ordentlich ausdrucken lassen. */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  header,
+  nav,
+  [role='status'] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}
