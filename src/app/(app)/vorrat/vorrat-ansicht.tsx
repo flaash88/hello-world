@@ -160,11 +160,6 @@ export function VorratAnsicht({
               label="Portionsgröße"
               wert={statistik.schnittMl !== null ? `${statistik.schnittMl} ml im Schnitt` : '—'}
             />
-            {statistik.verwurfProzent !== null && (
-              <p className="col-span-2 text-muted-foreground">
-                {statistik.verwurfProzent} % der abgepumpten Menge wurden verworfen.
-              </p>
-            )}
             {statistik.abgelaufenMl > 0 && (
               <p className="col-span-2 text-muted-foreground">
                 {statistik.abgelaufenMl} ml liegen abgelaufen im Vorrat.

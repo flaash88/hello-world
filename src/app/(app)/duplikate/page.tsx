@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Baby, Check } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { ladeOffeneVerdachtsfaelle } from '@/lib/events/duplicate-service'
 import { eventDetail, eventTitle } from '@/lib/events/format'
 import { formatDateShort, formatTime } from '@/lib/time'
@@ -25,6 +26,13 @@ export default async function DuplikatePage() {
     )
   }
 
+  const features = await currentFeatures()
+  const schlaf = features.aktiv.has('schlafanalyse')
+  // Der Weg zurueck haengt daran, woher man kam: ohne Auswertung gibt es sie
+  // nicht, dann fuehrt der Link ins Menue.
+  const zurueck = features.aktiv.has('auswertung')
+    ? { href: '/auswertung', label: 'Auswertung' }
+    : { href: '/mehr', label: 'Mehr' }
   const tz = ctx.timezone
   const units = unitPrefsFrom(ctx.household.settings)
   const verdachte = await ladeOffeneVerdachtsfaelle(child.id)
@@ -43,12 +51,12 @@ export default async function DuplikatePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <BackLink href="/auswertung" label="Auswertung" />
+      <BackLink href={zurueck.href} label={zurueck.label} />
       <div>
         <h1 className="font-display text-2xl font-bold">Doppelte Einträge</h1>
         <p className="text-muted-foreground">
-          Hier steht, wo ihr beide dasselbe eingetragen haben könntet. Offene Fälle zählen nicht
-          in die Wachfenster-Berechnung mit.
+          Hier steht, wo ihr beide dasselbe eingetragen haben könntet.
+          {schlaf && ' Offene Fälle zählen nicht in die Wachfenster-Berechnung mit.'}
         </p>
       </div>
 

@@ -4,7 +4,6 @@ import {
   MILESTONE_CATEGORIES,
   milestoneByKey,
   milestonesForAge,
-  overdueMilestones,
 } from './milestones'
 
 describe('MILESTONES', () => {
@@ -18,9 +17,6 @@ describe('MILESTONES', () => {
       expect(milestone.fromWeeks).toBeLessThanOrEqual(milestone.toWeeks)
       expect(milestone.description.length).toBeGreaterThan(15)
       expect(MILESTONE_CATEGORIES).toContain(milestone.category)
-      if (milestone.concernAfterWeeks !== undefined) {
-        expect(milestone.concernAfterWeeks).toBeGreaterThanOrEqual(milestone.toWeeks)
-      }
     }
   })
 
@@ -51,22 +47,12 @@ describe('milestonesForAge', () => {
   })
 })
 
-describe('overdueMilestones', () => {
-  it('meldet nur Meilensteine mit Sorgengrenze', () => {
-    const overdue = overdueMilestones(80, [])
-    expect(overdue.length).toBeGreaterThan(0)
-    for (const milestone of overdue) {
-      expect(milestone.concernAfterWeeks).toBeDefined()
+describe('Sprachregister', () => {
+  it('kennt keine Faelligkeit und keine Wertung', () => {
+    for (const milestone of MILESTONES) {
+      expect(milestone).not.toHaveProperty('concernAfterWeeks')
+      expect(milestone.description).not.toMatch(/sollte|muss|überfällig|zu spät|Defizit/i)
+      expect(milestone.description).not.toMatch(/!/)
     }
-  })
-
-  it('lässt bereits erreichte weg', () => {
-    const all = overdueMilestones(80, [])
-    const withOne = overdueMilestones(80, [all[0]!.key])
-    expect(withOne).toHaveLength(all.length - 1)
-  })
-
-  it('meldet bei einem jungen Kind nichts', () => {
-    expect(overdueMilestones(4, [])).toHaveLength(0)
   })
 })

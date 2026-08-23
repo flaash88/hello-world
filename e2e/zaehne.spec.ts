@@ -9,7 +9,7 @@ test.describe('Zähne', () => {
 
     await page.goto('/zaehne')
     await expect(page.getByRole('heading', { name: 'Zähne' })).toBeVisible()
-    await expect(page.getByText('0 von 20 Milchzähnen')).toBeVisible()
+    await expect(page.getByText(/Milchzähne eingetragen|Milchzahn eingetragen/)).toHaveCount(0)
 
     const gebiss = page.getByRole('group', { name: 'Milchgebiss' })
     await expect(gebiss.getByRole('button')).toHaveCount(20)
@@ -42,12 +42,12 @@ test.describe('Zähne', () => {
     await page.getByRole('button', { name: 'Speichern' }).click()
 
     await expect(page.getByRole('dialog')).toBeHidden()
-    await expect(page.getByText('1 von 20 Milchzähnen')).toBeVisible()
+    await expect(page.getByText('Ein Milchzahn eingetragen')).toBeVisible()
     await expect(page.getByText(/Erster Zahn:/)).toBeVisible()
 
     // Der Meilenstein „Erster Zahn" ist damit ohne zweites Zutun abgehakt.
     await page.goto('/entwicklung/meilensteine')
-    await page.getByRole('tab', { name: 'Geschafft' }).click()
+    await page.getByRole('tab', { name: 'Da', exact: true }).click()
     await expect(page.getByText('Erster Zahn')).toBeVisible()
   })
 
@@ -60,11 +60,11 @@ test.describe('Zähne', () => {
     await page.getByRole('button', { name: /Mittlerer Schneidezahn unten links/ }).click()
     await page.getByLabel('Durchgebrochen am').fill(dateInput(-5))
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('1 von 20 Milchzähnen')).toBeVisible()
+    await expect(page.getByText('Ein Milchzahn eingetragen')).toBeVisible()
 
     await page.getByRole('button', { name: /Mittlerer Schneidezahn unten links · da/ }).click()
     await page.getByRole('button', { name: 'Eintrag entfernen' }).click()
-    await expect(page.getByText('0 von 20 Milchzähnen')).toBeVisible()
+    await expect(page.getByText(/Milchzähne eingetragen|Milchzahn eingetragen/)).toHaveCount(0)
   })
 
   test('weist einen Ausfall vor dem Durchbruch zurück', async ({ page }) => {

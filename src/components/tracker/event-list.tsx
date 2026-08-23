@@ -45,7 +45,7 @@ export function EventList({
       <EmptyState
         icon={ListX}
         title="Noch nichts eingetragen"
-        description={emptyHint ?? 'Sobald ihr etwas festhaltet, steht es hier.'}
+        description={emptyHint ?? 'Was eingetragen wird, steht hier.'}
       />
     )
   }

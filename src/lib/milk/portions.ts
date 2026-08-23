@@ -159,8 +159,6 @@ export type VorratStatistik = {
   abgepumptMl30Tage: number
   /** Durchschnittliche Portionsgroesse der letzten 30 Tage. */
   schnittMl: number | null
-  /** Anteil der verworfenen an der abgepumpten Menge, in Prozent. */
-  verwurfProzent: number | null
 }
 
 export function statistik(
@@ -189,9 +187,9 @@ export function statistik(
       .reduce((sum, p) => sum + p.mengeMl, 0),
     verworfenMl30Tage,
     abgepumptMl30Tage,
+    // Bewusst keine Verwurfsquote in Prozent: die verworfene Menge steht als
+    // Zahl da, der Anteil daran macht daraus einen Vorwurf.
     schnittMl: letzte30.length > 0 ? Math.round(abgepumptMl30Tage / letzte30.length) : null,
-    verwurfProzent:
-      abgepumptMl30Tage > 0 ? Math.round((verworfenMl30Tage / abgepumptMl30Tage) * 100) : null,
   }
 }
 

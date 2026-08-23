@@ -1,21 +1,23 @@
-import { Moon, Sparkles, TriangleAlert } from 'lucide-react'
+import { Moon } from 'lucide-react'
 import type { SleepAnalysis } from '@/lib/sleep/analysis'
 import { formatDuration, formatTime } from '@/lib/time'
+import {
+  kalibrierText,
+  muedigkeitText,
+  schlafdruckText,
+  wachSeitText,
+  wachfensterText,
+} from '@/lib/sleep/wording'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { SleepPressureRing } from './sleep-pressure-ring'
-import { cn } from '@/lib/utils'
-
-const LEVEL_TEXT = {
-  fresh: 'Frisch und ausgeschlafen',
-  building: 'Schlafdruck baut sich auf',
-  ready: 'Bereit fürs nächste Schläfchen',
-  overtired: 'Vermutlich schon übermüdet',
-} as const
+import { ForecastNote } from './forecast-note'
 
 /**
- * Die wichtigste Karte des Dashboards: Wie lange ist das Kind wach, wann ist
- * das nächste Schlaffenster – und wie sicher ist das überhaupt.
+ * Wie lange das Kind wach ist und wann zuletzt Müdigkeit kam.
+ *
+ * Bewusst ohne Ampel: kein rotes „übermüdet", keine Konfidenzzahl, kein
+ * Countdown. Was daraus folgt, entscheiden die Eltern – die Karte stellt nur
+ * fest, was war. Der feste Hinweissatz steht darunter und bleibt.
  */
 export function SleepForecastCard({
   analysis,
@@ -49,10 +51,10 @@ export function SleepForecastCard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Moon className="size-5 text-muted-foreground" aria-hidden />
-            Noch keine Vorhersage
+            Noch nichts zu rechnen
           </CardTitle>
           <CardDescription>
-            Sobald der erste Schlaf eingetragen und beendet ist, rechnet Sprössling mit.
+            Sobald ein Schlaf eingetragen und beendet ist, steht hier, wie der Tag zuletzt lief.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -60,63 +62,33 @@ export function SleepForecastCard({
   }
 
   return (
-    <Card className={cn(pressure.level === 'overtired' && 'border-destructive/50')}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          {pressure.level === 'overtired' ? (
-            <TriangleAlert className="size-5 text-destructive" aria-hidden />
-          ) : (
+    <div className="flex flex-col gap-1.5">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2">
             <Moon className="size-5 text-cat-sleep" aria-hidden />
-          )}
-          {LEVEL_TEXT[pressure.level]}
-        </CardTitle>
-        <CardDescription>
-          Wach seit {formatDuration(pressure.awakeMin * 60)}
-          {analysis.lastWakeAt && ` · aufgewacht um ${formatTime(analysis.lastWakeAt, timezone)}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex items-center gap-4">
-        <SleepPressureRing ratio={pressure.ratio} level={pressure.level} />
-        <div className="min-w-0 flex-1">
-          {model.calibrating ? (
-            <>
-              <p className="flex items-center gap-1.5 font-semibold">
-                <Sparkles className="size-4 text-primary" aria-hidden />
-                Kalibriert noch
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Nach ein paar mehr Schlafeinträgen kennt Sprössling den Rhythmus eures Kindes und
-                sagt das nächste Fenster genauer vorher. Bis dahin gilt der Erfahrungswert für
-                dieses Alter: rund {formatDuration(model.baselineMin * 60)} wach.
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {model.sampleSize === 0
-                  ? 'Noch keine gemessenen Wachfenster.'
-                  : `${model.sampleSize} von 5 nötigen Messungen.`}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {forecast.kind === 'bedtime' ? 'Bettzeit' : 'Nächstes Nickerchen'}
-              </p>
-              <p className="font-display text-2xl font-bold tabular">
-                {formatTime(forecast.from, timezone)}–{formatTime(forecast.to, timezone)}
-              </p>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <Badge variant={forecast.confidence >= 0.6 ? 'default' : 'muted'}>
-                  Konfidenz {Math.round(forecast.confidence * 100)} %
-                </Badge>
-                {forecast.due && <Badge variant="secondary">Fenster läuft</Badge>}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Wachfenster aktuell rund {formatDuration(model.expectedMin * 60)} · aus{' '}
-                {model.sampleSize} Messungen der letzten zwei Wochen
-              </p>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {schlafdruckText(pressure.level)}
+          </CardTitle>
+          <CardDescription>
+            {wachSeitText(pressure)}
+            {analysis.lastWakeAt && ` · aufgewacht um ${formatTime(analysis.lastWakeAt, timezone)}`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center gap-4">
+          <SleepPressureRing ratio={pressure.ratio} awakeMin={pressure.awakeMin} />
+          <div className="min-w-0 flex-1">
+            {model.calibrating ? (
+              <p className="text-sm text-muted-foreground">{kalibrierText(model)}</p>
+            ) : (
+              <>
+                <p className="font-semibold">{muedigkeitText(forecast, timezone)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{wachfensterText(model)}</p>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <ForecastNote />
+    </div>
   )
 }

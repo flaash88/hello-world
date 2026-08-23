@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Baby, ChevronRight, Dumbbell, Flag, Smile, Sparkles, TrendingUp } from 'lucide-react'
+import { Baby, ChevronRight, Dumbbell, Flag, Smile, TrendingUp } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { ageInWeeks, localDateKey } from '@/lib/time'
@@ -8,7 +8,7 @@ import { correctedAgeDays } from '@/lib/sleep/windows'
 import { weekContent } from '@/lib/content/weeks'
 import { activeLeap, nextLeap } from '@/lib/content/leaps'
 import { exerciseOfTheDay } from '@/lib/content/exercises'
-import { MILESTONES, milestonesForAge, overdueMilestones } from '@/lib/content/milestones'
+import { milestonesForAge } from '@/lib/content/milestones'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -68,7 +68,6 @@ export default async function DevelopmentPage() {
   const openMilestones = milestonesForAge(correctedWeeks).filter(
     (milestone) => !achievedKeys.includes(milestone.key),
   )
-  const overdue = overdueMilestones(correctedWeeks, achievedKeys)
 
   return (
     <div className="flex flex-col gap-4">
@@ -138,7 +137,7 @@ export default async function DevelopmentPage() {
               <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
             </div>
             <CardDescription>
-              {achievedKeys.length} von {MILESTONES.length} abgehakt
+              Was schon da ist – und was in diesem Alter oft dazukommt.
             </CardDescription>
           </CardHeader>
           {openMilestones.length > 0 && (
@@ -170,37 +169,12 @@ export default async function DevelopmentPage() {
             </div>
             <CardDescription>
               {toothCount > 0
-                ? `${toothCount} von 20 Milchzähnen eingetragen`
+                ? `${toothCount === 1 ? 'Ein Milchzahn' : `${toothCount} Milchzähne`} eingetragen`
                 : 'Zwanzig Milchzähne, einer nach dem anderen'}
             </CardDescription>
           </CardHeader>
         </Card>
       </Link>
-
-      {overdue.length > 0 && (
-        <Card className="border-primary/40">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="size-4 text-primary" aria-hidden />
-              Beim nächsten Termin ansprechen
-            </CardTitle>
-            <CardDescription>
-              Diese Schritte liegen über dem üblichen Zeitfenster. Das ist oft harmlos – erwähnt
-              es trotzdem bei der nächsten Untersuchung.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-1 text-sm">
-              {overdue.map((milestone) => (
-                <li key={milestone.key} className="flex gap-2">
-                  <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                  {milestone.title}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       {!leap && upcoming && (
         <Card>

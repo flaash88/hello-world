@@ -71,16 +71,17 @@ test.describe('Entwicklung', () => {
     await setUpChild(page, 'Lina', 30 * 7)
 
     await page.goto('/entwicklung/meilensteine')
-    await expect(page.getByText(/0 von \d+ abgehakt/)).toBeVisible()
+    // Bewusst kein Zähler „x von y abgehakt“ – siehe Phase 11.
+    await expect(page.getByText(/abgehakt/)).toHaveCount(0)
 
     // Im Tab "Alle" bleibt der Eintrag sichtbar, egal ob abgehakt oder nicht.
     await page.getByRole('tab', { name: 'Alle' }).click()
     await page.getByRole('checkbox', { name: /Frei sitzen abhaken/ }).click()
-    await expect(page.getByText('„Frei sitzen“ geschafft')).toBeVisible()
-    await expect(page.getByText(/1 von \d+ abgehakt/)).toBeVisible()
+    await expect(page.getByText('„Frei sitzen“ eingetragen')).toBeVisible()
+    await expect(page.getByRole('checkbox', { name: /Frei sitzen abhaken/ })).toBeChecked()
 
     await page.getByRole('checkbox', { name: /Frei sitzen abhaken/ }).click()
-    await expect(page.getByText(/0 von \d+ abgehakt/)).toBeVisible()
+    await expect(page.getByRole('checkbox', { name: /Frei sitzen abhaken/ })).not.toBeChecked()
   })
 
   test('ergänzt einen Meilenstein um Datum, Notiz und Foto', async ({ page }) => {
@@ -91,7 +92,7 @@ test.describe('Entwicklung', () => {
     await page.goto('/entwicklung/meilensteine')
     await page.getByRole('tab', { name: 'Alle' }).click()
     await page.getByRole('checkbox', { name: /Frei sitzen abhaken/ }).click()
-    await expect(page.getByText(/1 von \d+ abgehakt/)).toBeVisible()
+    await expect(page.getByRole('checkbox', { name: /Frei sitzen abhaken/ })).toBeChecked()
 
     await page.getByRole('button', { name: /Frei sitzen bearbeiten/ }).click()
     await page.getByLabel('Wann war das?').fill('2026-05-04')

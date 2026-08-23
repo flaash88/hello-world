@@ -31,7 +31,6 @@ export function ZaehneAnsicht({
   hatGeburtsdatum,
   zaehne,
   anzahlDa,
-  anzahlGesamt,
   anzahlAusgefallen,
   erster,
   letzter,
@@ -41,7 +40,6 @@ export function ZaehneAnsicht({
   hatGeburtsdatum: boolean
   zaehne: ZahnView[]
   anzahlDa: number
-  anzahlGesamt: number
   anzahlAusgefallen: number
   erster: ZahnEckdaten | null
   letzter: ZahnEckdaten | null
@@ -67,10 +65,13 @@ export function ZaehneAnsicht({
       <div className="flex items-start justify-between gap-2">
         <div>
           <h1 className="font-display text-2xl font-bold">Zähne</h1>
-          <p className="text-muted-foreground">
-            {anzahlDa} von {anzahlGesamt} Milchzähnen
-            {anzahlAusgefallen > 0 ? ` · ${anzahlAusgefallen} ausgefallen` : ''}
-          </p>
+          {/* Bewusst kein "x von 20": eine Null behauptet, es fehle etwas. */}
+          {anzahlDa > 0 && (
+            <p className="text-muted-foreground">
+              {anzahlDa === 1 ? 'Ein Milchzahn' : `${anzahlDa} Milchzähne`} eingetragen
+              {anzahlAusgefallen > 0 ? ` · ${anzahlAusgefallen} ausgefallen` : ''}
+            </p>
+          )}
         </div>
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground print:hidden">
           <Printer className="size-4" aria-hidden />

@@ -7,12 +7,12 @@ import { parseHhMm } from '@/lib/time'
 import { sendToUser } from '@/lib/push/send'
 
 const prefsSchema = z.object({
-  napAlerts: z.boolean(),
-  napLeadMinutes: z.number().int().min(0).max(120),
-  feedAlerts: z.boolean(),
-  medicationAlerts: z.boolean(),
   appointmentAlerts: z.boolean(),
-  partnerActivity: z.boolean(),
+  sleepWindowAlerts: z.boolean(),
+  napLeadMinutes: z.number().int().min(0).max(120),
+  medicationAlerts: z.boolean(),
+  milkStockAlerts: z.boolean(),
+  nightShiftAlerts: z.boolean(),
   quietFrom: z.string().nullable(),
   quietTo: z.string().nullable(),
   ntfyEnabled: z.boolean(),
@@ -33,6 +33,30 @@ export async function updateNotificationPrefsAction(
     where: { userId: user.id },
     create: { userId: user.id, ...parsed.data },
     update: parsed.data,
+  })
+  revalidatePath('/mehr/benachrichtigungen')
+  return { ok: true }
+}
+
+/**
+ * Die Ruhezeit-Frage stellt sich einmal, beim ersten Einschalten irgendeiner
+ * Benachrichtigung. Danach ist sie beantwortet – auch dann, wenn die Antwort
+ * "keine Ruhezeit" war.
+ */
+export async function answerQuietHoursAction(
+  input: { quietFrom: string | null; quietTo: string | null },
+): Promise<{ ok: true } | { error: string }> {
+  const user = await requireUser()
+  const { quietFrom, quietTo } = input
+  if (quietFrom && parseHhMm(quietFrom) === null) return { error: 'Ruhezeit-Beginn ist ungültig.' }
+  if (quietTo && parseHhMm(quietTo) === null) return { error: 'Ruhezeit-Ende ist ungültig.' }
+  // Halb ausgefuellt ergibt kein Fenster – dann lieber gar keins.
+  const beide = quietFrom && quietTo ? { quietFrom, quietTo } : { quietFrom: null, quietTo: null }
+
+  await prisma.notificationPreference.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, ...beide, quietAskedAt: new Date() },
+    update: { ...beide, quietAskedAt: new Date() },
   })
   revalidatePath('/mehr/benachrichtigungen')
   return { ok: true }

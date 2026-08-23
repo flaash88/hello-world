@@ -131,7 +131,7 @@ export function AppointmentList({
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 {range && <Badge variant={soon ? 'default' : 'muted'}>{range}</Badge>}
-                {overdue && <Badge variant="destructive">Zeitfenster vorbei</Badge>}
+                {overdue && <Badge variant="outline">Zeitfenster vorbei</Badge>}
                 {appointment.category !== 'ekp' && (
                   <Badge variant="outline">{CATEGORY_LABEL[appointment.category] ?? 'Termin'}</Badge>
                 )}

@@ -55,3 +55,44 @@ Kein invertiertes Tagesschema, sondern ein eigener Zustand:
 
 Dezent und kurz (150–250 ms), nur für Zustandswechsel. `prefers-reduced-motion`
 schaltet alle Animationen global ab (in `globals.css` erzwungen).
+
+## Sprachregister
+
+Die App wird von zwei übermüdeten Menschen benutzt, die gerade Eltern geworden
+sind. Sie ist ein Protokoll, kein Ratgeber und kein Bewertungssystem. Daraus
+folgt für jeden Text – neuen wie bestehenden:
+
+**Beschreibend statt anweisend.** Die App weiß, was zuletzt war. Sie weiß
+nicht, was jetzt zu tun ist.
+
+- „Ungefähr ab 13:40 könnte Müdigkeit kommen" – nicht „Nächster Schlaf: 13:40"
+- „Zuletzt lagen dazwischen etwa 1 Std 45" – nicht „Wachfenster: 1:45"
+- kein Imperativ, kein „jetzt", kein Countdown auf eine Handlung
+
+**Spannen statt Punktwerte.** Wo ein Vergleichswert unvermeidlich ist, steht er
+als Bereich und mit dem Hinweis, dass die Spanne breit ist. Kein Sollwert neben
+dem tatsächlichen, kein Prozentsatz auf dessen Erfüllung, keine Prozentzahl auf
+eine Vermutung.
+
+**Kein Soll, keine Wertung.** Nichts ist überfällig, nichts fehlt, niemand
+liegt zurück. „Übermüdet" ist eine Diagnose, „länger wach als sonst" eine
+Feststellung. Rot und Orange sind medizinischen Warnzeichen vorbehalten – nicht
+Abweichungen von einer Vorgabe.
+
+**Keine Ausrufezeichen.** Auch nicht als Ermunterung.
+
+**Leere Zustände sind neutral.** „Für heute noch nichts eingetragen." – nicht
+„Du hast heute noch nichts eingetragen." Keine Aufforderung, die Lücke zu
+schließen; leere Zellen bleiben leer statt zu einer Null zu werden.
+
+**Nichts belohnt Vollständigkeit.** Keine Serien, keine Fortschrittsbalken auf
+Tagesziele, keine Abzeichen, keine Zähler der Form „x von y".
+
+**Jede Vorhersage trägt ihren Satz.** Auf jeder Ansicht, die etwas vorhersagt,
+steht fest und nicht ausblendbar:
+
+> Das ist aus euren bisherigen Einträgen gerechnet. Euer Kind kennt seinen
+> Rhythmus besser als die App.
+
+Die Texte des Schlafbereichs stehen gesammelt in `src/lib/sleep/wording.ts`,
+damit sich diese Regeln testen lassen statt nur zu gelten.

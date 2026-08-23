@@ -63,7 +63,6 @@ export function MilestoneList({
     [saved],
   )
   const ownMilestones = useMemo(() => saved.filter((m) => !m.key), [saved])
-  const achievedCount = saved.filter((m) => m.achievedAt).length
 
   const byCategory = useMemo(() => groupBy(templates, (t) => t.category), [templates])
 
@@ -74,7 +73,7 @@ export function MilestoneList({
         toast({ title: 'Nicht gespeichert', description: result.error, variant: 'destructive' })
       } else if (achieved) {
         toast({
-          title: `„${template.title}“ geschafft`,
+          title: `„${template.title}“ eingetragen`,
           action: {
             label: 'Rückgängig',
             onClick: async () => {
@@ -100,9 +99,7 @@ export function MilestoneList({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-muted-foreground">
-        {achievedCount} von {templates.length} abgehakt · Lebenswoche {currentWeek}
-      </p>
+      <p className="text-muted-foreground">Lebenswoche {currentWeek}</p>
 
       <Button size="lg" onClick={() => setAdding(true)}>
         <Plus aria-hidden />
@@ -112,7 +109,7 @@ export function MilestoneList({
       <Tabs defaultValue="offen">
         <TabsList className="w-full">
           <TabsTrigger value="offen">Offen</TabsTrigger>
-          <TabsTrigger value="geschafft">Geschafft</TabsTrigger>
+          <TabsTrigger value="geschafft">Da</TabsTrigger>
           <TabsTrigger value="alle">Alle</TabsTrigger>
         </TabsList>
 
@@ -210,10 +207,6 @@ export function MilestoneList({
                 const entry = savedByKey.get(template.key)
                 const achieved = Boolean(entry?.achievedAt)
                 const inWindow = currentWeek >= template.fromWeeks && currentWeek <= template.toWeeks
-                const overdue =
-                  !achieved &&
-                  template.concernAfterWeeks !== undefined &&
-                  currentWeek > template.concernAfterWeeks
 
                 return (
                   <li key={template.key} className="flex items-start gap-3 border-b border-border p-3 last:border-b-0">
@@ -233,8 +226,7 @@ export function MilestoneList({
                         <Badge variant="outline">
                           Woche {template.fromWeeks}–{template.toWeeks}
                         </Badge>
-                        {inWindow && !achieved && <Badge>Im Zeitfenster</Badge>}
-                        {overdue && <Badge variant="destructive">Beim Termin ansprechen</Badge>}
+                        {inWindow && !achieved && <Badge variant="muted">Im Zeitfenster</Badge>}
                         {achieved && entry?.achievedAt && (
                           <Badge variant="secondary">
                             {formatDateShort(new Date(entry.achievedAt))}

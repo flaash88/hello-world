@@ -117,7 +117,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
 
   await clearAttempts('register', email)
   await createSession(user.id)
-  redirect('/onboarding')
+  // Ueber die Wurzel: die entscheidet, ob zuerst die Erklaerung zum
+  // Protokollmodus kommt oder gleich die Einrichtung.
+  redirect('/')
 }
 
 export async function logoutAction(): Promise<void> {

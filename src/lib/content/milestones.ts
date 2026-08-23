@@ -3,8 +3,13 @@
  *
  * Die Altersfenster sind bewusst breit gehalten und als Spanne formuliert:
  * Der Zeitpunkt sagt bei gesunden Kindern wenig aus, die Reihenfolge dagegen
- * viel. Wo ein Meilenstein auch ein Warnsignal sein kann, wenn er ausbleibt,
- * steht das ausdrücklich dabei.
+ * viel.
+ *
+ * Es gibt hier bewusst keine Faelligkeit und kein "ueberfaellig". Ob die
+ * Entwicklung altersgemaess laeuft, sieht die Aerztin bei den
+ * Eltern-Kind-Pass-Untersuchungen – deren Fristen fuehrt die App weiter, und
+ * das ist der richtige Ort dafuer. Eine App, die zwischendurch "fehlt noch"
+ * sagt, macht Sorgen, die sie nicht aufloesen kann.
  */
 
 export const MILESTONE_CATEGORIES = [
@@ -34,17 +39,15 @@ export type MilestoneTemplate = {
   fromWeeks: number
   toWeeks: number
   description: string
-  /** Wenn gesetzt: ab dieser Woche lohnt eine ärztliche Abklärung. */
-  concernAfterWeeks?: number
 }
 
 export const MILESTONES: MilestoneTemplate[] = [
   // ------------------------------------------------------------- Erste Male
-  { key: 'erstes-laecheln', title: 'Erstes bewusstes Lächeln', category: 'erstes', fromWeeks: 4, toWeeks: 10, description: 'Ein Lächeln als Antwort auf euer Gesicht – nicht im Schlaf.', concernAfterWeeks: 13 },
+  { key: 'erstes-laecheln', title: 'Erstes bewusstes Lächeln', category: 'erstes', fromWeeks: 4, toWeeks: 10, description: 'Ein Lächeln als Antwort auf euer Gesicht – nicht im Schlaf.' },
   { key: 'erstes-lachen', title: 'Erstes lautes Lachen', category: 'erstes', fromWeeks: 8, toWeeks: 20, description: 'Das erste echte Lachen aus dem Bauch heraus.' },
   { key: 'erster-zahn', title: 'Erster Zahn', category: 'erstes', fromWeeks: 16, toWeeks: 52, description: 'Meist einer der unteren Schneidezähne. Die Spanne ist groß.' },
-  { key: 'erstes-wort', title: 'Erstes Wort', category: 'erstes', fromWeeks: 40, toWeeks: 70, description: 'Ein Laut, der immer dasselbe bedeutet – auch wenn er nicht perfekt klingt.', concernAfterWeeks: 78 },
-  { key: 'erste-schritte', title: 'Erste freie Schritte', category: 'erstes', fromWeeks: 40, toWeeks: 78, description: 'Mehrere Schritte ohne Festhalten.', concernAfterWeeks: 78 },
+  { key: 'erstes-wort', title: 'Erstes Wort', category: 'erstes', fromWeeks: 40, toWeeks: 70, description: 'Ein Laut, der immer dasselbe bedeutet – auch wenn er nicht perfekt klingt.' },
+  { key: 'erste-schritte', title: 'Erste freie Schritte', category: 'erstes', fromWeeks: 40, toWeeks: 78, description: 'Mehrere Schritte ohne Festhalten.' },
   { key: 'erstes-bad', title: 'Erstes Bad in der Wanne', category: 'erstes', fromWeeks: 0, toWeeks: 8, description: 'Meist nachdem der Nabel abgeheilt ist.' },
   { key: 'erster-ausflug', title: 'Erster Ausflug', category: 'erstes', fromWeeks: 0, toWeeks: 8, description: 'Der erste Weg nach draußen, der über den Spaziergang hinausgeht.' },
   { key: 'erste-nacht-durch', title: 'Erste durchgeschlafene Nacht', category: 'erstes', fromWeeks: 12, toWeeks: 156, description: 'Fünf bis sechs Stunden am Stück gelten als durchgeschlafen.' },
@@ -54,14 +57,14 @@ export const MILESTONES: MilestoneTemplate[] = [
   { key: 'erstes-schuhwerk', title: 'Erste eigene Schuhe', category: 'erstes', fromWeeks: 45, toWeeks: 90, description: 'Nötig erst, wenn draußen gelaufen wird.' },
 
   // --------------------------------------------------------------- Motorik
-  { key: 'kopf-heben', title: 'Kopf in Bauchlage heben', category: 'motorik', fromWeeks: 2, toWeeks: 12, description: 'Der Kopf wird kurz angehoben und gehalten.', concernAfterWeeks: 16 },
-  { key: 'kopf-stabil', title: 'Kopf sicher halten', category: 'motorik', fromWeeks: 8, toWeeks: 20, description: 'Der Kopf bleibt beim Hochnehmen in aufrechter Haltung stabil.', concernAfterWeeks: 26 },
+  { key: 'kopf-heben', title: 'Kopf in Bauchlage heben', category: 'motorik', fromWeeks: 2, toWeeks: 12, description: 'Der Kopf wird kurz angehoben und gehalten.' },
+  { key: 'kopf-stabil', title: 'Kopf sicher halten', category: 'motorik', fromWeeks: 8, toWeeks: 20, description: 'Der Kopf bleibt beim Hochnehmen in aufrechter Haltung stabil.' },
   { key: 'haende-mitte', title: 'Hände in der Körpermitte', category: 'motorik', fromWeeks: 8, toWeeks: 20, description: 'Beide Hände treffen sich vor der Brust – beide Körperhälften arbeiten zusammen.' },
-  { key: 'gezielt-greifen', title: 'Gezielt greifen', category: 'motorik', fromWeeks: 12, toWeeks: 24, description: 'Nach einem Gegenstand strecken und ihn treffen.', concernAfterWeeks: 30 },
-  { key: 'drehen-bauch', title: 'Vom Rücken auf den Bauch drehen', category: 'motorik', fromWeeks: 16, toWeeks: 32, description: 'Die vollständige Drehung aus eigener Kraft.', concernAfterWeeks: 39 },
+  { key: 'gezielt-greifen', title: 'Gezielt greifen', category: 'motorik', fromWeeks: 12, toWeeks: 24, description: 'Nach einem Gegenstand strecken und ihn treffen.' },
+  { key: 'drehen-bauch', title: 'Vom Rücken auf den Bauch drehen', category: 'motorik', fromWeeks: 16, toWeeks: 32, description: 'Die vollständige Drehung aus eigener Kraft.' },
   { key: 'drehen-ruecken', title: 'Vom Bauch auf den Rücken drehen', category: 'motorik', fromWeeks: 14, toWeeks: 30, description: 'Meist die erste der beiden Drehrichtungen.' },
   { key: 'hand-uebergabe', title: 'Von Hand zu Hand geben', category: 'motorik', fromWeeks: 18, toWeeks: 34, description: 'Ein Gegenstand wandert bewusst von einer Hand in die andere.' },
-  { key: 'frei-sitzen', title: 'Frei sitzen', category: 'motorik', fromWeeks: 22, toWeeks: 39, description: 'Ohne Abstützen und ohne umzukippen.', concernAfterWeeks: 44 },
+  { key: 'frei-sitzen', title: 'Frei sitzen', category: 'motorik', fromWeeks: 22, toWeeks: 39, description: 'Ohne Abstützen und ohne umzukippen.' },
   { key: 'robben', title: 'Erste eigene Fortbewegung', category: 'motorik', fromWeeks: 24, toWeeks: 45, description: 'Robben, Rollen, Schieben – jedes Kind findet seinen Weg.' },
   { key: 'krabbeln', title: 'Krabbeln', category: 'motorik', fromWeeks: 28, toWeeks: 52, description: 'Im Vierfüßlergang. Manche Kinder lassen das Krabbeln ganz aus.' },
   { key: 'pinzettengriff', title: 'Pinzettengriff', category: 'motorik', fromWeeks: 32, toWeeks: 52, description: 'Kleine Dinge mit Daumen und Zeigefinger aufheben.' },
@@ -81,23 +84,23 @@ export const MILESTONES: MilestoneTemplate[] = [
   // --------------------------------------------------------------- Sprache
   { key: 'gurren', title: 'Erste Gurrlaute', category: 'sprache', fromWeeks: 4, toWeeks: 14, description: 'Vokalähnliche Laute jenseits des Weinens.' },
   { key: 'wechselgespraech', title: 'Wechselgespräch mit Lauten', category: 'sprache', fromWeeks: 8, toWeeks: 22, description: 'Euer Kind antwortet auf Ansprache mit eigenen Lauten und wartet.' },
-  { key: 'silben', title: 'Silbenketten', category: 'sprache', fromWeeks: 20, toWeeks: 39, description: 'Wiederholte Silben wie "bababa" oder "dadada".', concernAfterWeeks: 44 },
-  { key: 'name-reagieren', title: 'Auf den Namen reagieren', category: 'sprache', fromWeeks: 20, toWeeks: 39, description: 'Aufsehen oder Innehalten beim eigenen Namen.', concernAfterWeeks: 48 },
-  { key: 'zeigen', title: 'Mit dem Finger zeigen', category: 'sprache', fromWeeks: 32, toWeeks: 56, description: 'Zeigen, damit ihr dasselbe seht – eine zentrale Vorstufe zur Sprache.', concernAfterWeeks: 65 },
+  { key: 'silben', title: 'Silbenketten', category: 'sprache', fromWeeks: 20, toWeeks: 39, description: 'Wiederholte Silben wie "bababa" oder "dadada".' },
+  { key: 'name-reagieren', title: 'Auf den Namen reagieren', category: 'sprache', fromWeeks: 20, toWeeks: 39, description: 'Aufsehen oder Innehalten beim eigenen Namen.' },
+  { key: 'zeigen', title: 'Mit dem Finger zeigen', category: 'sprache', fromWeeks: 32, toWeeks: 56, description: 'Zeigen, damit ihr dasselbe seht – eine zentrale Vorstufe zur Sprache.' },
   { key: 'winken', title: 'Winken', category: 'sprache', fromWeeks: 32, toWeeks: 60, description: 'Eine erste soziale Geste.' },
   { key: 'mama-papa', title: 'Mama oder Papa gezielt', category: 'sprache', fromWeeks: 40, toWeeks: 70, description: 'Nicht mehr für alles, sondern für die richtige Person.' },
   { key: 'zehn-woerter', title: 'Zehn Wörter', category: 'sprache', fromWeeks: 52, toWeeks: 90, description: 'Zehn Wörter mit stabiler Bedeutung.' },
-  { key: 'zweiwortsatz', title: 'Erster Zweiwortsatz', category: 'sprache', fromWeeks: 70, toWeeks: 110, description: '"Mama da", "mehr Saft" – zwei Wörter mit gemeinsamer Bedeutung.', concernAfterWeeks: 110 },
-  { key: 'fuenfzig-woerter', title: 'Fünfzig Wörter', category: 'sprache', fromWeeks: 78, toWeeks: 110, description: 'Ab hier folgt bei vielen die Wortschatzexplosion.', concernAfterWeeks: 110 },
+  { key: 'zweiwortsatz', title: 'Erster Zweiwortsatz', category: 'sprache', fromWeeks: 70, toWeeks: 110, description: '"Mama da", "mehr Saft" – zwei Wörter mit gemeinsamer Bedeutung.' },
+  { key: 'fuenfzig-woerter', title: 'Fünfzig Wörter', category: 'sprache', fromWeeks: 78, toWeeks: 110, description: 'Ab hier folgt bei vielen die Wortschatzexplosion.' },
   { key: 'ich-sagen', title: 'Sich selbst "ich" nennen', category: 'sprache', fromWeeks: 110, toWeeks: 156, description: 'Ein großer Schritt im Selbstbild.' },
   { key: 'satz-drei', title: 'Sätze mit drei Wörtern', category: 'sprache', fromWeeks: 100, toWeeks: 145, description: 'Zusammenhängende Sätze mit einfacher Grammatik.' },
   { key: 'fremde-verstehen', title: 'Für Fremde verständlich', category: 'sprache', fromWeeks: 130, toWeeks: 165, description: 'Etwa drei Viertel des Gesagten sind auch für Fremde verständlich.' },
 
   // ---------------------------------------------------------------- Sozial
-  { key: 'blickkontakt', title: 'Blickkontakt halten', category: 'sozial', fromWeeks: 1, toWeeks: 10, description: 'Längerer, gehaltener Blick in euer Gesicht.', concernAfterWeeks: 13 },
+  { key: 'blickkontakt', title: 'Blickkontakt halten', category: 'sozial', fromWeeks: 1, toWeeks: 10, description: 'Längerer, gehaltener Blick in euer Gesicht.' },
   { key: 'fremdeln', title: 'Fremdeln beginnt', category: 'sozial', fromWeeks: 20, toWeeks: 45, description: 'Ein Entwicklungsfortschritt: Bekannt und fremd werden unterschieden.' },
   { key: 'kuckuck-freude', title: 'Freude an Kuckuck-Spielen', category: 'sozial', fromWeeks: 20, toWeeks: 52, description: 'Die Erwartung des Bekannten wird zum Vergnügen.' },
-  { key: 'rueckversicherung', title: 'Blick zur Rückversicherung', category: 'sozial', fromWeeks: 30, toWeeks: 56, description: 'Vor etwas Neuem wird euer Gesicht geprüft.', concernAfterWeeks: 65 },
+  { key: 'rueckversicherung', title: 'Blick zur Rückversicherung', category: 'sozial', fromWeeks: 30, toWeeks: 56, description: 'Vor etwas Neuem wird euer Gesicht geprüft.' },
   { key: 'nachahmen', title: 'Alltagshandlungen nachahmen', category: 'sozial', fromWeeks: 34, toWeeks: 70, description: 'Telefonieren, Wischen, Bürsten – nachgespielt.' },
   { key: 'trost-geben', title: 'Andere trösten', category: 'sozial', fromWeeks: 70, toWeeks: 130, description: 'Erste Anzeichen von Mitgefühl.' },
   { key: 'parallelspiel', title: 'Nebeneinander spielen', category: 'sozial', fromWeeks: 78, toWeeks: 130, description: 'Neben anderen Kindern, noch nicht mit ihnen.' },
@@ -125,19 +128,6 @@ export const MILESTONES: MilestoneTemplate[] = [
 export function milestonesForAge(weeks: number, lookaheadWeeks = 8): MilestoneTemplate[] {
   return MILESTONES.filter(
     (milestone) => weeks >= milestone.fromWeeks - lookaheadWeeks && weeks <= milestone.toWeeks,
-  )
-}
-
-/**
- * Meilensteine, deren übliches Fenster deutlich überschritten ist und die
- * bei der nächsten Untersuchung angesprochen gehören.
- */
-export function overdueMilestones(weeks: number, achievedKeys: string[]): MilestoneTemplate[] {
-  return MILESTONES.filter(
-    (milestone) =>
-      milestone.concernAfterWeeks !== undefined &&
-      weeks > milestone.concernAfterWeeks &&
-      !achievedKeys.includes(milestone.key),
   )
 }
 

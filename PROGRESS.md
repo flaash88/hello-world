@@ -154,3 +154,23 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - `/api/v1` für Home Assistant: eigene Tokens, 60 Anfragen pro Minute, Audit-Log, Webhooks,
   `docs/homeassistant.md` mit fertigen Snippets. Der Typ-Enum kommt aus der Ereignis-Registry.
 - Grün: lint, typecheck, 600 Unit-Tests (88,2 % Coverage), 154 E2E-Tests, build.
+
+## Phase 11 – Zurückhaltung als Standard (abgeschlossen)
+
+- Neue Haushalte starten im Modus „Nur Protokoll": Schlafrhythmus, Kreisuhr, Auswertung,
+  Entwicklung, Perzentilkurven und Eltern-Check-in sind aus. Der Code bleibt vollständig.
+- Umschalten unter **Mehr → Was die App anzeigt**: drei Stufen als Voreinstellung, dazu ein
+  Schalter je Bereich. Abgeschaltetes verschwindet aus Leiste und Menü, seine Route leitet auf
+  `/heute`, seine Abfragen laufen nicht – auch `/api/export/pdf` und `/api/v1/status` prüfen mit.
+- Alle Push-Nachrichten aus außer den Eltern-Kind-Pass-Fristen. `lib/push/kategorien.ts` ist eine
+  Erlaubnisliste: Aufforderungen, Wochenrückblicke und Tracking-Erinnerungen gehen nie raus.
+  Ruhezeit gilt für alles; das Zeitfenster wird einmal beim ersten Einschalten erfragt.
+- Abgebaut: Tagesziel mit Balken, Konfidenz in Prozent, roter Übermüdungs-Alarm, „überfällige"
+  Meilensteine samt `concernAfterWeeks`, Zähler „x von y" und der Balken im Sprungfenster.
+- Vorhersagen sprechen als Beobachtung („Ungefähr ab 13:40 könnte Müdigkeit kommen"). Der Satz
+  „Euer Kind kennt seinen Rhythmus besser als die App" steht fest darunter. Regeln in `DESIGN.md`,
+  Texte in `lib/sleep/wording.ts`, dort gegen Imperativ, „jetzt", Prozent und Wertung getestet.
+- „Mehreres nachtragen" auf `/heute`: Liste statt Assistent, Zeit als Text („vor 2 Stunden",
+  „halb drei"), Ein-Tap-Vorschläge ab drei gleichen Werten. Nachgetragenes ist nicht markiert.
+- `/willkommen` erklärt beim ersten Start den Protokollmodus – ohne Feature-Rundgang. In den
+  Einstellungen: „Auf Protokollmodus zurücksetzen" und „Pause" für 1, 3, 7 oder 30 Tage.
