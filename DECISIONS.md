@@ -399,3 +399,14 @@ an `src/lib/i18n.ts`; alle Datums-, Zahlen- und Einheitenformate gehen über
 Quelltext. Für genau eine Sprache kostet `t('sleep.startedAt')` Lesbarkeit und
 bringt nichts; kommt eine zweite dazu, sind wenigstens die Formate schon
 richtig aufgehängt und der Ort dafür steht fest.
+
+**Die Prisma-CLI wird im Runtime-Image installiert, nicht hineinkopiert.** Der
+erste Deploy auf echter Hardware ist daran gescheitert: `node_modules/.bin/prisma`
+ist ein Symlink, den `COPY` zu einer echten Datei macht – die CLI sucht ihre
+WASM-Dateien danach neben sich in `.bin` statt in `prisma/build`. Dahinter lagen
+noch zwei fehlende Pakete (`@prisma/engines`, `effect` über `@prisma/config`).
+Ein Teil-Kopieren dieser Kette ist bei jedem Prisma-Update wieder falsch,
+deshalb steht die CLI jetzt eigenständig unter `/opt/prisma-cli`, mit der
+Version aus der `package.json` und einem `--version`-Rauchtest im Build. Wenn
+etwas fehlt, scheitert der Build – nicht der Containerstart in einer
+Restart-Schleife.
