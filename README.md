@@ -14,7 +14,7 @@ echo "POSTGRES_PASSWORD=$(openssl rand -base64 24)" >> .env
 sed -i 's/^BOOTSTRAP_INVITE_CODE=.*/BOOTSTRAP_INVITE_CODE="START-CODE"/' .env
 docker compose up -d --build                 # App, Postgres, Backup-Sidecar
 curl -f http://127.0.0.1:3000/api/health     # {"status":"ok"}
-# Cloudflare Tunnel auf 127.0.0.1:3000 zeigen lassen
+# Cloudflare Tunnel einrichten (siehe unten – Ziel ist app:3000, nicht 127.0.0.1)
 # https://<deine-domain>/register mit START-CODE öffnen und Konto anlegen
 ```
 
@@ -27,6 +27,9 @@ Die App bindet bewusst nur auf `127.0.0.1:3000` – erreichbar wird sie über ei
 Tunnel, nicht über einen offenen Port.
 
 **Variante A – Tunnel als Container (empfohlen, alles in einem Compose):**
+
+Wichtig: Ziel ist `app:3000`. `127.0.0.1` wäre aus Sicht des cloudflared-Containers
+er selbst – dort lauscht nichts.
 
 ```bash
 # Cloudflare Zero Trust -> Networks -> Tunnels -> Create tunnel -> Token kopieren
