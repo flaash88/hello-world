@@ -98,3 +98,18 @@ export function dateInput(days: number): string {
   date.setDate(date.getDate() + days)
   return date.toISOString().slice(0, 10)
 }
+
+/** Legt einen Integrationstoken fuer den Haushalt von `email` an. */
+export async function apiTokenFor(email: string, name = 'E2E'): Promise<string> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } })
+  const token = `sp_${randomBytes(24).toString('base64url')}`
+  await prisma.integrationToken.create({
+    data: {
+      householdId: user.householdId,
+      userId: user.id,
+      name,
+      tokenHash: hashToken(token),
+    },
+  })
+  return token
+}

@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Download,
   HardDriveDownload,
+  KeyRound,
   LineChart,
   LogOut,
   Milk,
@@ -69,6 +70,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
     links: [
       { href: '/mehr/export', label: 'Export', icon: Download },
       { href: '/mehr/daten', label: 'Backup & Daten', icon: HardDriveDownload },
+      { href: '/mehr/integrationen', label: 'Automationen & API', icon: KeyRound },
     ],
   },
 ]

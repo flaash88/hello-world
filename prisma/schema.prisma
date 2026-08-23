@@ -28,6 +28,8 @@ model Household {
   customSounds      CustomSound[]
   milkPortions      MilkPortion[]
   emergencyContacts EmergencyContact[]
+  integrationTokens IntegrationToken[]
+  webhooks          Webhook[]
 }
 
 /**
@@ -35,6 +37,68 @@ model Household {
  * zentrale, 1450) stehen im Code und nicht hier – sie sollen sich nicht
  * loeschen lassen.
  */
+/**
+ * Token fuer Automationen (Home Assistant, NFC-Tag am Wickeltisch).
+ * Bewusst getrennt von der Session: ein Token haengt an genau einem Haushalt
+ * und einem User, ist einzeln widerrufbar und steht nur einmal im Klartext da.
+ * In der DB liegt nur der Hash.
+ */
+model IntegrationToken {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  tokenHash   String    @unique
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  auditEntries ApiAuditLog[]
+
+  @@index([householdId, createdAt])
+}
+
+/**
+ * Jeder Zugriff ueber die API, damit nachvollziehbar bleibt, wer was tat.
+ */
+model ApiAuditLog {
+  id          String            @id @default(cuid())
+  householdId String
+  tokenId     String?
+  token       IntegrationToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+  method      String
+  path        String
+  status      Int
+  detail      String?
+  createdAt   DateTime          @default(now())
+
+  @@index([householdId, createdAt])
+}
+
+/**
+ * Ausgehender Webhook bei neuen Ereignissen.
+ */
+model Webhook {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  url         String
+  /**
+   * Ereignistypen, auf die der Webhook reagiert. Leer = alle.
+   */
+  eventTypes  Json      @default("[]")
+  active      Boolean   @default(true)
+  lastSentAt  DateTime?
+  lastError   String?
+  failures    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId])
+}
+
 model EmergencyContact {
   id          String    @id @default(cuid())
   householdId String
@@ -117,6 +181,7 @@ model User {
   exerciseLogs      ExerciseLog[]
   customSounds      CustomSound[]
   vorsorgeEntries   VorsorgeEntry[]
+  integrationTokens IntegrationToken[]
   teethEntries      Tooth[]
   milkPortions      MilkPortion[]
   audioNotes        AudioNote[]
@@ -371,6 +436,10 @@ model Event {
   pausedSec   Int       @default(0)
   createdById String
   createdBy   User      @relation("EventCreatedBy", fields: [createdById], references: [id])
+  /**
+   * Woher der Eintrag kam. null = App, "automation" = ueber /api/v1.
+   */
+  source      String?
   clientId    String?   @unique // Idempotenz fuer die Offline-Queue
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())

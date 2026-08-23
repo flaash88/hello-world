@@ -51,6 +51,8 @@ export type CreateEventInput = {
   clientId?: string
   /** Timer laeuft weiter, bis er beendet wird. */
   running?: boolean
+  /** Woher der Eintrag kam. "automation" fuer Eintraege ueber /api/v1. */
+  source?: string | null
 }
 
 export async function createEvent(
@@ -88,6 +90,7 @@ export async function createEvent(
         note: parsed.data.note?.trim() || null,
         running,
         createdById: ctx.userId,
+        source: input.source ?? null,
         clientId: parsed.data.clientId ?? null,
       },
     })
@@ -305,6 +308,7 @@ export async function startTimer(
   type: EventType,
   payload: unknown = {},
   clientId?: string,
+  source?: string | null,
 ): Promise<ServiceResult<{ id: string; created: boolean; duplikat?: DuplikatHinweis }>> {
   const category = EVENT_CATEGORIES[type]
   if (!category?.timed) return { ok: false, error: 'Für diesen Eintrag gibt es keinen Timer.' }
@@ -321,6 +325,7 @@ export async function startTimer(
     payload,
     running: true,
     clientId,
+    source,
   })
 }
 
