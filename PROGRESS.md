@@ -101,4 +101,5 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Eigene Audiodateien als Einschlafgeräusch: Format wird an der Signatur geprüft, Wiedergabe in
   Schleife über denselben Regler samt Timer, Ausblenden und Sperrbildschirm.
 - Meilensteine mit Datum, Notiz und Foto; Sprache und Regionsformat hängen an `src/lib/i18n.ts`.
-- Grün: lint, typecheck, 350 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.
+- Zugriff von außen: Cloudflare Tunnel als optionales Compose-Profil, `APP_URL` für ntfy-Links.
+- Grün: lint, typecheck, 354 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.
