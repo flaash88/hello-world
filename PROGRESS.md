@@ -115,3 +115,20 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Wochenbett: Verlauf, Körper, Babyblues gegen Wochenbettdepression, rote Warnzeichen zuerst.
 - 15 Rezepte mit höchstens 15 Minuten aktiver Zeit, filterbar, die Hälfte einhändig essbar.
 - Grün: lint, typecheck, 389 Unit-Tests, 70 E2E-Tests, build.
+
+## Phase 9 – Vorsorge, Zähne, Fieber, Vorrat, Töne (abgeschlossen)
+
+- Mutter-Kind-Pass durchgehend in Eltern-Kind-Pass umbenannt, inklusive Datenmigration.
+- `/vorsorge`: Impfungen und die zehn Untersuchungen des Kindes mit Zeitfenster, Status und
+  Zeitstrahl über fünf Jahre; Erledigt mit Datum, Ort, Notiz und Foto, Impfung schreibt ein Event.
+- KBG-Fristen mit der Kürzung von 1.300 € je fehlendem Nachweis; Erinnerung 14 und 3 Tage vorher.
+- Quelle und Stand stehen unter jeder Ansicht; ungeprüfte Daten sagen das ausdrücklich.
+- `/zaehne`: 20 Milchzähne nach FDI als SVG, Tap für Durchbruch, Ausfall, Notiz und Foto;
+  der erste Zahn setzt den Meilenstein von selbst.
+- `/gesundheit/fieber` ab 37,5 °C in 72 Stunden: Verlauf mit Medikamenten-Markern, Messort,
+  Intervall-Countdown, einseitiger Zettel für die Ordination. Keine Dosisberechnung.
+- `/vorrat`: Milchportionen nach Lagerort, FIFO-Vorschlag, Teilentnahme, eigenes Fenster für
+  aufgetaute Milch, Push einen Tag vor Ablauf, Etiketten 70 × 37 mm mit QR-Code, 24 auf A4.
+- `/tagebuch/toene`: Aufnahme bis drei Minuten, Transkodierung nach Opus, Wellenform,
+  gemerkte Abspielstelle, Schlagworte, Meilenstein-Verknüpfung, Offline-Queue.
+- Grün: lint, typecheck, 510 Unit-Tests (94,6 % Coverage), 103 E2E-Tests, build.
