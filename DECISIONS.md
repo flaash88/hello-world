@@ -323,6 +323,11 @@ aussehen. Ein Hinweis, der jeden Tag kommt, wird weggeklickt statt gelesen.
 Der Text nennt keine Krankheit und stellt keine Diagnose – ein Test prüft
 genau das, damit es beim Umformulieren nicht verrutscht.
 
+**Der Eltern-Tab liegt in der Tab-Leiste, nicht zwei Ebenen tief.** Ein
+Check-in, den man erst sucht, macht niemand. Dafür ist das Tagebuch unter
+„Mehr“ gewandert: Es wird wöchentlich geöffnet, der Check-in täglich. Bei
+paralleler Schwangerschaft weicht die Entwicklungsseite, nicht der Eltern-Tab.
+
 **Die Kontakte sind österreichisch und konkret**: Hebamme, Frühe Hilfen,
 Rat auf Draht 147, Telefonseelsorge 142, Rettung 144 – als `tel:`-Links, weil
 man nachts keine Nummer abtippt.

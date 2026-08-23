@@ -4,10 +4,10 @@ import Link from 'next/link'
 import {
   Baby,
   BellRing,
+  BookHeart,
   ChevronRight,
   Download,
   HardDriveDownload,
-  HeartHandshake,
   LineChart,
   LogOut,
   Moon,
@@ -31,7 +31,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
   {
     title: 'Für euch',
     links: [
-      { href: '/eltern', label: 'Eltern – Stimmung & Nachtschicht', icon: HeartHandshake },
+      { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
       { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
       { href: '/auswertung', label: 'Auswertung', icon: LineChart },
