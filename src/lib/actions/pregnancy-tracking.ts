@@ -310,6 +310,7 @@ export async function toggleChecklistItemAction(id: string, done: boolean): Prom
   if (result.count === 0) return { error: 'Eintrag nicht gefunden.' }
   await refresh(user, 'checklist-toggle', id)
   revalidatePath('/schwangerschaft/kliniktasche')
+  revalidatePath('/wissen/behoerdenwege')
   return { ok: true }
 }
 
@@ -360,6 +361,7 @@ export async function deleteChecklistItemAction(id: string): Promise<Result> {
   if (result.count === 0) return { error: 'Eintrag nicht gefunden.' }
   await refresh(user, 'checklist-delete', id)
   revalidatePath('/schwangerschaft/kliniktasche')
+  revalidatePath('/wissen/behoerdenwege')
   return { ok: true }
 }
 

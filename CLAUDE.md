@@ -56,7 +56,9 @@ src/
     sleep/             Wachfenster-Modell, Vorhersage, Schlafdruck
     growth/            WHO-LMS-Daten und Perzentil-Rechnung
     stats/             Aggregationen für die Auswertungen
-    content/           Wochen-Content, Sprünge, Übungen, Meilensteine
+    content/           Wochen-Content, Sprünge, Übungen, Meilensteine,
+                       Ernährung, Lebensmittel-Check, Geburtsvorbereitung,
+                       Behördenwege AT, Stillen, Wochenbett, Rezepte
     parents/           Eltern-Signal und Unterstützungskontakte
     settings/          Startbildschirm, Schnellaktionen, Bestätigungswort
     backup/            Lesezugriff auf das Backup-Volume

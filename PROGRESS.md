@@ -103,3 +103,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Meilensteine mit Datum, Notiz und Foto; Sprache und Regionsformat hängen an `src/lib/i18n.ts`.
 - Zugriff von außen: Cloudflare Tunnel als optionales Compose-Profil, `APP_URL` für ntfy-Links.
 - Grün: lint, typecheck, 354 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.
+
+## Phase 8 – Wissen (abgeschlossen)
+
+- Neuer Bereich `/wissen` mit sieben Seiten, erreichbar über „Mehr“.
+- Ernährung je Trimester: Nährstoffe mit Lebensmitteln, Energiebedarf, typische Beschwerden.
+- „Darf ich das essen?“: über 50 Lebensmittel mit Synonymsuche, drei Einordnungen und Zubereitung.
+- Geburtsvorbereitung ab SSW 34: 16 Maßnahmen mit Zeitpunkt und 11 Übungen (Yoga, Atem, Beckenboden).
+- Behördenwege Österreich: 19 Meldepflichten mit Frist und Stelle, abhakbar und für beide sichtbar.
+- Stillen: Anlegen, Positionen, Probleme mit Warnzeichen, Aufbewahrung abgepumpter Milch.
+- Wochenbett: Verlauf, Körper, Babyblues gegen Wochenbettdepression, rote Warnzeichen zuerst.
+- 15 Rezepte mit höchstens 15 Minuten aktiver Zeit, filterbar, die Hälfte einhändig essbar.
+- Grün: lint, typecheck, 389 Unit-Tests, 70 E2E-Tests, build.

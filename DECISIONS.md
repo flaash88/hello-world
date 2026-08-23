@@ -410,3 +410,54 @@ deshalb steht die CLI jetzt eigenständig unter `/opt/prisma-cli`, mit der
 Version aus der `package.json` und einem `--version`-Rauchtest im Build. Wenn
 etwas fehlt, scheitert der Build – nicht der Containerstart in einer
 Restart-Schleife.
+
+## Phase 8 – Wissen
+
+**Kein Foto-Scanner für Lebensmittel.** Die naheliegende Umsetzung von „darf
+ich das essen?“ wäre: Bild aufnehmen, an ein Bilderkennungsmodell schicken,
+Antwort anzeigen. Das hiesse, Fotos aus der Küche an einen fremden Dienst zu
+geben – bei einer App, deren ganzer Sinn ist, dass nichts das Haus verlässt.
+Stattdessen eine durchsuchbare Liste mit Synonymen: über 50 Einträge, Treffer
+in Millisekunden, funktioniert offline, und sie sagt zusätzlich, was die Sache
+sicher macht („Camembert überbacken ist in Ordnung“) statt nur ja oder nein.
+
+**Bei Unbekanntem lieber nichts sagen.** Findet die Suche einen Begriff nicht,
+kommt keine geratene Einschätzung, sondern die Grundregel und der Hinweis, bei
+der Hebamme zu fragen. Ein falsches „Ja“ wäre hier teurer als ein „Weiß ich
+nicht“.
+
+**Drei Einordnungen statt zwei.** „Kommt darauf an“ ist die häufigste ehrliche
+Antwort – bei Feta, Kaffee, Räucherlachs. Ein Test erzwingt, dass jeder
+solche Eintrag auch erklärt, worauf es ankommt.
+
+**Fristen mit sichtbarem Stand und zuständiger Stelle.** Behördenfristen
+veralten, und eine falsche Frist kostet in Österreich echtes Geld – wer das
+Kinderbetreuungsgeld später als 182 Tage rückwirkend beantragt, verliert
+Bezugstage endgültig. Deshalb trägt jeder Eintrag die zuständige Stelle, die
+Seite trägt ein Datum, und die Quellen stehen sichtbar darunter statt im
+Impressum.
+
+**Der Eltern-Kind-Pass heißt so.** Der Mutter-Kind-Pass wurde mit der
+Digitalisierung umbenannt. Die App nennt den neuen Namen und den alten dazu,
+weil im Alltag noch beide kursieren – ein Test hält beides fest.
+
+**Die Behörden-Checkliste speichert nur den Zustand.** Frist, Stelle und
+Hinweis kommen weiter aus dem Content-Modul, verknüpft über einen
+`templateKey` an `ChecklistItem` – dieselbe Mechanik wie bei den
+Mutter-Kind-Pass-Terminen. Dadurch lassen sich Texte korrigieren, ohne dass
+ein Haken verloren geht, und neue Einträge werden nachgezogen.
+
+**Nährstoffe statt Kalorien.** Die Ernährungsseite nennt bewusst zuerst, was
+knapp wird (Folsäure, Jod, Eisen, DHA), und erst danach den Energiebedarf – mit
+der konkreten Ansage, dass der Mehrbedarf einer Jause entspricht und nicht
+einer zweiten Portion. „Für zwei essen“ ist der verbreitetste Irrtum in dieser
+Zeit.
+
+**Übungen mit Gegenanzeigen.** Die tiefe Hocke steht erst ab SSW 34 und mit dem
+ausdrücklichen Hinweis, sie bei tiefliegender Plazenta, vorzeitigen Wehen oder
+Beckenendlage vorher abzuklären. Ein Test prüft genau diesen Hinweis, damit er
+beim Umformulieren nicht verschwindet.
+
+**Warnzeichen zuerst, nicht am Ende.** Auf der Wochenbett-Seite steht die rote
+Karte mit Fieber, starker Blutung und Präeklampsie-Zeichen ganz oben – vor
+allem Erklärenden. Wer sie braucht, scrollt nicht.
