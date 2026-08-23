@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Baby, Printer } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { addDays, formatAge, formatDateLong, startOfLocalDay } from '@/lib/time'
 import { formatLength, formatWeight, unitPrefsFrom } from '@/lib/units'
+import { dauerText } from '@/lib/audio/notes'
 import { EmptyState } from '@/components/ui/empty-state'
 import { BackLink } from '@/components/layout/back-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,7 +38,7 @@ export default async function YearReviewPage({
   const from = startOfLocalDay(new Date(Date.UTC(year, 0, 1, 12)), ctx.timezone)
   const to = addDays(startOfLocalDay(new Date(Date.UTC(year + 1, 0, 1, 12)), ctx.timezone), 0, ctx.timezone)
 
-  const [entries, milestones, measurements] = await Promise.all([
+  const [entries, milestones, measurements, toene] = await Promise.all([
     prisma.journalEntry.findMany({
       where: { childId: child.id, happenedAt: { gte: from, lt: to } },
       include: { media: { take: 3 } },
@@ -49,6 +51,11 @@ export default async function YearReviewPage({
     prisma.growthMeasurement.findMany({
       where: { childId: child.id, measuredAt: { gte: from, lt: to } },
       orderBy: { measuredAt: 'asc' },
+    }),
+    prisma.audioNote.findMany({
+      where: { childId: child.id, recordedAt: { gte: from, lt: to } },
+      orderBy: { recordedAt: 'asc' },
+      select: { id: true, title: true, recordedAt: true, durationSec: true },
     }),
   ])
 
@@ -75,7 +82,7 @@ export default async function YearReviewPage({
         <PrintHint />
       </div>
 
-      {entries.length === 0 && milestones.length === 0 ? (
+      {entries.length === 0 && milestones.length === 0 && toene.length === 0 ? (
         <EmptyState
           icon={Baby}
           title={`Für ${year} gibt es noch nichts`}
@@ -90,6 +97,7 @@ export default async function YearReviewPage({
             <CardContent className="grid grid-cols-2 gap-3">
               <Stat label="Tagebucheinträge" value={String(entries.length)} />
               <Stat label="Meilensteine" value={String(milestones.length)} />
+              <Stat label="Aufnahmen" value={String(toene.length)} />
               <Stat
                 label="Fotos"
                 value={String(entries.reduce((sum, entry) => sum + entry.media.length, 0))}
@@ -123,6 +131,35 @@ export default async function YearReviewPage({
                       <span className="shrink-0 text-sm text-muted-foreground">
                         {milestone.achievedAt && formatDateLong(milestone.achievedAt, ctx.timezone)}
                       </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {toene.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Wie {child.name} geklungen hat</CardTitle>
+                <CardDescription>
+                  {toene.length} {toene.length === 1 ? 'Aufnahme' : 'Aufnahmen'} in diesem Jahr
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="flex flex-col gap-2">
+                  {toene.map((ton) => (
+                    <li key={ton.id}>
+                      <Link
+                        href="/tagebuch/toene"
+                        className="flex items-baseline justify-between gap-3"
+                      >
+                        <span className="font-semibold">{ton.title}</span>
+                        <span className="shrink-0 text-sm text-muted-foreground">
+                          {formatDateLong(ton.recordedAt, ctx.timezone)} ·{' '}
+                          {dauerText(ton.durationSec)}
+                        </span>
+                      </Link>
                     </li>
                   ))}
                 </ul>

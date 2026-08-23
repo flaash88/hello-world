@@ -694,8 +694,11 @@ model AudioNote {
   mimeType    String
   bytes       Int
   durationSec Int?
+  // Ausschlaege fuer die Wellenform, beim Hochladen einmal berechnet
+  peaks       Json     @default("[]")
   tags        Json     @default("[]")
   milestoneId String?
+  clientId    String?  @unique // Idempotenz fuer die Offline-Queue
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdAt   DateTime @default(now())

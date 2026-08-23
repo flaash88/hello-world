@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 /**
- * Liefert hochgeladene Dateien aus: Bilder und eigene Einschlafgeräusche. Nur
+ * Liefert hochgeladene Dateien aus: Bilder, eigene Einschlafgeräusche und die
+ * Tonspuren aus dem Tagebuch. Nur
  * für angemeldete Mitglieder des Haushalts, dem die Datei gehört – sie liegen
  * bewusst nicht im öffentlichen `public`-Verzeichnis.
  */
@@ -20,8 +21,8 @@ export async function GET(
   const { path: segments } = await context.params
   const relativePath = segments.join('/')
 
-  // Der Pfad muss zu einem Medium oder Klang des eigenen Haushalts gehören.
-  const [image, sound] = await Promise.all([
+  // Der Pfad muss zu einem Medium, Klang oder Ton des eigenen Haushalts gehören.
+  const [image, sound, audio] = await Promise.all([
     prisma.mediaAsset.findFirst({
       where: {
         child: { householdId: user.householdId },
@@ -33,8 +34,12 @@ export async function GET(
       where: { householdId: user.householdId, path: relativePath },
       select: { bytes: true, mimeType: true },
     }),
+    prisma.audioNote.findFirst({
+      where: { child: { householdId: user.householdId }, path: relativePath },
+      select: { bytes: true, mimeType: true },
+    }),
   ])
-  const asset = image ?? sound
+  const asset = image ?? sound ?? audio
   if (!asset) return new Response('Nicht gefunden', { status: 404 })
 
   const etag = etagFor(relativePath, asset.bytes)

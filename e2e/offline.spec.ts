@@ -24,7 +24,8 @@ test.describe('Offline', () => {
 
     // Direkt in die Queue schreiben – so wie es die App im Offline-Fall tut.
     await page.evaluate(async () => {
-      const request = indexedDB.open('sproessling', 1)
+      // Ohne Versionsnummer öffnen – die App bestimmt sie, der Test nicht.
+      const request = indexedDB.open('sproessling')
       await new Promise<void>((resolve, reject) => {
         request.onsuccess = () => resolve()
         request.onerror = () => reject(request.error)

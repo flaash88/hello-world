@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Baby, CalendarRange, Images } from 'lucide-react'
+import { Baby, CalendarRange, Images, Music } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { knownJournalTagsAction } from '@/lib/actions/journal'
@@ -58,6 +58,13 @@ export default async function JournalPage({
       <div className="flex items-start justify-between gap-2">
         <h1 className="font-display text-2xl font-bold">Tagebuch</h1>
         <div className="flex gap-1">
+          <Link
+            href="/tagebuch/toene"
+            aria-label="Töne"
+            className="flex size-12 items-center justify-center rounded-lg border border-border"
+          >
+            <Music className="size-5" aria-hidden />
+          </Link>
           <Link
             href="/tagebuch/monatsfotos"
             aria-label="Monatsfotos"
