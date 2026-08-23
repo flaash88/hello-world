@@ -64,6 +64,81 @@ const serwist = new Serwist({
 
 serwist.addEventListeners()
 
+// ------------------------------------------------------------ Teilen ----
+
+/**
+ * Ueber "Teilen" hereingereichte Dateien, wenn gerade kein Netz da ist.
+ *
+ * Der Browser schickt sie als POST an /api/share. Geht das schief, landen sie
+ * in derselben IndexedDB wie die uebrige Schreib-Queue; die App schickt sie
+ * beim naechsten Reconnect nach. Ohne das waere die geteilte Datei verloren,
+ * und das faellt erst auf, wenn man sie sucht.
+ */
+const QUEUE_DB = 'sproessling'
+const GETEILT_STORE = 'geteilt'
+
+function oeffneQueueDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    // Ohne Versionsnummer: die App legt die Stores an, der Worker schreibt nur.
+    const request = indexedDB.open(QUEUE_DB)
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+async function legeGeteiltAb(datei: File, titel: string): Promise<void> {
+  const db = await oeffneQueueDb()
+  if (!db.objectStoreNames.contains(GETEILT_STORE)) {
+    db.close()
+    throw new Error('Queue noch nicht angelegt')
+  }
+
+  const bytes = await datei.arrayBuffer()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(GETEILT_STORE, 'readwrite')
+    tx.objectStore(GETEILT_STORE).put({
+      clientId: crypto.randomUUID(),
+      bytes,
+      mimeType: datei.type || 'application/octet-stream',
+      name: datei.name || 'geteilt',
+      titel,
+      queuedAt: new Date().toISOString(),
+      attempts: 0,
+    })
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+  db.close()
+}
+
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url)
+  if (event.request.method !== 'POST' || url.pathname !== '/api/share') return
+
+  event.respondWith(
+    (async () => {
+      const geklont = event.request.clone()
+      try {
+        return await fetch(event.request)
+      } catch {
+        // Kein Netz: wegspeichern und den Nutzer trotzdem in der App landen
+        // lassen, statt ihm eine Fehlerseite zu zeigen.
+        try {
+          const form = await geklont.formData()
+          const titel = String(form.get('title') ?? '')
+          const dateien = form
+            .getAll('media')
+            .filter((eintrag): eintrag is File => eintrag instanceof File)
+          for (const datei of dateien) await legeGeteiltAb(datei, titel)
+          return Response.redirect('/tagebuch?geteiltOffline=1', 303)
+        } catch {
+          return Response.redirect('/tagebuch', 303)
+        }
+      }
+    })(),
+  )
+})
+
 // -------------------------------------------------------------- Web Push ----
 
 self.addEventListener('push', (event) => {

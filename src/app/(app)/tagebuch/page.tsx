@@ -13,7 +13,13 @@ export const metadata: Metadata = { title: 'Tagebuch' }
 export default async function JournalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; monat?: string }>
+  searchParams: Promise<{
+    tag?: string
+    monat?: string
+    geteilt?: string
+    titel?: string
+    geteiltOffline?: string
+  }>
 }) {
   const ctx = await getAppContext()
   const child = ctx.activeChild
@@ -31,6 +37,28 @@ export default async function JournalPage({
   const params = await searchParams
   const tagFilter = params.tag?.trim() || null
   const monthFilter = params.monat?.trim() || null
+
+  // Ueber "Teilen" gekommene Fotos haengen schon am neuen Eintrag. Die Ids
+  // stehen in der URL, geladen wird nur, was wirklich diesem Kind gehoert.
+  const geteilteIds = (params.geteilt ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean)
+    .slice(0, 12)
+  const geteilteFotos =
+    geteilteIds.length > 0
+      ? (
+          await prisma.mediaAsset.findMany({
+            where: { id: { in: geteilteIds }, childId: child.id },
+            select: { id: true, path: true, thumbPath: true, takenAt: true },
+          })
+        ).map((asset) => ({
+          id: asset.id,
+          path: asset.path,
+          thumbPath: asset.thumbPath ?? asset.path,
+          takenAt: asset.takenAt ? asset.takenAt.toISOString() : null,
+        }))
+      : []
 
   const entries = await prisma.journalEntry.findMany({
     where: {
@@ -89,6 +117,9 @@ export default async function JournalPage({
         knownTags={tags}
         activeTag={tagFilter}
         activeMonth={monthFilter}
+        geteilteFotos={geteilteFotos}
+        geteilterTitel={params.titel?.trim() || null}
+        geteiltOffline={params.geteiltOffline === '1'}
         availableMonths={[
           ...new Set(entries.map((entry) => entry.happenedAt.toISOString().slice(0, 7))),
         ].sort((a, b) => b.localeCompare(a))}

@@ -75,17 +75,34 @@ export type AudioEntry = QueuedAudio & { attempts: number; lastError?: string }
  */
 export type NotfallSpiegel = { key: 'aktuell'; karte: unknown; gespiegeltAm: string }
 
+/**
+ * Ueber "Teilen" hereingereichte Dateien, die offline ankamen. Der Service
+ * Worker legt sie hier ab, der naechste Flush-Lauf schickt sie an /api/share.
+ */
+export type GeteilteDatei = {
+  clientId: string
+  bytes: ArrayBuffer
+  mimeType: string
+  name: string
+  titel: string
+  queuedAt: string
+  attempts: number
+  lastError?: string
+}
+
 interface QueueDb extends DBSchema {
   operations: { key: string; value: QueueEntry; indexes: { queuedAt: string } }
   audio: { key: string; value: AudioEntry; indexes: { queuedAt: string } }
   notfall: { key: string; value: NotfallSpiegel }
+  geteilt: { key: string; value: GeteilteDatei; indexes: { queuedAt: string } }
 }
 
 const DB_NAME = 'sproessling'
-const DB_VERSION = 3
+const DB_VERSION = 4
 const STORE = 'operations'
 const AUDIO_STORE = 'audio'
 const NOTFALL_STORE = 'notfall'
+export const GETEILT_STORE = 'geteilt'
 /** Nach so vielen Fehlversuchen gilt ein Eintrag als dauerhaft kaputt. */
 export const MAX_ATTEMPTS = 8
 
@@ -104,6 +121,10 @@ function db(): Promise<IDBPDatabase<QueueDb>> {
       }
       if (alteVersion < 3) {
         database.createObjectStore(NOTFALL_STORE, { keyPath: 'key' })
+      }
+      if (alteVersion < 4) {
+        const store = database.createObjectStore(GETEILT_STORE, { keyPath: 'clientId' })
+        store.createIndex('queuedAt', 'queuedAt')
       }
     },
   })
@@ -218,4 +239,32 @@ export async function spiegleNotfallKarte(karte: unknown): Promise<void> {
 export async function gespiegelteNotfallKarte(): Promise<NotfallSpiegel | null> {
   const database = await db()
   return (await database.get(NOTFALL_STORE, 'aktuell')) ?? null
+}
+
+// ---------------------------------------------------- Geteilte Dateien --
+
+export async function pendingGeteilt(): Promise<GeteilteDatei[]> {
+  const database = await db()
+  const all = await database.getAllFromIndex(GETEILT_STORE, 'queuedAt')
+  return all.filter((entry) => entry.attempts < MAX_ATTEMPTS)
+}
+
+export async function removeGeteilt(clientId: string): Promise<void> {
+  const database = await db()
+  await database.delete(GETEILT_STORE, clientId)
+}
+
+export async function markGeteiltFailed(
+  clientId: string,
+  error: string,
+  opts: { endgueltig?: boolean } = {},
+): Promise<void> {
+  const database = await db()
+  const entry = await database.get(GETEILT_STORE, clientId)
+  if (!entry) return
+  await database.put(GETEILT_STORE, {
+    ...entry,
+    attempts: opts.endgueltig ? MAX_ATTEMPTS : entry.attempts + 1,
+    lastError: error,
+  })
 }

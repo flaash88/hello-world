@@ -46,6 +46,9 @@ export function JournalTimeline({
   activeTag,
   activeMonth,
   availableMonths,
+  geteilteFotos = [],
+  geteilterTitel = null,
+  geteiltOffline = false,
 }: {
   childId: string
   childName: string
@@ -55,8 +58,15 @@ export function JournalTimeline({
   activeTag: string | null
   activeMonth: string | null
   availableMonths: string[]
+  /** Ueber "Teilen" hereingereichte Fotos – haengen gleich am neuen Eintrag. */
+  geteilteFotos?: UploadedPhoto[]
+  geteilterTitel?: string | null
+  /** Ueber "Teilen" ohne Netz angekommen – liegt in der Queue. */
+  geteiltOffline?: boolean
 }) {
-  const [editing, setEditing] = useState<JournalEntryView | 'new' | null>(null)
+  const [editing, setEditing] = useState<JournalEntryView | 'new' | null>(
+    geteilteFotos.length > 0 ? 'new' : null,
+  )
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
@@ -85,6 +95,13 @@ export function JournalTimeline({
 
   return (
     <div className="flex flex-col gap-4">
+      {geteiltOffline && (
+        <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+          Ohne Verbindung geteilt – die Datei liegt in der Queue und geht raus, sobald wieder Netz
+          da ist.
+        </p>
+      )}
+
       <Button size="lg" onClick={() => setEditing('new')}>
         <Plus aria-hidden />
         Eintrag schreiben
@@ -250,6 +267,8 @@ export function JournalTimeline({
       )}
 
       <JournalDialog
+        geteilteFotos={geteilteFotos}
+        geteilterTitel={geteilterTitel}
         childId={childId}
         currentMonth={currentMonth}
         knownTags={knownTags}
@@ -277,6 +296,8 @@ function JournalDialog({
   entry,
   open,
   onOpenChange,
+  geteilteFotos = [],
+  geteilterTitel = null,
 }: {
   childId: string
   currentMonth: number | null
@@ -284,6 +305,8 @@ function JournalDialog({
   entry: JournalEntryView | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  geteilteFotos?: UploadedPhoto[]
+  geteilterTitel?: string | null
 }) {
   const [photos, setPhotos] = useState<UploadedPhoto[]>([])
   const [tags, setTags] = useState<string[]>([])
@@ -297,11 +320,17 @@ function JournalDialog({
   const router = useRouter()
 
   if (open && loadedFor !== (entry?.id ?? 'new')) {
-    setPhotos(entry?.media ?? [])
+    // Geteilte Fotos gelten nur fuer einen neuen Eintrag – beim Bearbeiten
+    // haetten sie nichts verloren.
+    setPhotos(entry?.media ?? geteilteFotos)
     setTags(entry?.tags ?? [])
     setMood(entry?.mood ?? null)
     setIsMonthPhoto(entry?.monthPhoto !== null && entry?.monthPhoto !== undefined)
-    setHappenedAt(toLocalInput(entry?.happenedAt ?? new Date().toISOString()))
+    setHappenedAt(
+      toLocalInput(
+        entry?.happenedAt ?? geteilteFotos[0]?.takenAt ?? new Date().toISOString(),
+      ),
+    )
     setError(null)
     setLoadedFor(entry?.id ?? 'new')
   }
@@ -363,7 +392,12 @@ function JournalDialog({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title">Überschrift (optional)</Label>
-            <Input id="title" name="title" maxLength={120} defaultValue={entry?.title ?? ''} />
+            <Input
+              id="title"
+              name="title"
+              maxLength={120}
+              defaultValue={entry?.title ?? geteilterTitel ?? ''}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">

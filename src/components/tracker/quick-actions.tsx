@@ -1,12 +1,19 @@
 'use client'
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { startTimerAction } from '@/lib/actions/events'
 import { meldeDuplikat } from './duplicate-banner'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
 import { useToast } from '@/components/ui/toast'
 import { EventDialog } from './event-dialog'
 import { QUICK_ACTION_ICONS } from './quick-actions-icons'
+import {
+  SHORTCUT_PARAM,
+  istShortcutAction,
+  planFor,
+  sollStarten,
+  urlOhneAktion,
+} from '@/lib/tracker/shortcut-actions'
 import { cn } from '@/lib/utils'
 
 /**
@@ -33,6 +40,8 @@ export function QuickActions({
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const aktionErledigt = useRef(false)
 
   function activate(type: EventType) {
     const category = EVENT_CATEGORIES[type]
@@ -57,6 +66,33 @@ export function QuickActions({
     }
     setDialogType(type)
   }
+
+  // Verknuepfung vom Startbildschirm: `/heute?action=sleep-start`. Der
+  // Parameter wird sofort aus der URL entfernt, damit ein Neuladen den Timer
+  // nicht ein zweites Mal startet.
+  useEffect(() => {
+    if (aktionErledigt.current) return
+    const wunsch = searchParams.get(SHORTCUT_PARAM)
+    if (!istShortcutAction(wunsch)) return
+
+    aktionErledigt.current = true
+    window.history.replaceState(null, '', urlOhneAktion(window.location.href))
+
+    const plan = planFor(wunsch)
+    if (plan.art === 'dialog') {
+      setDialogType(plan.type)
+      return
+    }
+    if (!sollStarten(plan, runningTypes)) {
+      // Laeuft schon – dann wird der laufende gezeigt, statt einen zweiten zu
+      // starten.
+      toast({ title: `${EVENT_CATEGORIES[plan.type].label} läuft bereits` })
+      return
+    }
+    activate(plan.type)
+    // activate haengt an vielen Werten; die Aktion soll genau einmal laufen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   return (
     <>

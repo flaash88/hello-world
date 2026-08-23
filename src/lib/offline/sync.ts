@@ -1,11 +1,14 @@
 'use client'
 import {
+  markGeteiltFailed,
   markAudioFailed,
   markFailed,
   pending,
   pendingAudio,
   remove,
   removeAudio,
+  pendingGeteilt,
+  removeGeteilt,
   type QueueEntry,
 } from './queue'
 
@@ -16,6 +19,8 @@ export type SyncSummary = {
   remaining: number
   /** Hochgeladene Aufnahmen aus dem Tonspur-Tagebuch. */
   audioApplied: number
+  /** Offline geteilte Dateien, die jetzt durchgegangen sind. */
+  sharedApplied: number
 }
 
 type SyncOutcome = {
@@ -55,7 +60,14 @@ let running = false
 
 export async function flushQueue(): Promise<SyncSummary> {
   if (running) {
-    return { applied: 0, duplicate: 0, failed: 0, audioApplied: 0, remaining: await countRemaining() }
+    return {
+      applied: 0,
+      duplicate: 0,
+      failed: 0,
+      audioApplied: 0,
+      sharedApplied: 0,
+      remaining: await countRemaining(),
+    }
   }
   running = true
   try {
@@ -64,9 +76,11 @@ export async function flushQueue(): Promise<SyncSummary> {
       duplicate: 0,
       failed: 0,
       audioApplied: 0,
+      sharedApplied: 0,
       remaining: 0,
     }
     summary.audioApplied = await flushAudio()
+    summary.sharedApplied = await flushGeteilt()
 
     const entries = await pending()
     if (entries.length === 0) {
@@ -109,8 +123,51 @@ export async function flushQueue(): Promise<SyncSummary> {
 }
 
 async function countRemaining(): Promise<number> {
-  const [operationen, aufnahmen] = await Promise.all([pending(), pendingAudio()])
-  return operationen.length + aufnahmen.length
+  const [operationen, aufnahmen, geteilt] = await Promise.all([
+    pending(),
+    pendingAudio(),
+    pendingGeteilt(),
+  ])
+  return operationen.length + aufnahmen.length + geteilt.length
+}
+
+/**
+ * Dateien, die offline ueber "Teilen" hereinkamen. Der Service Worker hat sie
+ * abgelegt, hier gehen sie denselben Weg wie ein Teilen mit Verbindung.
+ */
+async function flushGeteilt(): Promise<number> {
+  const entries = await pendingGeteilt()
+  let gesendet = 0
+
+  for (const entry of entries) {
+    const form = new FormData()
+    if (entry.titel) form.set('title', entry.titel)
+    form.set('media', new Blob([entry.bytes], { type: entry.mimeType }), entry.name)
+
+    try {
+      const response = await fetch('/api/share', {
+        method: 'POST',
+        headers: { 'x-csrf-token': csrfToken() },
+        body: form,
+        redirect: 'manual',
+      })
+      // Der Endpunkt antwortet mit einem Redirect; alles ausser 5xx heisst
+      // "angekommen".
+      if (response.status < 500) {
+        await removeGeteilt(entry.clientId)
+        gesendet += 1
+        continue
+      }
+      await markGeteiltFailed(entry.clientId, `Server antwortete mit ${response.status}`)
+    } catch (error) {
+      await markGeteiltFailed(
+        entry.clientId,
+        error instanceof Error ? error.message : 'Netzwerkfehler',
+      )
+    }
+  }
+
+  return gesendet
 }
 
 /**
