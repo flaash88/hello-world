@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/nunito-latin.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215;
+}
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/fonts/fraunces-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215;
+}
+
+@layer base {
+  :root {
+    --font-sans: 'Nunito';
+    --font-display: 'Fraunces';
+
+    /* Tag – warmes Sand/Lehm-Schema, eine kraeftige Akzentfarbe (Terrakotta) */
+    --background: 36 44% 97%;
+    --foreground: 24 24% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 24% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 24% 16%;
+    --primary: 14 66% 46%;
+    --primary-foreground: 36 44% 98%;
+    --secondary: 33 40% 92%;
+    --secondary-foreground: 24 28% 22%;
+    --muted: 33 32% 93%;
+    --muted-foreground: 26 12% 42%;
+    --accent: 33 46% 90%;
+    --accent-foreground: 24 28% 22%;
+    --destructive: 0 62% 44%;
+    --destructive-foreground: 36 44% 98%;
+    --border: 30 22% 87%;
+    --input: 30 22% 87%;
+    --ring: 14 66% 46%;
+    --radius: 1rem;
+
+    --cat-sleep: 232 42% 52%;
+    --cat-feed: 28 78% 48%;
+    --cat-bottle: 196 62% 40%;
+    --cat-pump: 268 38% 52%;
+    --cat-solids: 96 38% 38%;
+    --cat-diaper: 172 46% 36%;
+    --cat-mood: 340 54% 50%;
+    --cat-health: 288 38% 46%;
+    --cat-other: 26 14% 46%;
+  }
+
+  /*
+   * Nachtmodus: kein invertiertes Tagesschema, sondern ein eigenes,
+   * stark reduziertes Layout. Sehr dunkler warmer Grund, rot-warme Akzente,
+   * niedrige Leuchtdichte – blendet nachts nicht und stoert den Schlaf weniger.
+   */
+  [data-theme='night'] {
+    --background: 20 18% 4%;
+    --foreground: 24 40% 78%;
+    --card: 20 16% 8%;
+    --card-foreground: 24 40% 78%;
+    --popover: 20 16% 8%;
+    --popover-foreground: 24 40% 78%;
+    --primary: 12 62% 44%;
+    --primary-foreground: 24 44% 92%;
+    --secondary: 20 14% 12%;
+    --secondary-foreground: 24 34% 72%;
+    --muted: 20 14% 11%;
+    --muted-foreground: 24 18% 52%;
+    --accent: 16 30% 16%;
+    --accent-foreground: 24 40% 80%;
+    --destructive: 0 52% 40%;
+    --destructive-foreground: 24 44% 92%;
+    --border: 20 14% 15%;
+    --input: 20 14% 15%;
+    --ring: 12 62% 48%;
+
+    --cat-sleep: 232 24% 46%;
+    --cat-feed: 28 44% 44%;
+    --cat-bottle: 196 32% 38%;
+    --cat-pump: 268 22% 46%;
+    --cat-solids: 96 22% 36%;
+    --cat-diaper: 172 26% 34%;
+    --cat-mood: 340 30% 44%;
+    --cat-health: 288 22% 42%;
+    --cat-other: 26 10% 40%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'ss01', 'cv01';
+    overscroll-behavior-y: none;
+  }
+  h1, h2, h3 {
+    @apply font-display font-semibold tracking-tight;
+  }
+  /* Touch-Ziele: nie kleiner als 48px (WCAG 2.2 AA / Bedienung mit einer Hand). */
+  button, [role='button'], a.tap, input[type='checkbox'], input[type='radio'] {
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0rem);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Der Jahresrückblick soll sich ordentlich ausdrucken lassen. */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  header,
+  nav,
+  [role='status'] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+}

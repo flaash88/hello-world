@@ -1,0 +1,589 @@
+// Sprössling – Datenmodell
+// Alle Zeitstempel werden in UTC gespeichert und erst in der UI nach
+// Europe/Vienna umgerechnet (siehe src/lib/time.ts).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- Haushalt --
+
+model Household {
+  id        String   @id @default(cuid())
+  name      String
+  timezone  String   @default("Europe/Vienna")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  children     Child[]
+  invites      Invite[]
+  pregnancies  Pregnancy[]
+  settings     HouseholdSettings?
+  customSounds CustomSound[]
+}
+
+model HouseholdSettings {
+  householdId String    @id
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  // Nachtmodus
+  nightModeStart String  @default("20:00")
+  nightModeEnd   String  @default("06:00")
+  nightModeAuto  Boolean @default(true)
+
+  // ntfy (optional, zusaetzlich zu Web Push)
+  ntfyServerUrl String?
+  ntfyTopic     String?
+
+  // Einheiten
+  unitWeight String @default("kg") // kg | lb
+  unitLength String @default("cm") // cm | in
+  unitTemp   String @default("c") // c | f
+  unitVolume String @default("ml") // ml | oz
+
+  quickActions Json   @default("[\"sleep\",\"nursing\",\"bottle\",\"diaper\"]")
+  startScreen  String @default("dashboard")
+
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String    @id @default(cuid())
+  householdId  String
+  household    Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  email        String    @unique
+  passwordHash String
+  displayName  String
+  initials     String
+  color        String    @default("#C0563A")
+  role         String    @default("parent") // parent | admin
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions          Session[]
+  createdEvents     Event[]                 @relation("EventCreatedBy")
+  editedEvents      EventRevision[]
+  measurements      GrowthMeasurement[]
+  milestones        Milestone[]
+  journalEntries    JournalEntry[]
+  moodLogs          MoodLog[]
+  parentSleepLogs   ParentSleepLog[]
+  parentJournal     ParentJournalEntry[]
+  reminders         Reminder[]
+  pushSubscriptions PushSubscription[]
+  notificationPrefs NotificationPreference?
+  nameVotes         NameVote[]
+  nameSuggestions   NameSuggestion[]
+  invitesCreated    Invite[]                @relation("InviteCreatedBy")
+  checklistChanges  ChecklistItem[]
+  nightShifts       NightShift[]
+  exerciseLogs      ExerciseLog[]
+  customSounds      CustomSound[]
+
+  @@index([householdId])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  userAgent  String?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Invite {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  codeHash    String    @unique
+  label       String?
+  createdById String?
+  createdBy   User?     @relation("InviteCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  usedAt      DateTime?
+  usedByEmail String?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  key       String // gehashter Bucket-Schluessel (E-Mail bzw. IP)
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
+// ------------------------------------------------------------------- Kinder --
+
+model Child {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  birthDate   DateTime?
+  dueDate     DateTime? // fuer korrigiertes Alter bei Fruehgeburt
+  sex         String    @default("unknown") // male | female | unknown
+  avatarPath  String?
+  archived    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  events       Event[]
+  measurements GrowthMeasurement[]
+  milestones   Milestone[]
+  journal      JournalEntry[]
+  media        MediaAsset[]
+  predictions  SleepPrediction[]
+  reminders    Reminder[]
+  exerciseLogs ExerciseLog[]
+  pregnancy    Pregnancy?
+
+  @@index([householdId])
+}
+
+// ---------------------------------------------------------- Schwangerschaft --
+
+model Pregnancy {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childId     String?   @unique
+  child       Child?    @relation(fields: [childId], references: [id], onDelete: SetNull)
+  dueDate     DateTime
+  lastPeriod  DateTime?
+  label       String    @default("Unser Baby")
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  contractions    Contraction[]
+  kickSessions    KickSession[]
+  maternalLogs    MaternalLog[]
+  appointments    Appointment[]
+  checklistItems  ChecklistItem[]
+  nameSuggestions NameSuggestion[]
+
+  @@index([householdId])
+}
+
+model Contraction {
+  id          String    @id @default(cuid())
+  pregnancyId String
+  pregnancy   Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  startedAt   DateTime
+  endedAt     DateTime?
+  intensity   Int? // 1..5
+  note        String?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@index([pregnancyId, startedAt])
+}
+
+model KickSession {
+  id          String    @id @default(cuid())
+  pregnancyId String
+  pregnancy   Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  startedAt   DateTime
+  endedAt     DateTime?
+  kicks       Json      @default("[]") // Array von ISO-Zeitstempeln
+  count       Int       @default(0)
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@index([pregnancyId, startedAt])
+}
+
+model MaternalLog {
+  id          String    @id @default(cuid())
+  pregnancyId String
+  pregnancy   Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  recordedAt  DateTime
+  weightKg    Float?
+  systolic    Int?
+  diastolic   Int?
+  pulse       Int?
+  symptoms    Json      @default("[]")
+  note        String?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@index([pregnancyId, recordedAt])
+}
+
+model Appointment {
+  id          String     @id @default(cuid())
+  pregnancyId String?
+  pregnancy   Pregnancy? @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  householdId String
+  title       String
+  category    String     @default("mkp") // mkp | doctor | midwife | course | other
+  scheduledAt DateTime?
+  windowFrom  DateTime?
+  windowTo    DateTime?
+  location    String?
+  note        String?
+  done        Boolean    @default(false)
+  doneAt      DateTime?
+  templateKey String?
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([householdId, scheduledAt])
+}
+
+model ChecklistItem {
+  id          String     @id @default(cuid())
+  pregnancyId String?
+  pregnancy   Pregnancy? @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  householdId String
+  listKey     String     @default("hospitalbag") // hospitalbag | custom
+  section     String
+  label       String
+  note        String?
+  quantity    String?
+  done        Boolean    @default(false)
+  doneAt      DateTime?
+  doneById    String?
+  doneBy      User?      @relation(fields: [doneById], references: [id], onDelete: SetNull)
+  sortOrder   Int        @default(0)
+  custom      Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([householdId, listKey])
+}
+
+model NameSuggestion {
+  id          String    @id @default(cuid())
+  pregnancyId String
+  pregnancy   Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
+  name        String
+  sex         String    @default("unknown")
+  note        String?
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  votes NameVote[]
+
+  @@unique([pregnancyId, name])
+  @@index([pregnancyId])
+}
+
+model NameVote {
+  id           String         @id @default(cuid())
+  suggestionId String
+  suggestion   NameSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vote         Int // 1 = ja, -1 = nein
+  createdAt    DateTime       @default(now())
+
+  @@unique([suggestionId, userId])
+}
+
+// ----------------------------------------------------------------- Tracker --
+
+// Polymorpher Event-Typ: `type` bestimmt das Schema der `payload` (zod-validiert
+// in src/lib/events/schemas.ts). Timer-Events nutzen startedAt/endedAt,
+// Punkt-Events nur startedAt.
+model Event {
+  id          String    @id @default(cuid())
+  childId     String
+  child       Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  type        String
+  startedAt   DateTime
+  endedAt     DateTime?
+  durationSec Int? // denormalisiert fuer schnelle Statistiken
+  payload     Json      @default("{}")
+  note        String?
+  running     Boolean   @default(false)
+  pausedAt    DateTime?
+  pausedSec   Int       @default(0)
+  createdById String
+  createdBy   User      @relation("EventCreatedBy", fields: [createdById], references: [id])
+  clientId    String?   @unique // Idempotenz fuer die Offline-Queue
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  revisions EventRevision[]
+
+  @@index([childId, type, startedAt])
+  @@index([childId, startedAt])
+  @@index([childId, running])
+}
+
+model EventRevision {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  changedById String
+  changedBy   User     @relation(fields: [changedById], references: [id], onDelete: Cascade)
+  action      String // create | update | delete | restore
+  before      Json?
+  after       Json?
+  createdAt   DateTime @default(now())
+
+  @@index([eventId, createdAt])
+}
+
+// ----------------------------------------------------- Wachstum & Meilenst. --
+
+model GrowthMeasurement {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  measuredAt  DateTime
+  weightKg    Float?
+  lengthCm    Float?
+  headCm      Float?
+  note        String?
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  clientId    String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([childId, measuredAt])
+}
+
+model Milestone {
+  id          String      @id @default(cuid())
+  childId     String
+  child       Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
+  key         String? // Schluessel aus der kuratierten Liste, null = eigener
+  title       String
+  category    String      @default("other")
+  achievedAt  DateTime?
+  note        String?
+  mediaId     String?
+  media       MediaAsset? @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([childId, key])
+  @@index([childId, achievedAt])
+}
+
+model ExerciseLog {
+  id         String   @id @default(cuid())
+  childId    String
+  child      Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  exerciseId String
+  doneAt     DateTime @default(now())
+  rating     Int? // 1..3 – hat es Spass gemacht?
+  note       String?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([childId, exerciseId])
+}
+
+// ------------------------------------------------------ Tagebuch und Medien --
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  happenedAt  DateTime
+  title       String?
+  body        String
+  tags        Json     @default("[]")
+  mood        Int? // 1..5
+  monthPhoto  Int? // Lebensmonat fuer die Monatsfoto-Serie
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  media MediaAsset[]
+
+  @@index([childId, happenedAt])
+}
+
+model MediaAsset {
+  id             String        @id @default(cuid())
+  childId        String
+  child          Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  journalEntryId String?
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id], onDelete: SetNull)
+  kind           String        @default("image") // image | audio
+  path           String
+  thumbPath      String?
+  width          Int?
+  height         Int?
+  bytes          Int           @default(0)
+  mimeType       String
+  takenAt        DateTime?
+  caption        String?
+  createdById    String
+  createdAt      DateTime      @default(now())
+
+  milestones Milestone[]
+
+  @@index([childId, createdAt])
+}
+
+// -------------------------------------------------------------- Eltern-Tab --
+
+model MoodLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  mood      Int // 1..5
+  energy    Int // 1..5
+  stress    Int // 1..5
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model ParentSleepLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  hours     Float
+  quality   Int // 1..5
+  wakeCount Int      @default(0)
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+// Privat: nur fuer den schreibenden User sichtbar.
+model ParentJournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  mood      Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model NightShift {
+  id           String   @id @default(cuid())
+  householdId  String
+  date         DateTime @db.Date
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  handoverNote String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([householdId, date])
+}
+
+// ---------------------------------------------- Erinnerungen & Vorhersagen --
+
+model Reminder {
+  id          String    @id @default(cuid())
+  householdId String
+  childId     String?
+  child       Child?    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind        String // nap | medication | appointment | custom
+  title       String
+  dueAt       DateTime
+  repeatEvery Int? // Minuten
+  payload     Json      @default("{}")
+  sentAt      DateTime?
+  doneAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId, dueAt])
+  @@index([sentAt, dueAt])
+}
+
+model SleepPrediction {
+  id           String   @id @default(cuid())
+  childId      String
+  child        Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  computedAt   DateTime @default(now())
+  basedOnEvent String?
+  kind         String // nap | bedtime
+  windowFrom   DateTime
+  windowTo     DateTime
+  confidence   Float // 0..1
+  sampleSize   Int      @default(0)
+  method       String   @default("adaptive")
+
+  @@index([childId, computedAt])
+}
+
+model PushSubscription {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String    @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime  @default(now())
+  lastOkAt  DateTime?
+
+  @@index([userId])
+}
+
+model NotificationPreference {
+  userId            String   @id
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  napAlerts         Boolean  @default(true)
+  napLeadMinutes    Int      @default(15)
+  feedAlerts        Boolean  @default(false)
+  medicationAlerts  Boolean  @default(true)
+  appointmentAlerts Boolean  @default(true)
+  partnerActivity   Boolean  @default(false)
+  quietFrom         String? // "22:00"
+  quietTo           String? // "06:00"
+  ntfyEnabled       Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+}
+
+// ------------------------------------------------------------ Eigene Sounds --
+
+model CustomSound {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  // Pfad relativ zu UPLOAD_DIR – wie bei Fotos ausserhalb von /public.
+  path        String    @unique
+  mimeType    String
+  bytes       Int
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+}
