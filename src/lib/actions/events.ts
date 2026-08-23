@@ -15,6 +15,7 @@ import {
   type UpdateEventInput,
 } from '@/lib/events/service'
 import { isEventType, type EventType } from '@/lib/events/types'
+import type { DuplikatHinweis } from '@/lib/events/duplicate-service'
 
 export type ActionResult<T = Record<string, never>> = ({ ok: true } & T) | { error: string }
 
@@ -25,12 +26,16 @@ function refreshTrackerViews() {
 
 export async function createEventAction(
   input: CreateEventInput,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; duplikat?: DuplikatHinweis }>> {
   const user = await requireUser()
   const result = await createEvent({ userId: user.id, householdId: user.householdId }, input)
   if (!result.ok) return { error: result.error }
   refreshTrackerViews()
-  return { ok: true, id: result.data.id }
+  return {
+    ok: true,
+    id: result.data.id,
+    ...(result.data.duplikat ? { duplikat: result.data.duplikat } : {}),
+  }
 }
 
 export async function updateEventAction(
@@ -64,7 +69,7 @@ export async function startTimerAction(
   childId: string,
   type: string,
   payload: unknown = {},
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; duplikat?: DuplikatHinweis }>> {
   const user = await requireUser()
   await assertChildInHousehold(childId, user.householdId)
   if (!isEventType(type)) return { error: 'Unbekannte Art von Eintrag.' }
@@ -77,7 +82,11 @@ export async function startTimerAction(
   )
   if (!result.ok) return { error: result.error }
   refreshTrackerViews()
-  return { ok: true, id: result.data.id }
+  return {
+    ok: true,
+    id: result.data.id,
+    ...(result.data.duplikat ? { duplikat: result.data.duplikat } : {}),
+  }
 }
 
 export async function stopTimerAction(

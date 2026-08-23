@@ -383,6 +383,26 @@ model Event {
   @@index([childId, running])
 }
 
+/**
+ * Verdacht auf Doppelerfassung: beide haben dasselbe eingetragen.
+ * Der Eintrag bleibt stehen, bis jemand entscheidet. `beide` heisst
+ * "ausdruecklich zwei verschiedene Ereignisse" – so ein Paar wird nicht erneut
+ * gemeldet und zaehlt auch nicht mehr als offener Verdacht.
+ */
+model EventDuplicate {
+  id           String    @id @default(cuid())
+  childId      String
+  olderEventId String
+  newerEventId String
+  status       String    @default("offen") // offen | zusammengefuehrt | beide | geloescht
+  detectedAt   DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  @@unique([olderEventId, newerEventId])
+  @@index([childId, status])
+}
+
 model EventRevision {
   id          String   @id @default(cuid())
   eventId     String

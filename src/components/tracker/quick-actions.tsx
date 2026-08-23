@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { startTimerAction } from '@/lib/actions/events'
+import { meldeDuplikat } from './duplicate-banner'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
 import { useToast } from '@/components/ui/toast'
 import { EventDialog } from './event-dialog'
@@ -48,6 +49,7 @@ export function QuickActions({
           toast({ title: 'Nicht gestartet', description: result.error, variant: 'destructive' })
         } else {
           toast({ title: `${category.label} läuft` })
+          if (result.duplikat) meldeDuplikat(result.duplikat)
         }
         router.refresh()
       })

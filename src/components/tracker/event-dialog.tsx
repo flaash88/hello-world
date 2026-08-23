@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Clock, Trash2 } from 'lucide-react'
 import { createEventAction, deleteEventAction, updateEventAction } from '@/lib/actions/events'
 import { savePortionAction } from '@/lib/actions/milk'
+import { meldeDuplikat } from './duplicate-banner'
 import { restoreEventAction } from '@/lib/actions/events'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
 import { formatDuration } from '@/lib/time'
@@ -111,25 +112,33 @@ export function EventDialog({
     }
 
     startTransition(async () => {
-      const result = event
-        ? await updateEventAction(event.id, {
-            startedAt: startIso,
-            endedAt: endIso,
-            payload,
-            note: note.trim() || null,
-          })
-        : await createEventAction({
-            childId,
-            type,
-            startedAt: startIso,
-            endedAt: endIso,
-            payload,
-            note: note.trim() || undefined,
-          })
-
-      if ('error' in result) {
-        setError(result.error)
-        return
+      if (event) {
+        const result = await updateEventAction(event.id, {
+          startedAt: startIso,
+          endedAt: endIso,
+          payload,
+          note: note.trim() || null,
+        })
+        if ('error' in result) {
+          setError(result.error)
+          return
+        }
+      } else {
+        const result = await createEventAction({
+          childId,
+          type,
+          startedAt: startIso,
+          endedAt: endIso,
+          payload,
+          note: note.trim() || undefined,
+        })
+        if ('error' in result) {
+          setError(result.error)
+          return
+        }
+        // Hat die andere Person kurz davor dasselbe eingetragen? Nur beim
+        // Anlegen – ein bearbeiteter Eintrag ist keine Doppelerfassung.
+        if (result.duplikat) meldeDuplikat(result.duplikat)
       }
       router.refresh()
 
