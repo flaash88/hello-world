@@ -10,6 +10,7 @@ import { ListX } from 'lucide-react'
 import { EventDialog, type EditableEvent } from './event-dialog'
 import { QUICK_ACTION_ICONS } from './quick-actions-icons'
 import { groupBy } from '@/lib/utils'
+import { localeTag } from '@/lib/i18n'
 
 export type ListedEvent = EditableEvent & {
   durationSec: number | null
@@ -142,7 +143,7 @@ function dayLabel(dayKey: string): string {
   if (dayKey === today) return 'Heute'
   if (dayKey === yesterday) return 'Gestern'
   const [year, month, day] = dayKey.split('-').map(Number)
-  return new Date(Date.UTC(year!, month! - 1, day!)).toLocaleDateString('de-AT', {
+  return new Date(Date.UTC(year!, month! - 1, day!)).toLocaleDateString(localeTag(), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

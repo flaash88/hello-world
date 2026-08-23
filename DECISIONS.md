@@ -385,3 +385,17 @@ Einschlafgeräusch überdauert das erste Jahr und gilt auch fürs Geschwisterkin
 Im JSON-Backup steht deshalb nur, welche Klänge es gab; die Audiodateien selbst
 liegen im Upload-Volume, sonst wäre ein Backup je nach Sammlung hundert
 Megabyte groß.
+
+**Meilensteine bekommen Datum, Notiz und Foto erst im zweiten Schritt.** Das
+Abhaken bleibt ein Tap – wer im Moment nur bestätigen will, wird nicht mit
+einem Formular aufgehalten. Der Stift daneben öffnet die Details. Das Foto
+läuft durch denselben Upload wie das Tagebuch, wird also ebenfalls neu kodiert
+und von EXIF befreit, und muss zum selben Kind gehören.
+
+**i18n: ein Seam, keine Nachrichtendateien.** Sprache und Regionsformat hängen
+an `src/lib/i18n.ts`; alle Datums-, Zahlen- und Einheitenformate gehen über
+`localeTag()`, die Wocheninhalte liegen unter `content/weeks/<locale>/`, und
+`<html lang>` kommt aus derselben Konstante. Die UI-Texte selbst stehen im
+Quelltext. Für genau eine Sprache kostet `t('sleep.startedAt')` Lesbarkeit und
+bringt nichts; kommt eine zweite dazu, sind wenigstens die Formate schon
+richtig aufgehängt und der Ort dafür steht fest.

@@ -83,6 +83,31 @@ test.describe('Entwicklung', () => {
     await expect(page.getByText(/0 von \d+ abgehakt/)).toBeVisible()
   })
 
+  test('ergänzt einen Meilenstein um Datum, Notiz und Foto', async ({ page }) => {
+    const code = await createHouseholdInvite()
+    await register(page, { name: 'Mama', email: uniqueEmail('dev8'), code })
+    await setUpChild(page, 'Lina', 30 * 7)
+
+    await page.goto('/entwicklung/meilensteine')
+    await page.getByRole('tab', { name: 'Alle' }).click()
+    await page.getByRole('checkbox', { name: /Frei sitzen abhaken/ }).click()
+    await expect(page.getByText(/1 von \d+ abgehakt/)).toBeVisible()
+
+    await page.getByRole('button', { name: /Frei sitzen bearbeiten/ }).click()
+    await page.getByLabel('Wann war das?').fill('2026-05-04')
+    await page.getByLabel('Notiz').fill('Auf der Picknickdecke im Garten.')
+    await page.getByLabel('Fotos auswählen').setInputFiles({
+      name: 'sitzen.jpg',
+      mimeType: 'image/jpeg',
+      buffer: await buildJpeg(),
+    })
+    await expect(page.getByRole('button', { name: 'Foto entfernen' })).toBeVisible({ timeout: 20_000 })
+    await page.getByRole('button', { name: 'Speichern' }).click()
+
+    await expect(page.getByText('Auf der Picknickdecke im Garten.')).toBeVisible()
+    await expect(page.locator('main img').first()).toBeVisible()
+  })
+
   test('legt einen eigenen Meilenstein an', async ({ page }) => {
     const code = await createHouseholdInvite()
     await register(page, { name: 'Mama', email: uniqueEmail('dev7'), code })
@@ -97,3 +122,13 @@ test.describe('Entwicklung', () => {
     await expect(page.getByText('Erstes Mal am Meer')).toBeVisible()
   })
 })
+
+/** Kleines JPEG als Testfoto. */
+async function buildJpeg(): Promise<Buffer> {
+  const sharp = (await import('sharp')).default
+  return sharp({
+    create: { width: 64, height: 64, channels: 3, background: { r: 120, g: 160, b: 90 } },
+  })
+    .jpeg()
+    .toBuffer()
+}

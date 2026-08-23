@@ -8,13 +8,14 @@ import { BackLink } from '@/components/layout/back-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BackupNowButton } from './backup-now'
 import { DangerZone } from './danger-zone'
+import { localeTag } from '@/lib/i18n'
 
 export const metadata: Metadata = { title: 'Backup & Daten' }
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toLocaleString('de-AT', { maximumFractionDigits: 0 })} KB`
-  return `${(bytes / 1024 / 1024).toLocaleString('de-AT', { maximumFractionDigits: 1 })} MB`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toLocaleString(localeTag(), { maximumFractionDigits: 0 })} KB`
+  return `${(bytes / 1024 / 1024).toLocaleString(localeTag(), { maximumFractionDigits: 1 })} MB`
 }
 
 export default async function DataPage() {

@@ -61,6 +61,7 @@ src/
     settings/          Startbildschirm, Schnellaktionen, Bestätigungswort
     backup/            Lesezugriff auf das Backup-Volume
     units.ts           Einheiten-Umrechnung für die Anzeige (Speicher: metrisch)
+    i18n.ts            Sprache und Regionsformat (nur `de` ausgeliefert)
     actions/           Server Actions
 content/weeks/de/      Woche-für-Woche-Inhalte (Markdown + Frontmatter)
 prisma/                Schema, Migrationen, Seed
@@ -71,8 +72,10 @@ e2e/                   Playwright-Tests
 ## Konventionen
 
 - **Sprache:** UI durchgehend Deutsch, informelles „du“. Code, Kommentare und
-  Commits ebenfalls Deutsch, außer Fachbegriffe. i18n-Struktur ist vorbereitet,
-  ausgeliefert wird nur `de`.
+  Commits ebenfalls Deutsch, außer Fachbegriffe. Ausgeliefert wird nur `de`;
+  Sprache und Regionsformat hängen an `src/lib/i18n.ts` (`localeTag()` für alle
+  Datums-, Zahlen- und Einheitenformate, `content/weeks/<locale>/` für die
+  Inhalte). UI-Texte stehen bewusst im Quelltext statt in Nachrichtendateien.
 - **Zeit:** In der DB immer UTC. Anzeige in `Europe/Vienna` über `src/lib/time.ts`,
   24-Stunden-Format. Niemals `new Date().getHours()` für Anzeigezwecke.
 - **Touch-Ziele:** mindestens 48 px (`h-12`). Wichtige Aktionen gehören nach oben

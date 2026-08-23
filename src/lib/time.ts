@@ -2,6 +2,8 @@
  * Zeit-Helfer. Grundregel: In der DB steht alles in UTC, angezeigt wird in
  * der Haushalts-Zeitzone (Default Europe/Vienna), immer im 24-Stunden-Format.
  */
+import { localeTag } from './i18n'
+
 export const APP_TIMEZONE = process.env.TZ || 'Europe/Vienna'
 
 const partsCache = new Map<string, Intl.DateTimeFormat>()
@@ -10,7 +12,7 @@ function formatter(tz: string, options: Intl.DateTimeFormatOptions): Intl.DateTi
   const key = tz + JSON.stringify(options)
   let f = partsCache.get(key)
   if (!f) {
-    f = new Intl.DateTimeFormat('de-AT', { timeZone: tz, hourCycle: 'h23', ...options })
+    f = new Intl.DateTimeFormat(localeTag(), { timeZone: tz, hourCycle: 'h23', ...options })
     partsCache.set(key, f)
   }
   return f

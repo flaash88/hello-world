@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
 import { PhotoUpload, type UploadedPhoto } from '@/components/journal/photo-upload'
 import { cn } from '@/lib/utils'
+import { localeTag } from '@/lib/i18n'
 
 type Member = { id: string; displayName: string; initials: string; color: string }
 
@@ -262,7 +263,7 @@ export function JournalTimeline({
 
 function monthLabel(month: string): string {
   const [year, monthPart] = month.split('-')
-  return new Date(Date.UTC(Number(year), Number(monthPart) - 1, 1)).toLocaleDateString('de-AT', {
+  return new Date(Date.UTC(Number(year), Number(monthPart) - 1, 1)).toLocaleDateString(localeTag(), {
     month: 'short',
     year: '2-digit',
     timeZone: 'UTC',

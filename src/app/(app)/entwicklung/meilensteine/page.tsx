@@ -33,6 +33,7 @@ export default async function MilestonesPage() {
   const saved = await prisma.milestone.findMany({
     where: { childId: child.id },
     orderBy: [{ achievedAt: 'desc' }, { createdAt: 'desc' }],
+    include: { media: { select: { id: true, path: true, thumbPath: true } } },
   })
 
   return (
@@ -50,6 +51,14 @@ export default async function MilestonesPage() {
           category: milestone.category,
           achievedAt: milestone.achievedAt?.toISOString() ?? null,
           note: milestone.note,
+          photo: milestone.media
+            ? {
+                id: milestone.media.id,
+                path: milestone.media.path,
+                thumbPath: milestone.media.thumbPath ?? milestone.media.path,
+                takenAt: null,
+              }
+            : null,
         }))}
       />
     </div>

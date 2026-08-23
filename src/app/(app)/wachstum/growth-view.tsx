@@ -38,6 +38,7 @@ import { formatUnit, toDisplay, unitLabel, type UnitKind, type UnitPrefs } from 
 import { useToast } from '@/components/ui/toast'
 import { MedicalDisclaimer } from '@/components/medical-disclaimer'
 import { EmptyState } from '@/components/ui/empty-state'
+import { localeTag } from '@/lib/i18n'
 
 type Point = {
   id: string
@@ -73,7 +74,7 @@ function indicatorKind(indicator: Indicator): UnitKind | null {
 
 function formatIndicator(indicator: Indicator, value: number, units: UnitPrefs): string {
   const kind = indicatorKind(indicator)
-  if (!kind) return `${value.toLocaleString('de-AT', { maximumFractionDigits: 1 })} kg/m²`
+  if (!kind) return `${value.toLocaleString(localeTag(), { maximumFractionDigits: 1 })} kg/m²`
   return formatUnit(kind, value, units)
 }
 
@@ -262,7 +263,7 @@ export function GrowthView({
                           }}
                           labelFormatter={(value) => `${Math.round(Number(value) / 30.4)} Monate`}
                           formatter={(value, name) => [
-                            `${Number(value).toLocaleString('de-AT', { maximumFractionDigits: 2 })} ${indicatorUnitLabel(indicator, units)}`,
+                            `${Number(value).toLocaleString(localeTag(), { maximumFractionDigits: 2 })} ${indicatorUnitLabel(indicator, units)}`,
                             String(name),
                           ]}
                         />
