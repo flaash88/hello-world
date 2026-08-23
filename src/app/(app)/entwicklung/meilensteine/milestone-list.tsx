@@ -1,7 +1,8 @@
 'use client'
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Flag, Plus, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { Flag, Pencil, Plus, Trash2 } from 'lucide-react'
 import type { MilestoneTemplate } from '@/lib/content/milestones'
 import { MILESTONE_CATEGORIES, MILESTONE_CATEGORY_LABEL } from '@/lib/content/milestones'
 import {
@@ -27,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/components/ui/toast'
+import { PhotoUpload, type UploadedPhoto } from '@/components/journal/photo-upload'
 import { cn, groupBy } from '@/lib/utils'
 
 type SavedMilestone = {
@@ -36,6 +38,7 @@ type SavedMilestone = {
   category: string
   achievedAt: string | null
   note: string | null
+  photo: UploadedPhoto | null
 }
 
 export function MilestoneList({
@@ -50,6 +53,7 @@ export function MilestoneList({
   saved: SavedMilestone[]
 }) {
   const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<SavedMilestone | null>(null)
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
@@ -140,7 +144,25 @@ export function MilestoneList({
                         </p>
                       )}
                       {milestone.note && <p className="mt-1 text-sm">{milestone.note}</p>}
+                      {milestone.photo && (
+                        <Image
+                          src={`/api/uploads/${milestone.photo.thumbPath}`}
+                          alt=""
+                          width={160}
+                          height={160}
+                          unoptimized
+                          className="mt-2 aspect-square w-24 rounded-lg object-cover"
+                        />
+                      )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(milestone)}
+                      aria-label={`${milestone.title} bearbeiten`}
+                      className="flex size-12 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent"
+                    >
+                      <Pencil className="size-4" aria-hidden />
+                    </button>
                     <button
                       type="button"
                       onClick={() => removeOwn(milestone.id)}
@@ -159,6 +181,11 @@ export function MilestoneList({
       )}
 
       <MilestoneDialog childId={childId} open={adding} onOpenChange={setAdding} />
+      <MilestoneDetailsDialog
+        childId={childId}
+        milestone={editing}
+        onClose={() => setEditing(null)}
+      />
     </div>
   )
 
@@ -214,7 +241,28 @@ export function MilestoneList({
                           </Badge>
                         )}
                       </div>
+                      {entry?.note && <p className="mt-1 text-sm">{entry.note}</p>}
+                      {entry?.photo && (
+                        <Image
+                          src={`/api/uploads/${entry.photo.thumbPath}`}
+                          alt=""
+                          width={160}
+                          height={160}
+                          unoptimized
+                          className="mt-2 aspect-square w-24 rounded-lg object-cover"
+                        />
+                      )}
                     </div>
+                    {achieved && entry && (
+                      <button
+                        type="button"
+                        onClick={() => setEditing(entry)}
+                        aria-label={`${template.title} bearbeiten`}
+                        className="flex size-12 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent"
+                      >
+                        <Pencil className="size-4" aria-hidden />
+                      </button>
+                    )}
                   </li>
                 )
               })}
@@ -308,6 +356,109 @@ function MilestoneDialog({
             {pending ? 'Speichert …' : 'Speichern'}
           </Button>
         </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/**
+ * Datum, Notiz und Foto zu einem abgehakten Meilenstein. Erst hier – das
+ * Abhaken selbst bleibt ein Tap.
+ */
+function MilestoneDetailsDialog({
+  childId,
+  milestone,
+  onClose,
+}: {
+  childId: string
+  milestone: SavedMilestone | null
+  onClose: () => void
+}) {
+  const [achievedAt, setAchievedAt] = useState('')
+  const [note, setNote] = useState('')
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Beim Öffnen den gespeicherten Stand übernehmen.
+  const openedId = useRef<string | null>(null)
+  if (milestone && openedId.current !== milestone.id) {
+    openedId.current = milestone.id
+    setAchievedAt(milestone.achievedAt ? milestone.achievedAt.slice(0, 10) : '')
+    setNote(milestone.note ?? '')
+    setPhotos(milestone.photo ? [milestone.photo] : [])
+    setError(null)
+  }
+
+  function save() {
+    if (!milestone) return
+    setError(null)
+    startTransition(async () => {
+      const result = await saveMilestoneAction({
+        id: milestone.id,
+        childId,
+        key: milestone.key,
+        title: milestone.title,
+        category: milestone.category,
+        achievedAt: achievedAt || null,
+        note,
+        mediaId: photos[0]?.id ?? null,
+      })
+      if ('error' in result) {
+        setError(result.error)
+        return
+      }
+      toast({ title: 'Gespeichert' })
+      openedId.current = null
+      onClose()
+      router.refresh()
+    })
+  }
+
+  return (
+    <Dialog open={Boolean(milestone)} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{milestone?.title}</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="detailsDate">Wann war das?</Label>
+            <Input
+              id="detailsDate"
+              type="date"
+              value={achievedAt}
+              onChange={(event) => setAchievedAt(event.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="detailsNote">Notiz</Label>
+            <Textarea
+              id="detailsNote"
+              rows={3}
+              maxLength={1000}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </div>
+          <PhotoUpload
+            childId={childId}
+            photos={photos}
+            onChange={setPhotos}
+            max={1}
+            label="Foto hinzufügen"
+          />
+          {error && (
+            <p data-testid="form-error" className="text-sm font-medium text-destructive">
+              {error}
+            </p>
+          )}
+          <Button onClick={save} disabled={pending}>
+            {pending ? 'Speichert …' : 'Speichern'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

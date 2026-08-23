@@ -19,6 +19,7 @@ const milestoneSchema = z.object({
   category: z.string().max(30).default('other'),
   achievedAt: z.string().nullable().optional(),
   note: z.string().max(1000).optional(),
+  mediaId: z.string().nullable().optional(),
 })
 
 export async function saveMilestoneAction(
@@ -32,11 +33,23 @@ export async function saveMilestoneAction(
   const achievedAt = parsed.data.achievedAt ? new Date(parsed.data.achievedAt) : null
   if (achievedAt && Number.isNaN(achievedAt.getTime())) return { error: 'Datum ist ungültig.' }
 
+  // Das Foto muss zum selben Kind gehoeren – sonst waere es ein fremdes Bild.
+  let mediaId: string | null = null
+  if (parsed.data.mediaId) {
+    const asset = await prisma.mediaAsset.findFirst({
+      where: { id: parsed.data.mediaId, childId: parsed.data.childId },
+      select: { id: true },
+    })
+    if (!asset) return { error: 'Foto nicht gefunden.' }
+    mediaId = asset.id
+  }
+
   const data = {
     title: parsed.data.title,
     category: parsed.data.category,
     achievedAt,
     note: parsed.data.note?.trim() || null,
+    mediaId,
   }
 
   if (input.id) {

@@ -27,11 +27,16 @@ export function PhotoUpload({
   photos,
   onChange,
   onTakenAt,
+  max = 12,
+  label = 'Fotos hinzufügen',
 }: {
   childId: string
   photos: UploadedPhoto[]
   onChange: (photos: UploadedPhoto[]) => void
   onTakenAt?: (takenAt: string) => void
+  /** Höchstzahl Bilder – beim Meilenstein ist genau eines gemeint. */
+  max?: number
+  label?: string
 }) {
   const [uploading, setUploading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,7 +47,8 @@ export function PhotoUpload({
     try {
       const form = new FormData()
       form.set('childId', childId)
-      for (const file of Array.from(files).slice(0, 12)) form.append('files', file)
+      const room = Math.max(0, max - photos.length)
+      for (const file of Array.from(files).slice(0, room)) form.append('files', file)
 
       const response = await fetch('/api/media', {
         method: 'POST',
@@ -99,22 +105,24 @@ export function PhotoUpload({
         ref={inputRef}
         type="file"
         accept="image/*"
-        multiple
+        multiple={max > 1}
         className="sr-only"
         aria-label="Fotos auswählen"
         onChange={(event) => {
           if (event.target.files && event.target.files.length > 0) void upload(event.target.files)
         }}
       />
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-      >
-        {uploading ? <Loader2 className="animate-spin" aria-hidden /> : <ImagePlus aria-hidden />}
-        {uploading ? 'Lädt hoch …' : 'Fotos hinzufügen'}
-      </Button>
+      {photos.length < max && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? <Loader2 className="animate-spin" aria-hidden /> : <ImagePlus aria-hidden />}
+          {uploading ? 'Lädt hoch …' : label}
+        </Button>
+      )}
 
       {photos.length > 0 && (
         <ul className="grid grid-cols-3 gap-2">

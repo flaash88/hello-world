@@ -3,6 +3,8 @@
  * Voreinstellung wandelt nur an der Oberflaeche um. So bleiben Auswertungen,
  * WHO-Perzentile und Export unabhaengig davon, was jemand eingestellt hat.
  */
+import { localeTag } from './i18n'
+
 
 export type WeightUnit = 'kg' | 'lb'
 export type LengthUnit = 'cm' | 'in'
@@ -135,7 +137,7 @@ export function formatUnit(
   options: { withUnit?: boolean } = {},
 ): string {
   const { label, decimals } = spec(kind, prefs)
-  const text = toDisplay(kind, value, prefs).toLocaleString('de-AT', {
+  const text = toDisplay(kind, value, prefs).toLocaleString(localeTag(), {
     minimumFractionDigits: kind === 'temp' ? decimals : 0,
     maximumFractionDigits: decimals,
   })
@@ -166,8 +168,8 @@ export function formatMass(grams: number, prefs: UnitPrefs = DEFAULT_UNITS): str
   if (prefs.weight === 'lb') {
     const ounces = grams / G_PER_OZ
     if (ounces >= 16) return formatWeight(grams / 1000, prefs)
-    return `${ounces.toLocaleString('de-AT', { maximumFractionDigits: 1 })} oz`
+    return `${ounces.toLocaleString(localeTag(), { maximumFractionDigits: 1 })} oz`
   }
   if (grams >= 1000) return formatWeight(grams / 1000, prefs)
-  return `${grams.toLocaleString('de-AT', { maximumFractionDigits: 0 })} g`
+  return `${grams.toLocaleString(localeTag(), { maximumFractionDigits: 0 })} g`
 }

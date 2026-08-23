@@ -100,4 +100,5 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Haushalt samt beider Konten löschbar – mit Passwort, Bestätigungswort und Export daneben.
 - Eigene Audiodateien als Einschlafgeräusch: Format wird an der Signatur geprüft, Wiedergabe in
   Schleife über denselben Regler samt Timer, Ausblenden und Sperrbildschirm.
-- Grün: lint, typecheck, 346 Unit-Tests (97,7 % Coverage auf der Logik), 59 E2E-Tests, build.
+- Meilensteine mit Datum, Notiz und Foto; Sprache und Regionsformat hängen an `src/lib/i18n.ts`.
+- Grün: lint, typecheck, 350 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.

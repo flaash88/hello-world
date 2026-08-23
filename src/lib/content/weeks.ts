@@ -1,6 +1,7 @@
 import 'server-only'
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { contentLocaleDir } from '@/lib/i18n'
 import { cache } from 'react'
 import matter from 'gray-matter'
 
@@ -14,7 +15,7 @@ import matter from 'gray-matter'
  * Datei, deren Wochennummer nicht groesser als die gesuchte Woche ist.
  */
 
-export const CONTENT_DIR = path.join(process.cwd(), 'content', 'weeks', 'de')
+export const CONTENT_DIR = path.join(process.cwd(), 'content', 'weeks', contentLocaleDir())
 export const MAX_CONTENT_WEEK = 156
 
 export type WeekSection = { heading: string; body: string }
