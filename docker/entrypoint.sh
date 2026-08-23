@@ -18,7 +18,14 @@ for i in $(seq 1 60); do
 done
 
 echo "[sproessling] Migrationen einspielen ..."
-./node_modules/.bin/prisma migrate deploy
+# Die CLI liegt unter /opt (eigene Abhaengigkeitskette, siehe Dockerfile), das
+# Schema hier im App-Verzeichnis.
+PRISMA_CLI=/opt/prisma-cli/node_modules/prisma/build/index.js
+if [ ! -f "$PRISMA_CLI" ]; then
+  echo "[sproessling] Prisma-CLI fehlt unter $PRISMA_CLI – Image neu bauen." >&2
+  exit 1
+fi
+node "$PRISMA_CLI" migrate deploy --schema ./prisma/schema.prisma
 
 if [ -n "$BOOTSTRAP_INVITE_CODE" ]; then
   echo "[sproessling] Haushalt und Einladungscode sicherstellen ..."

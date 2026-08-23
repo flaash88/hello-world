@@ -72,6 +72,10 @@ Danach:
   docker compose start app cron
   ```
   Dieselbe Anleitung steht in der App unter **Mehr → Backup & Daten**.
+- **Migrationen** laufen beim Start des App-Containers (`prisma migrate deploy`).
+  Die CLI dafür liegt im Image unter `/opt/prisma-cli`; hängt der Container in
+  einer Restart-Schleife, zeigt `docker compose logs app`, an welcher der drei
+  Startschritte es klemmt.
 - **Update:** `git pull && docker compose up -d --build` – Migrationen laufen
   beim Start automatisch (`prisma migrate deploy`).
 - **Uploads** liegen im Volume `uploads` und sind Teil des Backups nur, wenn du
