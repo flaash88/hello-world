@@ -2,6 +2,7 @@ import 'server-only'
 import webpush from 'web-push'
 import { prisma } from '@/lib/db'
 import { isWithinWindow } from '@/lib/time'
+import { absoluteUrl } from './urls'
 
 export type PushMessage = {
   title: string
@@ -135,13 +136,15 @@ async function sendNtfy(userId: string, message: PushMessage): Promise<void> {
   if (!settings?.ntfyServerUrl || !settings.ntfyTopic) return
 
   const url = `${settings.ntfyServerUrl.replace(/\/+$/, '')}/${encodeURIComponent(settings.ntfyTopic)}`
+  // Der ntfy-Client oeffnet den Link ausserhalb der App – relativ waere kaputt.
+  const click = absoluteUrl(message.url)
   try {
     await fetch(url, {
       method: 'POST',
       headers: {
         Title: encodeHeader(message.title),
         Tags: 'baby_symbol',
-        ...(message.url ? { Click: message.url } : {}),
+        ...(click ? { Click: click } : {}),
       },
       body: message.body,
       signal: AbortSignal.timeout(5000),

@@ -89,6 +89,22 @@ services:
       - ./docker/backup.sh:/usr/local/bin/backup.sh:ro
     entrypoint: ['/bin/sh', '/usr/local/bin/backup.sh']
 
+  # Optional: Cloudflare Tunnel im selben Netz. Start mit
+  # `docker compose --profile tunnel up -d`; ohne Profil bleibt der Container
+  # aus, dann kann der Tunnel genauso gut am Host laufen.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ['tunnel']
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-Europe/Vienna}
+    # Token aus dem Cloudflare-Dashboard (Zero Trust -> Networks -> Tunnels).
+    # Das Ingress-Ziel ist dann http://app:3000 – im Compose-Netz, nicht 127.0.0.1.
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN fehlt}
+
 volumes:
   pgdata:
   uploads:
