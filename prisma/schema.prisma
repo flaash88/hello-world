@@ -51,6 +51,13 @@ model HouseholdSettings {
   quickActions Json   @default("[\"sleep\",\"nursing\",\"bottle\",\"diaper\"]")
   startScreen  String @default("dashboard")
 
+  // Haltbarkeit abgepumpter Milch in Stunden – Vorgaben siehe src/lib/milk/storage.ts
+  milkFridgeHours     Int     @default(96)
+  milkFreezerHours    Int     @default(4320)
+  milkDeepFreezeHours Int     @default(8640)
+  milkThawedHours     Int     @default(24)
+  milkExpiryPush      Boolean @default(true)
+
   updatedAt DateTime @updatedAt
 }
 

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { formatTime } from '@/lib/time'
 import { analyseSleep } from '@/lib/sleep/analysis'
 import { syncVorsorgeReminders } from '@/lib/vorsorge/reminders'
+import { syncVorratErinnerungen } from '@/lib/milk/reminders'
 import { sendToHousehold, sendToUser } from './send'
 
 export type ReminderRun = {
@@ -40,6 +41,16 @@ async function syncVorsorge(now: Date, result: ReminderRun): Promise<void> {
   for (const child of children) {
     try {
       result.vorsorgeReminders += await syncVorsorgeReminders(child, child.household.timezone, now)
+    } catch (error) {
+      result.errors.push(error instanceof Error ? error.message : 'Unbekannter Fehler')
+    }
+  }
+
+  // Der Milchvorrat haengt am Haushalt, nicht am Kind.
+  const households = await prisma.household.findMany({ select: { id: true } })
+  for (const household of households) {
+    try {
+      await syncVorratErinnerungen(household.id, now)
     } catch (error) {
       result.errors.push(error instanceof Error ? error.message : 'Unbekannter Fehler')
     }

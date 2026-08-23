@@ -61,9 +61,10 @@ export async function buildBackup(
       prisma.customSound.findMany({ where: { householdId } }),
     ])
 
-  const [vorsorge, teeth] = await Promise.all([
+  const [vorsorge, teeth, milkPortions] = await Promise.all([
     prisma.vorsorgeEntry.findMany({ where: { child: { householdId } }, orderBy: { doneAt: 'asc' } }),
     prisma.tooth.findMany({ where: { child: { householdId } } }),
+    prisma.milkPortion.findMany({ where: { householdId }, orderBy: { abgepumptAm: 'asc' } }),
   ])
 
   const privateJournal = options.includeOwnPrivate
@@ -92,6 +93,7 @@ export async function buildBackup(
     customSounds,
     vorsorge,
     teeth,
+    milkPortions,
     privateJournal,
   }
 }

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Clock, Trash2 } from 'lucide-react'
 import { createEventAction, deleteEventAction, updateEventAction } from '@/lib/actions/events'
+import { savePortionAction } from '@/lib/actions/milk'
 import { restoreEventAction } from '@/lib/actions/events'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
 import { formatDuration } from '@/lib/time'
@@ -33,6 +34,13 @@ function fromLocalInput(value: string): string | null {
   if (!value) return null
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}
+
+/** Menge einer Abpump-Sitzung – entweder direkt oder aus beiden Seiten. */
+function abgepumpteMenge(payload: unknown): number {
+  const data = payload as { amountMl?: number; leftMl?: number; rightMl?: number }
+  const gesamt = data.amountMl ?? (data.leftMl ?? 0) + (data.rightMl ?? 0)
+  return Math.round(Math.max(0, gesamt))
 }
 
 export function EventDialog({
@@ -124,7 +132,35 @@ export function EventDialog({
         return
       }
       router.refresh()
-      toast({ title: event ? 'Gespeichert' : `${category.label} eingetragen` })
+
+      // Abgepumpte Milch landet meistens im Vorrat – deshalb steht das Angebot
+      // direkt an der Bestätigung und nicht zwei Bildschirme weiter.
+      const abgepumpt = !event && type === 'pumping' ? abgepumpteMenge(payload) : 0
+      if (abgepumpt > 0) {
+        toast({
+          title: `${category.label} eingetragen`,
+          description: `${abgepumpt} ml – in den Vorrat legen?`,
+          action: {
+            label: 'Einlagern',
+            onClick: async () => {
+              const gespeichert = await savePortionAction({
+                childId,
+                abgepumptAm: startIso,
+                mengeMl: abgepumpt,
+                lagerort: 'kuehlschrank',
+              })
+              toast(
+                'error' in gespeichert
+                  ? { title: 'Nicht eingelagert', description: gespeichert.error, variant: 'destructive' }
+                  : { title: `${abgepumpt} ml im Kühlschrank` },
+              )
+              router.refresh()
+            },
+          },
+        })
+      } else {
+        toast({ title: event ? 'Gespeichert' : `${category.label} eingetragen` })
+      }
       onOpenChange(false)
     })
   }
