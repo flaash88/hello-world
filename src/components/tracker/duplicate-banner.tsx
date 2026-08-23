@@ -68,7 +68,7 @@ export function DuplicateBanner() {
       role="status"
       data-testid="duplikat-hinweis"
       className={cn(
-        'fixed inset-x-2 bottom-20 z-40 rounded-xl border-2 bg-card p-3 shadow-lg',
+        'fixed inset-x-2 bottom-20 z-40 rounded-xl border-2 bg-card p-3 shadow-lg print:hidden',
         hinweis.deutlich ? 'border-primary' : 'border-border',
       )}
     >

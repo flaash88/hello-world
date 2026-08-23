@@ -62,7 +62,7 @@ test.describe('Stillprotokoll', () => {
     await page.goto('/mehr/kind')
     await page.getByLabel('Geburtsgewicht (g)').fill('3400')
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Gespeichert')).toBeVisible()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 
     await page.goto('/protokoll')
     await expect(page.getByText('Lina', { exact: true })).toBeVisible()

@@ -5,7 +5,7 @@ async function setzeGeburtsgewicht(page: Page, gramm: string) {
   await page.goto('/mehr/kind')
   await page.getByLabel('Geburtsgewicht (g)').fill(gramm)
   await page.getByRole('button', { name: 'Speichern' }).click()
-  await expect(page.getByText('Gespeichert')).toBeVisible()
+  await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 }
 
 async function wiege(page: Page, gramm: string) {

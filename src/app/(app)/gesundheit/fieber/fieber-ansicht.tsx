@@ -99,7 +99,9 @@ export function FieberAnsicht({ daten }: { daten: FieberDaten }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-2">
+      {/* Auf dem Papier steht der Titel in der Kopfzeile des Zettels – hier
+          waere er doppelt. */}
+      <div className="flex items-start justify-between gap-2 print:hidden">
         <div>
           <h1 className="font-display text-2xl font-bold">Fieberverlauf</h1>
           <p className="text-muted-foreground">

@@ -31,7 +31,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur"
+      className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur print:hidden"
     >
       <ul className="mx-auto flex max-w-2xl items-stretch">
         {items.map(({ href, label, icon }) => {

@@ -8,8 +8,10 @@ import type { Kopf } from '@/lib/print/kopf'
  * aussehen.
  */
 export function PrintHeader({ kopf }: { kopf: Kopf }) {
+  // Bewusst kein <header>-Element: die Druckregeln blenden die App-Huelle aus,
+  // und diese Kopfzeile soll gerade aufs Papier.
   return (
-    <header className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2">
       {/* Auf dem Bildschirm sagt die Seitenueberschrift schon, was das ist –
           auf dem Papier gibt es die nicht, deshalb steht der Titel nur dort. */}
       <h2 className="hidden font-display text-lg font-bold print:block">{kopf.titel}</h2>
@@ -21,6 +23,6 @@ export function PrintHeader({ kopf }: { kopf: Kopf }) {
           </div>
         ))}
       </dl>
-    </header>
+    </section>
   )
 }

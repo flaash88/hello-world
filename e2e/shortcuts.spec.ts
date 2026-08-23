@@ -32,6 +32,55 @@ test.describe('Manifest', () => {
     }
   })
 
+  test('erfüllt, was Chrome zum Installieren braucht', async ({ request }) => {
+    const manifest = await (await request.get('/manifest.webmanifest')).json()
+
+    expect(manifest.name).toBeTruthy()
+    expect(manifest.short_name.length).toBeLessThanOrEqual(12)
+    expect(manifest.start_url).toBe('/')
+    expect(manifest.display).toBe('standalone')
+    expect(manifest.background_color).toBeTruthy()
+    expect(manifest.theme_color).toBeTruthy()
+
+    // Chrome verlangt mindestens ein 192er und ein 512er Icon, dazu ein
+    // maskierbares, damit das Symbol auf Android nicht in einem weissen
+    // Quadrat sitzt.
+    const groessen = manifest.icons.map((icon: { sizes: string }) => icon.sizes)
+    expect(groessen).toContain('192x192')
+    expect(groessen).toContain('512x512')
+    expect(manifest.icons.some((icon: { purpose?: string }) => icon.purpose === 'maskable')).toBe(
+      true,
+    )
+
+    for (const icon of manifest.icons) {
+      expect((await request.get(icon.src)).status(), icon.src).toBe(200)
+    }
+  })
+
+  test('bringt mit, was Safari auf dem iPhone auswertet', async ({ page, request }) => {
+    const code = await createHouseholdInvite()
+    await register(page, { name: 'Mama', email: uniqueEmail('sc-safari'), code })
+    await setUpChild(page, 'Lina', 30)
+    await page.goto('/heute')
+
+    // iOS liest weder shortcuts noch share_target aus dem Manifest – dort
+    // zaehlen das Apple-Touch-Icon, der Standalone-Schalter und der Titel.
+    await expect(page.locator('link[rel="apple-touch-icon"]').first()).toBeAttached()
+    await expect(page.locator('meta[name="apple-mobile-web-app-capable"]')).toHaveAttribute(
+      'content',
+      'yes',
+    )
+    await expect(page.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute(
+      'content',
+      'Sprössling',
+    )
+    // Nur: es gibt eine. Mehrere mit media-Bedingung waeren auch zulaessig.
+    await expect(page.locator('meta[name="theme-color"]').first()).toBeAttached()
+
+    const apple = await page.locator('link[rel="apple-touch-icon"]').first().getAttribute('href')
+    expect((await request.get(apple!)).status()).toBe(200)
+  })
+
   test('meldet ein Share Target für Bilder und Ton an', async ({ request }) => {
     const manifest = await (await request.get('/manifest.webmanifest')).json()
     expect(manifest.share_target.action).toBe('/api/share')

@@ -51,6 +51,7 @@ src/
     tracker/           Timer, Schnellaktionen, Event-Listen
     teeth/             Zahnschema als SVG
     audio/             Aufnahme, Abspieler, Wellenform
+    print/             Kopfzeile für die Druckansichten
     dashboard/         24h-Kreisuhr, Schlafdruck, Vorhersage-Karten
   lib/
     auth/              Passwort, Session, CSRF, Rate-Limit
@@ -110,4 +111,10 @@ solange `geprueft: false` ist, zeigt die App den Prüfhinweis sichtbar an.
 **Keine Dosierungen.** Die App rechnet keine Medikamentenmengen aus – weder nach
 Gewicht noch nach Alter –, schlägt kein Präparat vor und prüft keine
 Höchstmenge. Sie erinnert ausschließlich an Intervalle, die selbst eingetragen
-wurden.
+wurden. Das Gewicht auf der Notfallkarte steht dort, weil Rettung und Ärztin
+danach fragen – abgeleitet wird daraus nichts.
+
+**Notfalldaten nur an einer Stelle.** Die Notfallkarte liest Allergien,
+Dauermedikamente, Gewicht und Impfungen aus den vorhandenen Quellen. Neu
+gepflegt wird nur, was es sonst nirgends gibt. Zwei Orte für dieselbe Angabe
+sind schlimmer als keiner.

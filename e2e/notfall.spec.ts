@@ -36,7 +36,7 @@ test.describe('Notfallkarte', () => {
     await page.getByLabel('Vorerkrankungen').fill('Keine')
     await page.getByLabel('Adresse').fill('Hauptstraße 1/2/5, 5020 Salzburg')
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Gespeichert')).toBeVisible()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 
     await page.goto('/notfall')
     await expect(page.getByText('0 Rh+')).toBeVisible()
@@ -82,7 +82,7 @@ test.describe('Notfallkarte', () => {
     await page.getByLabel(/^Blutgruppe/).fill('A Rh−')
     await page.getByLabel('Adresse').fill('Hauptstraße 1, 5020 Salzburg')
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Gespeichert')).toBeVisible()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 
     // Einmal mit Verbindung öffnen – danach liegt die Karte lokal.
     await page.goto('/notfall')
