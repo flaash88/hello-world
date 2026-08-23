@@ -26,6 +26,7 @@ model Household {
   pregnancies  Pregnancy[]
   settings     HouseholdSettings?
   customSounds CustomSound[]
+  milkPortions MilkPortion[]
 }
 
 model HouseholdSettings {
@@ -49,6 +50,13 @@ model HouseholdSettings {
 
   quickActions Json   @default("[\"sleep\",\"nursing\",\"bottle\",\"diaper\"]")
   startScreen  String @default("dashboard")
+
+  // Haltbarkeit abgepumpter Milch in Stunden – Vorgaben siehe src/lib/milk/storage.ts
+  milkFridgeHours     Int     @default(96)
+  milkFreezerHours    Int     @default(4320)
+  milkDeepFreezeHours Int     @default(8640)
+  milkThawedHours     Int     @default(24)
+  milkExpiryPush      Boolean @default(true)
 
   updatedAt DateTime @updatedAt
 }
@@ -85,6 +93,10 @@ model User {
   nightShifts       NightShift[]
   exerciseLogs      ExerciseLog[]
   customSounds      CustomSound[]
+  vorsorgeEntries   VorsorgeEntry[]
+  teethEntries      Tooth[]
+  milkPortions      MilkPortion[]
+  audioNotes        AudioNote[]
 
   @@index([householdId])
 }
@@ -151,6 +163,9 @@ model Child {
   predictions  SleepPrediction[]
   reminders    Reminder[]
   exerciseLogs ExerciseLog[]
+  vorsorge     VorsorgeEntry[]
+  teeth        Tooth[]
+  audioNotes   AudioNote[]
   pregnancy    Pregnancy?
 
   @@index([householdId])
@@ -232,7 +247,7 @@ model Appointment {
   pregnancy   Pregnancy? @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
   householdId String
   title       String
-  category    String     @default("mkp") // mkp | doctor | midwife | course | other
+  category    String     @default("ekp") // ekp | doctor | midwife | course | other
   scheduledAt DateTime?
   windowFrom  DateTime?
   windowTo    DateTime?
@@ -590,4 +605,104 @@ model CustomSound {
   createdAt   DateTime  @default(now())
 
   @@index([householdId])
+}
+
+// ------------------------------------------------------- Vorsorge & Zaehne --
+
+model VorsorgeEntry {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  // impfung | untersuchung
+  kind        String
+  // Schluessel aus content/vorsorge/*.json
+  templateKey String
+  doneAt      DateTime
+  ort         String?
+  note        String?
+  // Foto vom Passeintrag
+  mediaId     String?
+  // Der zusaetzlich erzeugte Gesundheitseintrag, damit er mitgeloescht wird.
+  eventId     String?
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([childId, kind, templateKey])
+  @@index([childId, doneAt])
+}
+
+model Tooth {
+  id          String    @id @default(cuid())
+  childId     String
+  child       Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  // FDI-Zahnschema, z. B. 51 fuer den oberen rechten mittleren Schneidezahn
+  toothKey    String
+  eruptedOn   DateTime?
+  lostOn      DateTime?
+  note        String?
+  mediaId     String?
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([childId, toothKey])
+  @@index([childId])
+}
+
+// -------------------------------------------------- Muttermilch-Vorrat ------
+
+model MilkPortion {
+  id           String    @id @default(cuid())
+  householdId  String
+  household    Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  childId      String?
+  abgepumptAm  DateTime
+  mengeMl      Int
+  // kuehlschrank | gefrierfach | tiefkuehler
+  lagerort     String
+  behaelter    String?
+  // vorraetig | verbraucht | verworfen
+  status       String    @default("vorraetig")
+  // Ab dem Auftauen gilt eine eigene, kuerzere Frist.
+  aufgetautAm  DateTime?
+  verbrauchtAm DateTime?
+  notiz        String?
+  // Der Abpump-Eintrag, aus dem die Portion entstanden ist.
+  eventId      String?
+  createdById  String
+  createdBy    User      @relation(fields: [createdById], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([householdId, status])
+  @@index([householdId, abgepumptAm])
+}
+
+// -------------------------------------------------------- Audio-Journal -----
+
+model AudioNote {
+  id          String   @id @default(cuid())
+  childId     String
+  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  title       String
+  recordedAt  DateTime
+  // Pfad relativ zu UPLOAD_DIR, wie bei Bildern ausserhalb von /public
+  path        String   @unique
+  mimeType    String
+  bytes       Int
+  durationSec Int?
+  // Ausschlaege fuer die Wellenform, beim Hochladen einmal berechnet
+  peaks       Json     @default("[]")
+  tags        Json     @default("[]")
+  milestoneId String?
+  clientId    String?  @unique // Idempotenz fuer die Offline-Queue
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([childId, recordedAt])
 }

@@ -20,10 +20,10 @@ Zwischen der vierten und sechsten Woche kommt bei vielen das erste echte soziale
 Insgesamt 14 bis 17 Stunden. Der längste Nachtblock kann drei bis vier Stunden erreichen. Ein Abendritual jetzt zu beginnen, ist noch nicht nötig, aber auch nicht zu früh.
 
 ## Ernährung
-Bei Stillkindern hat sich meist ein Muster von acht bis zwölf Mahlzeiten eingespielt. Vitamin D wird in Österreich ab der ersten Lebenswoche empfohlen, ebenso Vitamin K nach dem Schema im Mutter-Kind-Pass.
+Bei Stillkindern hat sich meist ein Muster von acht bis zwölf Mahlzeiten eingespielt. Vitamin D wird in Österreich ab der ersten Lebenswoche empfohlen, ebenso Vitamin K nach dem Schema im Eltern-Kind-Pass.
 
 ## Worauf zu achten ist
-Die Mutter-Kind-Pass-Untersuchung in der vierten bis siebten Lebenswoche steht an. Bringt eure Fragen mit, aufgeschrieben – im Termin fällt einem die Hälfte nicht mehr ein.
+Die Eltern-Kind-Pass-Untersuchung in der vierten bis siebten Lebenswoche steht an. Bringt eure Fragen mit, aufgeschrieben – im Termin fällt einem die Hälfte nicht mehr ein.
 
 ## Tipp für euch
 Macht ein Foto im gleichen Setting jeden Monat. In einem Jahr ist diese Reihe mehr wert als hundert Einzelbilder.

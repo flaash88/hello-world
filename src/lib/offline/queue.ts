@@ -44,13 +44,39 @@ export type QueuedOperation =
 
 export type QueueEntry = QueuedOperation & { attempts: number; lastError?: string }
 
+/**
+ * Aufnahmen aus dem Tonspur-Tagebuch. Sie koennen nicht in denselben Speicher
+ * wie die Events: dort liegt JSON, hier ein Blob, und verschickt wird er als
+ * Multipart statt im Stapel. Dieselbe Datenbank, derselbe Flush-Lauf.
+ */
+export type QueuedAudio = {
+  clientId: string
+  childId: string
+  title: string
+  recordedAt: string
+  tags: string[]
+  milestoneId: string | null
+  /**
+   * Die Aufnahme als Rohdaten, nicht als Blob: Blobs in IndexedDB sind je nach
+   * Browser heikel, ein ArrayBuffer ist es nirgends. Der Blob entsteht erst
+   * beim Hochladen wieder.
+   */
+  bytes: ArrayBuffer
+  mimeType: string
+  queuedAt: string
+}
+
+export type AudioEntry = QueuedAudio & { attempts: number; lastError?: string }
+
 interface QueueDb extends DBSchema {
   operations: { key: string; value: QueueEntry; indexes: { queuedAt: string } }
+  audio: { key: string; value: AudioEntry; indexes: { queuedAt: string } }
 }
 
 const DB_NAME = 'sproessling'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE = 'operations'
+const AUDIO_STORE = 'audio'
 /** Nach so vielen Fehlversuchen gilt ein Eintrag als dauerhaft kaputt. */
 export const MAX_ATTEMPTS = 8
 
@@ -58,9 +84,15 @@ let dbPromise: Promise<IDBPDatabase<QueueDb>> | null = null
 
 function db(): Promise<IDBPDatabase<QueueDb>> {
   dbPromise ??= openDB<QueueDb>(DB_NAME, DB_VERSION, {
-    upgrade(database) {
-      const store = database.createObjectStore(STORE, { keyPath: 'clientId' })
-      store.createIndex('queuedAt', 'queuedAt')
+    upgrade(database, alteVersion) {
+      if (alteVersion < 1) {
+        const store = database.createObjectStore(STORE, { keyPath: 'clientId' })
+        store.createIndex('queuedAt', 'queuedAt')
+      }
+      if (alteVersion < 2) {
+        const store = database.createObjectStore(AUDIO_STORE, { keyPath: 'clientId' })
+        store.createIndex('queuedAt', 'queuedAt')
+      }
     },
   })
   return dbPromise
@@ -107,5 +139,55 @@ export async function clearFailed(): Promise<number> {
   const database = await db()
   const broken = await failed()
   await Promise.all(broken.map((entry) => database.delete(STORE, entry.clientId)))
-  return broken.length
+  const brokenAudio = await failedAudio()
+  await Promise.all(brokenAudio.map((entry) => database.delete(AUDIO_STORE, entry.clientId)))
+  return broken.length + brokenAudio.length
+}
+
+// ------------------------------------------------------------- Aufnahmen --
+
+export async function enqueueAudio(entry: QueuedAudio): Promise<void> {
+  const database = await db()
+  await database.put(AUDIO_STORE, { ...entry, attempts: 0 })
+}
+
+export async function pendingAudio(): Promise<AudioEntry[]> {
+  const database = await db()
+  const all = await database.getAllFromIndex(AUDIO_STORE, 'queuedAt')
+  return all.filter((entry) => entry.attempts < MAX_ATTEMPTS)
+}
+
+export async function removeAudio(clientId: string): Promise<void> {
+  const database = await db()
+  await database.delete(AUDIO_STORE, clientId)
+}
+
+/**
+ * Zaehlt einen Fehlversuch. `endgueltig` ist fuer Antworten, die sich beim
+ * naechsten Mal nicht aendern (zu gross, kein Kind, kaputte Datei) – dann
+ * hoert die App auf, es zu versuchen, statt Datenvolumen zu verbrennen.
+ */
+export async function markAudioFailed(
+  clientId: string,
+  error: string,
+  opts: { endgueltig?: boolean } = {},
+): Promise<void> {
+  const database = await db()
+  const entry = await database.get(AUDIO_STORE, clientId)
+  if (!entry) return
+  await database.put(AUDIO_STORE, {
+    ...entry,
+    attempts: opts.endgueltig ? MAX_ATTEMPTS : entry.attempts + 1,
+    lastError: error,
+  })
+}
+
+export async function failedAudio(): Promise<AudioEntry[]> {
+  const database = await db()
+  const all = await database.getAll(AUDIO_STORE)
+  return all.filter((entry) => entry.attempts >= MAX_ATTEMPTS)
+}
+
+export async function countPendingAudio(): Promise<number> {
+  return (await pendingAudio()).length
 }

@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "HouseholdSettings" ADD COLUMN     "milkDeepFreezeHours" INTEGER NOT NULL DEFAULT 8640,
+ADD COLUMN     "milkExpiryPush" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "milkFreezerHours" INTEGER NOT NULL DEFAULT 4320,
+ADD COLUMN     "milkFridgeHours" INTEGER NOT NULL DEFAULT 96,
+ADD COLUMN     "milkThawedHours" INTEGER NOT NULL DEFAULT 24;
+

@@ -197,7 +197,7 @@ export function GrowthView({
         <EmptyState
           icon={Ruler}
           title="Noch keine Messung"
-          description="Trage Gewicht, Länge oder Kopfumfang ein – meist gibt es die Werte beim Mutter-Kind-Pass-Termin."
+          description="Trage Gewicht, Länge oder Kopfumfang ein – meist gibt es die Werte beim Eltern-Kind-Pass-Termin."
         />
       ) : (
         <Tabs defaultValue="weight">

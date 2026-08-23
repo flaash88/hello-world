@@ -461,3 +461,111 @@ beim Umformulieren nicht verschwindet.
 **Warnzeichen zuerst, nicht am Ende.** Auf der Wochenbett-Seite steht die rote
 Karte mit Fieber, starker Blutung und Präeklampsie-Zeichen ganz oben – vor
 allem Erklärenden. Wer sie braucht, scrollt nicht.
+
+## Phase 9
+
+### Herkunft der Vorsorgedaten – bitte vor dem Verlassen auf sie lesen
+
+Die beiden Dateien unter `content/vorsorge/` tragen beide `"geprueft": false`.
+Das ist keine Formalie, sondern der Kern dieser Entscheidung.
+
+**Impfplan Österreich 2025/2026** (`impfplan-2025-2026.json`)
+- Angegebene Quelle: Impfplan Österreich 2025/2026, Version 1.1, Stand 10.10.2025,
+  Bundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz,
+  `sozialministerium.gv.at/impfplan`.
+- Tatsächlich übernommen aus: Zusammenfassungen der offiziellen Seiten. Der direkte
+  Abruf des PDFs war aus der Entwicklungsumgebung gesperrt (`EGRESS_BLOCKED`).
+- Abgerufen am: 23.08.2026.
+- **Vor der Verwendung gegen das Original-PDF zu prüfen.** Das gilt für jeden
+  einzelnen Termin und ausdrücklich auch für die Umrechnung der Zeitangaben: die
+  Quellen formulieren teils ordinal („im 3. Lebensmonat“), teils vollendet („ab der
+  vollendeten 7. Lebenswoche“). In der Datei stehen durchgehend vollendete
+  Einheiten; das kann um bis zu eine Woche bzw. einen Monat abweichen.
+- Nächste Prüfung: **jährlich**, sobald der neue Impfplan erscheint (üblicherweise
+  im Herbst). Danach `version`, `stand` und `abgerufenAm` mitziehen.
+
+**Eltern-Kind-Pass-Untersuchungen** (`ekp-untersuchungen.json`)
+- Angegebene Quelle: Eltern-Kind-Pass-Verordnung, dargestellt auf `gesundheit.gv.at`
+  und `oesterreich.gv.at`.
+- Tatsächlich übernommen aus: Zusammenfassungen derselben Seiten; der direkte Abruf
+  war ebenfalls gesperrt.
+- Abgerufen am: 23.08.2026.
+- Belegt sind die Untersuchungen 1, 2, 3, 5, 7, 8 und 10 samt Zeitfenster und die
+  beiden KBG-Fristen. **Die Untersuchungen 4, 6 und 9 tragen bewusst
+  `"fenster": null`** und in der UI den Satz, im Pass nachzusehen.
+- Nächste Prüfung: mit dem **digitalen Eltern-Kind-Pass ab Oktober 2026** – dann
+  liegen die Zeiträume in einer belastbaren Form vor und die drei offenen Einträge
+  gehören ergänzt.
+
+**Es wurde kein einziger Termin geraten.** Wo nichts zu belegen war, steht `null`
+und ein Hinweis, nachzusehen. Das ist der ganze Punkt: eine erfundene Frist wäre in
+diesem Bereich schlimmer als eine fehlende, weil sie geglaubt wird.
+
+### Weitere Entscheidungen dieser Phase
+
+**Vollendete Einheiten als einzige Zeitrechnung.** Impfplan und Pass mischen ordinale
+und vollendete Angaben. Statt beides zu unterstützen, steht in den Daten durchgehend
+die vollendete Einheit, und der Wortlaut der Quelle bleibt daneben in `fensterText`
+bzw. `hinweis` stehen. Eine Rechnung, zwei Lesarten – und die Quelle bleibt
+nachlesbar.
+
+**Abgelaufene Fenster ohne Drama.** Ein verpasster Termin ist ein Termin, der
+nachgeholt wird. Deshalb heißt es „Fenster seit … vorbei – Termin lässt sich
+nachholen“, in Grau statt in Rot, und ein Test verbietet die Wörter „verpasst“ und
+„versäumt“.
+
+**Zahndurchbruch als Spanne, nie als Norm.** Zwischen dem ersten Zahn mit vier und
+dem ersten Zahn mit dreizehn Monaten liegt nichts als Zufall. Die Zeitangaben stehen
+als Spanne da, „erwartete“ Zähne sind nur angedeutet, und ein Test hält fest, dass
+nirgends „sollte“ oder „zu spät“ steht.
+
+**Der erste Zahn setzt den Meilenstein selbst.** Wer den Zahn einträgt, hat den
+Meilenstein damit erlebt – ihn ein zweites Mal abzuhaken wäre Bürokratie. Kommt
+später ein früheres Datum dazu, wandert der Meilenstein mit.
+
+**Fieber: Intervalle ja, Dosierung nein.** Die App erinnert ausschließlich an das
+Intervall, das selbst eingetragen wurde. Sie rechnet keine Menge nach Gewicht oder
+Alter aus, schlägt kein Präparat vor und prüft keine Höchstmenge – es gibt bewusst
+keinen „zu viel“-Alarm. Eine falsch gerechnete Dosis wäre der einzige Weg, mit
+dieser App echten Schaden anzurichten. Der Hinweis dazu steht einmalig beim ersten
+Öffnen und dauerhaft unter der Ansicht.
+
+**Referenzlinien in Grau.** 37,5 und 38,5 °C markieren, sie warnen nicht. Rot wäre
+eine medizinische Aussage, die diese App nicht treffen darf; Messorte werden über
+die Form der Punkte unterschieden, damit auch der Ausdruck in Schwarzweiß lesbar
+bleibt.
+
+**Der Arztzettel gehört der Ärztin.** Eine Seite, A4, schwarz auf weiß, kein Logo,
+kein App-Name als Werbung – nur die Daten, die in der Ordination gefragt werden,
+und Platz für handschriftliche Notizen.
+
+**Haltbarkeiten als Konstante mit Quelle und Schalter.** Die Vorgaben (4 Tage
+Kühlschrank, 6 Monate Gefrierfach, 12 Monate Tiefkühler, 24 Stunden aufgetaut)
+stehen mit Quelle im Kommentar in `src/lib/milk/storage.ts` und lassen sich im
+Haushalt überschreiben. Wenn die Hebamme etwas anderes sagt, gilt die Hebamme.
+
+**Aufgetaute Milch kennt keinen Weg zurück.** Wieder einfrieren ist keine Option,
+also gibt es dafür auch keinen Knopf. Die Portion wandert in den Kühlschrank und
+bekommt das kurze Fenster ab dem Auftauen.
+
+**QR-Codes werden serverseitig gerendert.** Der Code entsteht als SVG im Server und
+steht direkt in der Seite – kein Skript im Browser, kein externer Dienst, passend zu
+„keine externen Requests zur Laufzeit“. Ohne gesetzte `APP_URL` bleibt er weg, statt
+ins Leere zu zeigen.
+
+**Aufnahmen als Opus, Original weg.** 64 kbit/s mono reichen für ein Lachen; drei
+Minuten wiegen damit gut 1,4 MB und passen in Backup und Export. Das Original wird
+erst gelöscht, wenn die Umwandlung wirklich durch ist – eine halbe Datei wäre
+schlimmer als keine.
+
+**Das Mikrofon wird erst gefragt, wenn es gebraucht wird.** Eine
+Berechtigungsabfrage beim bloßen Öffnen der Seite hat sich noch nie jemand
+gewünscht.
+
+**Die Wellenform entsteht einmal.** Beim Hochladen liest ffmpeg die Datei als rohes
+PCM und fasst sie zu 96 Ausschlägen zusammen. Der Player zeichnet danach nur noch –
+kein Decodieren im Browser, kein Ruckeln auf dem Telefon.
+
+**Aufnahmen liegen als ArrayBuffer in der Queue.** Blobs in IndexedDB sind je nach
+Browser heikel, Rohdaten sind es nirgends. Der Blob entsteht erst beim Hochladen
+wieder.

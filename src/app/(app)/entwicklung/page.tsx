@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Baby, ChevronRight, Dumbbell, Flag, Sparkles, TrendingUp } from 'lucide-react'
+import { Baby, ChevronRight, Dumbbell, Flag, Smile, Sparkles, TrendingUp } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { ageInWeeks, localDateKey } from '@/lib/time'
@@ -48,6 +48,10 @@ export default async function DevelopmentPage() {
       distinct: ['exerciseId'],
     }),
   ])
+
+  const toothCount = await prisma.tooth.count({
+    where: { childId: child.id, eruptedOn: { not: null }, lostOn: null },
+  })
 
   const achievedKeys = milestones
     .filter((milestone) => milestone.key && milestone.achievedAt)
@@ -151,6 +155,25 @@ export default async function DevelopmentPage() {
               </div>
             </CardContent>
           )}
+        </Card>
+      </Link>
+
+      <Link href="/zaehne" className="block">
+        <Card className="transition-colors hover:border-primary">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Smile className="size-4 text-primary" aria-hidden />
+                Zähne
+              </CardTitle>
+              <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+            </div>
+            <CardDescription>
+              {toothCount > 0
+                ? `${toothCount} von 20 Milchzähnen eingetragen`
+                : 'Zwanzig Milchzähne, einer nach dem anderen'}
+            </CardDescription>
+          </CardHeader>
         </Card>
       </Link>
 

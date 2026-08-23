@@ -49,6 +49,8 @@ src/
     ui/                shadcn-Bausteine (Button, Card, Dialog …)
     layout/            Header, Tab-Leiste, Kind-Umschalter
     tracker/           Timer, Schnellaktionen, Event-Listen
+    teeth/             Zahnschema als SVG
+    audio/             Aufnahme, Abspieler, Wellenform
     dashboard/         24h-Kreisuhr, Schlafdruck, Vorhersage-Karten
   lib/
     auth/              Passwort, Session, CSRF, Rate-Limit
@@ -66,6 +68,8 @@ src/
     i18n.ts            Sprache und Regionsformat (nur `de` ausgeliefert)
     actions/           Server Actions
 content/weeks/de/      Woche-für-Woche-Inhalte (Markdown + Frontmatter)
+content/vorsorge/      Impfplan und Eltern-Kind-Pass als versionierte JSON-Dateien
+                       (mit `quelle`, `version`, `stand`, `abgerufenAm`, `geprueft`)
 prisma/                Schema, Migrationen, Seed
 docker/                Entrypoint, Backup-Sidecar
 e2e/                   Playwright-Tests
@@ -97,3 +101,13 @@ Alle Texte sind selbst formuliert. Datensätze stammen ausschließlich aus offen
 lizenzierten Quellen (WHO Child Growth Standards). Jede Auswertung mit
 medizinischem Anschein (Wehen, Perzentile, Wachfenster) trägt einen kurzen
 Hinweis, dass sie Hebamme und Ärztin nicht ersetzt.
+
+**Termine werden nicht erfunden.** Was nicht belegt ist, steht als `null` in den
+Daten und in der UI als „bitte nachsehen“ – nie als geratenes Datum. Jede
+Vorsorgedatei trägt `quelle`, `version`, `stand`, `abgerufenAm` und `geprueft`;
+solange `geprueft: false` ist, zeigt die App den Prüfhinweis sichtbar an.
+
+**Keine Dosierungen.** Die App rechnet keine Medikamentenmengen aus – weder nach
+Gewicht noch nach Alter –, schlägt kein Präparat vor und prüft keine
+Höchstmenge. Sie erinnert ausschließlich an Intervalle, die selbst eingetragen
+wurden.

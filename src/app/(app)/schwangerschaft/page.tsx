@@ -27,7 +27,7 @@ const TOOLS = [
   { href: '/schwangerschaft/wehen', label: 'Wehen-Timer', icon: Timer },
   { href: '/schwangerschaft/bewegungen', label: 'Kindsbewegungen zählen', icon: Footprints },
   { href: '/schwangerschaft/werte', label: 'Gewicht, Blutdruck, Symptome', icon: Activity },
-  { href: '/schwangerschaft/termine', label: 'Termine & Mutter-Kind-Pass', icon: CalendarCheck },
+  { href: '/schwangerschaft/termine', label: 'Termine & Eltern-Kind-Pass', icon: CalendarCheck },
   { href: '/schwangerschaft/kliniktasche', label: 'Kliniktasche', icon: Luggage },
   { href: '/schwangerschaft/namen', label: 'Namensliste', icon: Heart },
 ]

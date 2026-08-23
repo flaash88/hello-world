@@ -23,7 +23,7 @@ Die Ich-Entwicklung schreitet voran. "Ich" und "mein" werden wichtiger, das Bed�
 Bietet dieselben Speisen an, die ihr esst. Getrennte Kinderportionen aus anderen Zutaten erschweren die spätere Umstellung.
 
 ## Worauf zu achten ist
-Die Mutter-Kind-Pass-Untersuchung im 22. bis 26. Lebensmonat steht an. Sprache, Motorik und Verhalten werden angesehen.
+Die Eltern-Kind-Pass-Untersuchung im 22. bis 26. Lebensmonat steht an. Sprache, Motorik und Verhalten werden angesehen.
 
 ## Tipp für euch
 Notiert vor dem Termin, welche Wörter euer Kind spricht. Im Gespräch fällt einem spontan höchstens die Hälfte ein.

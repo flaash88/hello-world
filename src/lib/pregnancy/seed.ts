@@ -1,10 +1,10 @@
 import 'server-only'
 import { prisma } from '@/lib/db'
 import { HOSPITAL_BAG_TEMPLATE } from './hospital-bag'
-import { mkpScheduleFor } from './mkp'
+import { ekpScheduleFor } from './ekp'
 
 /**
- * Einmalige Vorbefuellung von Kliniktasche und Mutter-Kind-Pass-Terminen.
+ * Einmalige Vorbefuellung von Kliniktasche und Eltern-Kind-Pass-Terminen.
  *
  * Bewusst keine Server Actions: Diese Funktionen werden beim Rendern der
  * jeweiligen Seite aufgerufen, und `revalidatePath` waehrend des Renderns ist
@@ -35,7 +35,7 @@ export async function ensureHospitalBag(
   return HOSPITAL_BAG_TEMPLATE.length
 }
 
-export async function ensureMkpAppointments(
+export async function ensureEkpAppointments(
   householdId: string,
   pregnancyId: string,
   dueDate: Date,
@@ -47,7 +47,7 @@ export async function ensureMkpAppointments(
     select: { templateKey: true },
   })
   const known = new Set(existing.map((a) => a.templateKey))
-  const missing = mkpScheduleFor(dueDate, timezone).filter((entry) => !known.has(entry.exam.key))
+  const missing = ekpScheduleFor(dueDate, timezone).filter((entry) => !known.has(entry.exam.key))
   if (missing.length === 0) return 0
 
   await prisma.appointment.createMany({
@@ -55,7 +55,7 @@ export async function ensureMkpAppointments(
       pregnancyId,
       householdId,
       title: entry.exam.title,
-      category: 'mkp',
+      category: 'ekp',
       windowFrom: entry.windowFrom,
       windowTo: entry.windowTo,
       note: entry.exam.description,

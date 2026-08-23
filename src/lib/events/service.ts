@@ -2,6 +2,7 @@ import 'server-only'
 import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { publish } from '@/lib/realtime'
+import { planeIntervallErinnerung } from '@/lib/fever/reminder'
 import { eventInputSchema, parsePayload } from './schemas'
 import { EVENT_CATEGORIES, type EventType } from './types'
 
@@ -107,7 +108,41 @@ export async function createEvent(
     kind: `${event.type}:create`,
     id: event.id,
   })
+
+  await planeMedikamentErinnerung(ctx.householdId, input.childId, event.startedAt, payload.data)
+
   return { ok: true, data: { id: event.id, created: true } }
+}
+
+/**
+ * Wurde ein Medikament mit Intervall eingetragen, meldet sich die App, wenn
+ * die eingetragenen Stunden um sind. Ohne Intervall passiert nichts – die App
+ * denkt sich keines aus.
+ */
+async function planeMedikamentErinnerung(
+  householdId: string,
+  childId: string,
+  startedAt: Date,
+  payload: unknown,
+): Promise<void> {
+  const data = payload as { kind?: string; medication?: string; repeatHours?: number }
+  if (data.kind !== 'medication' || !data.repeatHours) return
+
+  const child = await prisma.child.findUnique({
+    where: { id: childId },
+    select: { name: true, household: { select: { timezone: true } } },
+  })
+  if (!child) return
+
+  await planeIntervallErinnerung({
+    householdId,
+    childId,
+    childName: child.name,
+    mittel: data.medication?.trim() || 'Medikament',
+    gegebenAm: startedAt,
+    repeatHours: data.repeatHours,
+    timezone: child.household.timezone,
+  })
 }
 
 export type UpdateEventInput = {
