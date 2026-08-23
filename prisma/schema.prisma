@@ -20,11 +20,12 @@ model Household {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users       User[]
-  children    Child[]
-  invites     Invite[]
-  pregnancies Pregnancy[]
-  settings    HouseholdSettings?
+  users        User[]
+  children     Child[]
+  invites      Invite[]
+  pregnancies  Pregnancy[]
+  settings     HouseholdSettings?
+  customSounds CustomSound[]
 }
 
 model HouseholdSettings {
@@ -83,6 +84,7 @@ model User {
   checklistChanges  ChecklistItem[]
   nightShifts       NightShift[]
   exerciseLogs      ExerciseLog[]
+  customSounds      CustomSound[]
 
   @@index([householdId])
 }
@@ -566,4 +568,22 @@ model NotificationPreference {
   quietTo           String? // "06:00"
   ntfyEnabled       Boolean  @default(false)
   updatedAt         DateTime @updatedAt
+}
+
+// ------------------------------------------------------------ Eigene Sounds --
+
+model CustomSound {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name        String
+  // Pfad relativ zu UPLOAD_DIR – wie bei Fotos ausserhalb von /public.
+  path        String    @unique
+  mimeType    String
+  bytes       Int
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
 }

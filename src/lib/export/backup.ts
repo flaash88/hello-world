@@ -18,7 +18,7 @@ export async function buildBackup(
   householdId: string,
   options: { includeOwnPrivate?: string } = {},
 ) {
-  const [household, users, children, pregnancies, events, measurements, milestones, journal, media, moods, parentSleep, nightShifts, reminders, exerciseLogs] =
+  const [household, users, children, pregnancies, events, measurements, milestones, journal, media, moods, parentSleep, nightShifts, reminders, exerciseLogs, customSounds] =
     await Promise.all([
       prisma.household.findUniqueOrThrow({ where: { id: householdId }, include: { settings: true } }),
       prisma.user.findMany({
@@ -56,6 +56,9 @@ export async function buildBackup(
       prisma.nightShift.findMany({ where: { householdId } }),
       prisma.reminder.findMany({ where: { householdId, doneAt: null } }),
       prisma.exerciseLog.findMany({ where: { child: { householdId } } }),
+      // Die Audiodateien selbst liegen im Upload-Volume; hier steht nur, welche
+      // es gab – sonst waere das Backup je nach Sammlung hundert Megabyte gross.
+      prisma.customSound.findMany({ where: { householdId } }),
     ])
 
   const privateJournal = options.includeOwnPrivate
@@ -81,6 +84,7 @@ export async function buildBackup(
     nightShifts,
     reminders,
     exerciseLogs,
+    customSounds,
     privateJournal,
   }
 }

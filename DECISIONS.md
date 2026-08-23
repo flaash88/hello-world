@@ -371,3 +371,17 @@ noch da.
 **Der Wechsel „Kind anlegen“ liegt im Kindprofil, nicht in einem eigenen
 Menü.** Das Datenmodell kann Geschwister; die Oberfläche zeigt eines und
 schaltet erst um, wenn es wirklich mehr als eines gibt.
+
+**Eigene Audiodateien werden nicht neu kodiert.** Bei Bildern kann `sharp` das
+Format erzwingen und dabei EXIF entfernen; für Audio bräuchte es einen Decoder
+im Image, und dafür ist das Feature zu klein. Stattdessen entscheidet die
+Signatur am Dateianfang über das Format (Endung und gemeldeter MIME-Type sind
+frei wählbar), ausgeliefert wird nur mit dem so erkannten Typ, und die Datei
+liegt wie die Fotos hinter der Anmeldung statt in `public`. Enthaltene Tags
+bleiben erhalten – das steht so in der Oberfläche.
+
+**Eigene Klänge gehören dem Haushalt, nicht dem Kind.** Ein
+Einschlafgeräusch überdauert das erste Jahr und gilt auch fürs Geschwisterkind.
+Im JSON-Backup steht deshalb nur, welche Klänge es gab; die Audiodateien selbst
+liegen im Upload-Volume, sonst wäre ein Backup je nach Sammlung hundert
+Megabyte groß.

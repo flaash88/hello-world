@@ -3,6 +3,7 @@ import { mkdir, readFile, rm, unlink, writeFile } from 'node:fs/promises'
 import { createHash, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import sharp from 'sharp'
+import { AUDIO_MIME, MAX_AUDIO_BYTES, detectAudioFormat, safeSoundName } from './audio'
 
 /**
  * Bildablage auf der lokalen Platte.
@@ -132,6 +133,49 @@ export async function storeImage(file: File, childId: string): Promise<StoreResu
   }
 }
 
+export type StoredSound = {
+  path: string
+  mimeType: string
+  bytes: number
+  name: string
+}
+
+export type StoreSoundResult = { ok: true; sound: StoredSound } | { ok: false; error: string }
+
+/**
+ * Legt eine hochgeladene Audiodatei ab. Sie wird nicht neu kodiert – dafuer
+ * braeuchte es einen Decoder im Image –, deshalb entscheidet der Container
+ * ueber Typ und Auslieferung. Enthaltene Tags (z. B. ID3) bleiben erhalten;
+ * die Datei liegt wie die Fotos hinter der Anmeldung, nicht in `public`.
+ */
+export async function storeSound(file: File, householdId: string): Promise<StoreSoundResult> {
+  if (file.size === 0) return { ok: false, error: 'Die Datei ist leer.' }
+  if (file.size > MAX_AUDIO_BYTES) {
+    return { ok: false, error: `Die Datei ist größer als ${Math.round(MAX_AUDIO_BYTES / 1024 / 1024)} MB.` }
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const format = detectAudioFormat(new Uint8Array(buffer.subarray(0, 16)))
+  if (!format) {
+    return { ok: false, error: 'Das ist keine unterstützte Audiodatei (MP3, OGG, WAV, M4A, FLAC).' }
+  }
+
+  const folder = path.join(UPLOAD_DIR, 'sounds', householdId)
+  await mkdir(folder, { recursive: true })
+  const fileName = `${Date.now()}-${randomBytes(6).toString('hex')}.${format}`
+  await writeFile(path.join(folder, fileName), buffer)
+
+  return {
+    ok: true,
+    sound: {
+      path: path.join('sounds', householdId, fileName),
+      mimeType: AUDIO_MIME[format],
+      bytes: buffer.byteLength,
+      name: safeSoundName(file.name),
+    },
+  }
+}
+
 /** Liest eine gespeicherte Datei. Verhindert das Ausbrechen aus UPLOAD_DIR. */
 export async function readStoredFile(relativePath: string): Promise<Buffer | null> {
   const root = path.resolve(UPLOAD_DIR)
@@ -162,6 +206,18 @@ export async function deleteStoredFile(relativePath: string): Promise<void> {
 export async function deleteChildUploads(childId: string): Promise<void> {
   const root = path.resolve(UPLOAD_DIR)
   const target = path.resolve(root, childId)
+  if (!target.startsWith(root + path.sep)) return
+  try {
+    await rm(target, { recursive: true, force: true })
+  } catch {
+    // Verzeichnis gab es nie oder ist schon weg.
+  }
+}
+
+/** Entfernt die eigenen Klänge eines Haushalts (nur beim Loeschen des Haushalts). */
+export async function deleteHouseholdSounds(householdId: string): Promise<void> {
+  const root = path.resolve(UPLOAD_DIR)
+  const target = path.resolve(root, 'sounds', householdId)
   if (!target.startsWith(root + path.sep)) return
   try {
     await rm(target, { recursive: true, force: true })

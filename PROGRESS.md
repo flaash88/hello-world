@@ -98,4 +98,6 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Startbildschirm und Schnellaktionen wählbar; `/` leitet weiter, Dashboard liegt auf `/heute`.
 - Backup-Seite: vorhandene Dumps, „jetzt sichern“ über Markierungsdatei, Restore-Anleitung.
 - Haushalt samt beider Konten löschbar – mit Passwort, Bestätigungswort und Export daneben.
-- Grün: lint, typecheck, 341 Unit-Tests (96,9 % Coverage auf der Logik), 57 E2E-Tests, build.
+- Eigene Audiodateien als Einschlafgeräusch: Format wird an der Signatur geprüft, Wiedergabe in
+  Schleife über denselben Regler samt Timer, Ausblenden und Sperrbildschirm.
+- Grün: lint, typecheck, 346 Unit-Tests (97,7 % Coverage auf der Logik), 59 E2E-Tests, build.

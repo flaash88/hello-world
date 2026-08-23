@@ -12,10 +12,12 @@ export class SoundPlayer {
   private context: AudioContext | null = null
   private master: GainNode | null = null
   private active: ActiveSound | null = null
+  private element: HTMLAudioElement | null = null
   private fadeTimer: ReturnType<typeof setTimeout> | null = null
   private endTimer: ReturnType<typeof setTimeout> | null = null
 
-  currentId: SoundId | null = null
+  /** Erzeugter Klang: die Id. Eigene Datei: `custom:<id>`. */
+  currentId: string | null = null
   volume = 0.6
 
   private ensureContext(): AudioContext {
@@ -31,7 +33,7 @@ export class SoundPlayer {
     return this.context
   }
 
-  /** Startet einen Klang. `fadeOutAfterSec` blendet danach sanft aus. */
+  /** Startet einen erzeugten Klang. `fadeOutAfterSec` blendet danach sanft aus. */
   async play(id: SoundId, options: { fadeOutAfterSec?: number | null } = {}): Promise<void> {
     const context = this.ensureContext()
     if (context.state === 'suspended') await context.resume()
@@ -43,6 +45,40 @@ export class SoundPlayer {
     this.active = sound
     this.currentId = id
 
+    this.startEnvelope(context, options.fadeOutAfterSec ?? null)
+  }
+
+  /**
+   * Startet eine eigene Datei. Sie laeuft in Schleife und haengt am selben
+   * Master-Gain wie die erzeugten Klaenge – Lautstaerke, Timer und Ausblenden
+   * funktionieren dadurch identisch.
+   */
+  async playUrl(
+    key: string,
+    url: string,
+    options: { fadeOutAfterSec?: number | null } = {},
+  ): Promise<void> {
+    const context = this.ensureContext()
+    if (context.state === 'suspended') await context.resume()
+
+    this.stopInternal()
+
+    const element = new Audio(url)
+    element.loop = true
+    element.crossOrigin = 'use-credentials'
+    // Jedes Element darf nur einmal an den Context gehaengt werden – deshalb
+    // gibt es pro Wiedergabe ein neues.
+    const source = context.createMediaElementSource(element)
+    source.connect(this.master!)
+    this.element = element
+    this.currentId = key
+
+    await element.play()
+    this.startEnvelope(context, options.fadeOutAfterSec ?? null)
+  }
+
+  /** Einblenden, optional Timer fuers Ausblenden und Stoppen. */
+  private startEnvelope(context: AudioContext, fadeOutAfterSec: number | null): void {
     // Kurz einblenden, damit der Start nicht knackt.
     this.master!.gain.cancelScheduledValues(context.currentTime)
     this.master!.gain.setValueAtTime(0.0001, context.currentTime)
@@ -52,11 +88,11 @@ export class SoundPlayer {
     )
 
     this.clearTimers()
-    if (options.fadeOutAfterSec && options.fadeOutAfterSec > 0) {
-      const fadeSec = Math.min(60, Math.max(10, options.fadeOutAfterSec * 0.1))
-      const startFadeMs = Math.max(0, (options.fadeOutAfterSec - fadeSec) * 1000)
+    if (fadeOutAfterSec && fadeOutAfterSec > 0) {
+      const fadeSec = Math.min(60, Math.max(10, fadeOutAfterSec * 0.1))
+      const startFadeMs = Math.max(0, (fadeOutAfterSec - fadeSec) * 1000)
       this.fadeTimer = setTimeout(() => this.fadeOut(fadeSec), startFadeMs)
-      this.endTimer = setTimeout(() => this.stop(), options.fadeOutAfterSec * 1000 + 500)
+      this.endTimer = setTimeout(() => this.stop(), fadeOutAfterSec * 1000 + 500)
     }
   }
 
@@ -86,6 +122,11 @@ export class SoundPlayer {
   private stopInternal(): void {
     this.active?.stop()
     this.active = null
+    if (this.element) {
+      this.element.pause()
+      this.element.src = ''
+      this.element = null
+    }
   }
 
   stop(): void {
@@ -95,7 +136,7 @@ export class SoundPlayer {
   }
 
   get isPlaying(): boolean {
-    return this.active !== null
+    return this.active !== null || this.element !== null
   }
 
   async dispose(): Promise<void> {
@@ -113,7 +154,7 @@ export class SoundPlayer {
  * auf dem Sperrbildschirm sichtbar und steuerbar – und iOS hält den Ton bei
  * gesperrtem Display eher am Leben.
  */
-export function updateMediaSession(id: SoundId | null, onStop: () => void): void {
+export function updateMediaSession(id: string | null, onStop: () => void, title?: string): void {
   if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return
 
   if (!id) {
@@ -124,7 +165,7 @@ export function updateMediaSession(id: SoundId | null, onStop: () => void): void
 
   const sound = SOUNDS.find((entry) => entry.id === id)
   navigator.mediaSession.metadata = new MediaMetadata({
-    title: sound?.label ?? 'Einschlafgeräusch',
+    title: title ?? sound?.label ?? 'Einschlafgeräusch',
     artist: 'Sprössling',
     artwork: [{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
   })

@@ -10,7 +10,7 @@ import { EVENT_TYPES } from '@/lib/events/types'
 import { START_SCREENS } from '@/lib/settings/display'
 import { requestBackup } from '@/lib/backup/files'
 import { DELETE_CONFIRMATION } from '@/lib/settings/deletion'
-import { deleteChildUploads } from '@/lib/media/storage'
+import { deleteChildUploads, deleteHouseholdSounds } from '@/lib/media/storage'
 
 const nightModeSchema = z.object({
   nightModeAuto: z.boolean(),
@@ -136,6 +136,7 @@ export async function deleteHouseholdAction(
   // Erst die Datenbank – wenn das schiefgeht, sind die Dateien noch da.
   await prisma.household.delete({ where: { id: user.householdId } })
   for (const child of children) await deleteChildUploads(child.id)
+  await deleteHouseholdSounds(user.householdId)
 
   await destroySession()
   redirect('/login')

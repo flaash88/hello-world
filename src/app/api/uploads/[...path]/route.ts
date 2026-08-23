@@ -6,9 +6,9 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 /**
- * Liefert hochgeladene Bilder aus. Nur für angemeldete Mitglieder des
- * Haushalts, dem das Bild gehört – die Dateien liegen bewusst nicht im
- * öffentlichen `public`-Verzeichnis.
+ * Liefert hochgeladene Dateien aus: Bilder und eigene Einschlafgeräusche. Nur
+ * für angemeldete Mitglieder des Haushalts, dem die Datei gehört – sie liegen
+ * bewusst nicht im öffentlichen `public`-Verzeichnis.
  */
 export async function GET(
   request: Request,
@@ -20,14 +20,21 @@ export async function GET(
   const { path: segments } = await context.params
   const relativePath = segments.join('/')
 
-  // Der Pfad muss zu einem Medium gehören, das dem eigenen Haushalt gehört.
-  const asset = await prisma.mediaAsset.findFirst({
-    where: {
-      child: { householdId: user.householdId },
-      OR: [{ path: relativePath }, { thumbPath: relativePath }],
-    },
-    select: { bytes: true, mimeType: true },
-  })
+  // Der Pfad muss zu einem Medium oder Klang des eigenen Haushalts gehören.
+  const [image, sound] = await Promise.all([
+    prisma.mediaAsset.findFirst({
+      where: {
+        child: { householdId: user.householdId },
+        OR: [{ path: relativePath }, { thumbPath: relativePath }],
+      },
+      select: { bytes: true, mimeType: true },
+    }),
+    prisma.customSound.findFirst({
+      where: { householdId: user.householdId, path: relativePath },
+      select: { bytes: true, mimeType: true },
+    }),
+  ])
+  const asset = image ?? sound
   if (!asset) return new Response('Nicht gefunden', { status: 404 })
 
   const etag = etagFor(relativePath, asset.bytes)
@@ -43,7 +50,7 @@ export async function GET(
       'Content-Type': asset.mimeType,
       'Content-Length': String(data.byteLength),
       ETag: etag,
-      // Bilder ändern sich nie – aber privat, nicht in Zwischen-Caches.
+      // Dateien ändern sich nie – aber privat, nicht in Zwischen-Caches.
       'Cache-Control': 'private, max-age=31536000, immutable',
     },
   })
