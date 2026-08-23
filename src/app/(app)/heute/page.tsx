@@ -1,5 +1,14 @@
 import Link from 'next/link'
-import { Baby, ChevronRight, HeartHandshake, Plus, Thermometer, Timer, UserPlus } from 'lucide-react'
+import {
+  Baby,
+  ChevronRight,
+  ClipboardList,
+  HeartHandshake,
+  Plus,
+  Thermometer,
+  Timer,
+  UserPlus,
+} from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { gestationalAge } from '@/lib/pregnancy/weeks'
 import { pregnancyWeekContent } from '@/lib/pregnancy/content'
@@ -12,6 +21,7 @@ import {
 } from '@/lib/events/queries'
 import { unitPrefsFrom } from '@/lib/units'
 import { laufendeFieberEpisode } from '@/lib/fever/current'
+import { istNeugeborenes } from '@/lib/growth/newborn'
 import { parseQuickActions } from '@/lib/settings/display'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -55,6 +65,10 @@ export default async function HomePage() {
   // Laeuft gerade eine Fieberepisode, gehoert sie nach oben – dann sucht
   // niemand nachts im Menue danach.
   const fieber = child ? await laufendeFieberEpisode(child.id) : null
+
+  // In den ersten sechs Wochen ist das Protokoll fuer die Hebamme das, was am
+  // haeufigsten gebraucht wird – danach verschwindet die Karte wieder.
+  const wochenbett = istNeugeborenes(child?.birthDate ?? null, new Date(), ctx.timezone)
 
   const quickActions = parseQuickActions(ctx.household.settings?.quickActions)
   const runningTypes = events.filter((e) => e.running).map((e) => e.type)
@@ -116,6 +130,25 @@ export default async function HomePage() {
               initialLabel={clock.label}
             />
           </section>
+
+          {wochenbett && (
+            <Link href="/protokoll" className="block">
+              <Card className="transition-colors hover:border-primary">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <ClipboardList className="size-4 text-primary" aria-hidden />
+                      Stillprotokoll
+                    </CardTitle>
+                    <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                  </div>
+                  <CardDescription>
+                    Die letzten Tage auf einen Blick – für den Besuch der Hebamme.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          )}
 
           {fieber && (
             <Link href="/gesundheit/fieber" className="block">

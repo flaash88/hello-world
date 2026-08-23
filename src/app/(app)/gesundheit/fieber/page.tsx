@@ -3,7 +3,8 @@ import { Thermometer } from 'lucide-react'
 import Link from 'next/link'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
-import { ageInMonths, formatDateLong } from '@/lib/time'
+import { druckKopf } from '@/lib/print/kopf'
+import { unitPrefsFrom } from '@/lib/units'
 import {
   EPISODE_FENSTER_STUNDEN,
   FIEBER_AB_C,
@@ -108,10 +109,17 @@ export default async function FieberPage() {
 
   const daten: FieberDaten = {
     childName: child.name,
-    geburtsdatum: child.birthDate ? formatDateLong(child.birthDate, tz) : null,
-    alterMonate: child.birthDate ? ageInMonths(child.birthDate, now, tz) : null,
-    gewichtKg: letzteMessung?.weightKg ?? null,
-    gewichtVom: letzteMessung?.measuredAt ? formatDateLong(letzteMessung.measuredAt, tz) : null,
+    kopf: druckKopf('Fieberverlauf', {
+      childName: child.name,
+      birthDate: child.birthDate,
+      currentWeightKg: letzteMessung?.weightKg ?? null,
+      currentWeightAt: letzteMessung?.measuredAt ?? null,
+      from: ep.beginn,
+      to: now,
+      timezone: tz,
+      units: unitPrefsFrom(ctx.household.settings),
+      now,
+    }),
     beginn: ep.beginn!.toISOString(),
     hoechste: ep.hoechste
       ? {
