@@ -15,6 +15,7 @@ import {
   FEATURES,
   LEVEL_INFO,
   PAUSE_DAUERN,
+  schalterFuerStufe,
   type FeatureKey,
   type FeatureLevel,
 } from '@/lib/settings/features'
@@ -43,6 +44,9 @@ export function AnzeigeEinstellungen({
 
   function waehleStufe(next: FeatureLevel) {
     setLevel(next)
+    // Die Stufe setzt die Einzelschalter zurueck – das muss man auch sehen,
+    // ohne die Seite neu zu laden.
+    setSchalter(schalterFuerStufe(next))
     startTransition(async () => {
       const result = await setFeatureLevelAction({ level: next })
       if ('error' in result) {
@@ -190,7 +194,7 @@ export function AnzeigeEinstellungen({
               toast({ title: 'Nicht gespeichert', description: result.error, variant: 'destructive' })
             } else {
               setLevel('protokoll')
-              setSchalter(Object.fromEntries(FEATURE_KEYS.map((key) => [key, false])))
+              setSchalter(schalterFuerStufe('protokoll'))
               toast({ title: 'Zurück auf Protokollmodus' })
             }
             router.refresh()

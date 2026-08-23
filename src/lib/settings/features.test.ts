@@ -9,6 +9,7 @@ import {
   parseFeatureLevel,
   parseFeatureOverrides,
   pauseEnde,
+  schalterFuerStufe,
   routeErlaubt,
   schalterStand,
 } from './features'
@@ -102,6 +103,34 @@ describe('Pause', () => {
 
   it('rechnet das Ende aus Stunden aus', () => {
     expect(pauseEnde(24, JETZT).toISOString()).toBe('2026-08-24T10:00:00.000Z')
+  })
+})
+
+describe('schalterFuerStufe', () => {
+  it('beschreibt jede Stufe vollständig', () => {
+    expect(schalterFuerStufe('protokoll')).toEqual({
+      schlafanalyse: false,
+      kreisuhr: false,
+      auswertung: false,
+      entwicklung: false,
+      perzentile: false,
+      elternCheckin: false,
+    })
+    expect(schalterFuerStufe('erweitert')).toMatchObject({
+      schlafanalyse: true,
+      kreisuhr: true,
+      auswertung: false,
+    })
+    expect(Object.values(schalterFuerStufe('voll')).every(Boolean)).toBe(true)
+  })
+
+  it('deckt sich mit dem, was die Stufe wirklich einschaltet', () => {
+    for (const level of ['protokoll', 'erweitert', 'voll'] as const) {
+      const state = featureState({ level }, JETZT)
+      for (const key of FEATURE_KEYS) {
+        expect(schalterFuerStufe(level)[key]).toBe(state.aktiv.has(key))
+      }
+    }
   })
 })
 

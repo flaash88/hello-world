@@ -34,7 +34,6 @@ import { buildDayClockData } from '@/lib/actions/dashboard'
 import { DayClockSection } from '@/components/dashboard/day-clock-section'
 import { SleepForecastCard } from '@/components/dashboard/sleep-forecast-card'
 import { SleepTodayCard } from '@/components/dashboard/sleep-today-card'
-import { ForecastNote } from '@/components/dashboard/forecast-note'
 import { QuickActions } from '@/components/tracker/quick-actions'
 import { LastEventsStrip } from '@/components/tracker/last-events-strip'
 import { EventList } from '@/components/tracker/event-list'
@@ -152,11 +151,6 @@ export default async function HomePage() {
                 initialNowMinutes={clock.nowMinutes}
                 initialLabel={clock.label}
               />
-              {zeigeSchlaf && (
-                <div className="mt-1.5">
-                  <ForecastNote />
-                </div>
-              )}
             </section>
           )}
 

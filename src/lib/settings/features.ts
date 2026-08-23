@@ -195,6 +195,13 @@ export function schalterStand(state: FeatureState, key: FeatureKey): boolean {
   return LEVEL_FEATURES[state.level].includes(key)
 }
 
+/** Wie die Einzelschalter stehen, wenn nur die Stufe gilt. */
+export function schalterFuerStufe(level: FeatureLevel): Record<FeatureKey, boolean> {
+  const result = {} as Record<FeatureKey, boolean>
+  for (const key of FEATURE_KEYS) result[key] = LEVEL_FEATURES[level].includes(key)
+  return result
+}
+
 /**
  * Neue Abweichungen nach dem Umlegen eines Schalters. Deckt sich der Wunsch
  * mit der Stufe, faellt die Abweichung wieder weg – sonst sammeln sich
