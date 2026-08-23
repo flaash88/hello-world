@@ -54,11 +54,11 @@ test.describe('Schwangerschaft', () => {
     await expect(page.getByRole('heading', { name: 'Unterlagen' })).toBeVisible()
     await expect(page.getByText('0 /')).toBeVisible()
 
-    await page.getByRole('checkbox', { name: /Mutter-Kind-Pass abhaken/ }).click()
+    await page.getByRole('checkbox', { name: /Eltern-Kind-Pass abhaken/ }).click()
     await expect(page.getByText('1 /')).toBeVisible()
   })
 
-  test('Mutter-Kind-Pass-Termine sind vorbelegt', async ({ page }) => {
+  test('Eltern-Kind-Pass-Termine sind vorbelegt', async ({ page }) => {
     await page.goto('/schwangerschaft/termine')
     await expect(page.getByText('1. Untersuchung – Erstuntersuchung')).toBeVisible()
     await expect(page.getByText('Zuckerbelastungstest (oGTT)')).toBeVisible()

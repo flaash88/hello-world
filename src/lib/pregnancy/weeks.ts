@@ -1,7 +1,7 @@
 /**
  * Schwangerschaftsrechnung.
  *
- * Konvention (wie im Mutter-Kind-Pass): Die Schwangerschaftswoche wird ab dem
+ * Konvention (wie im Eltern-Kind-Pass): Die Schwangerschaftswoche wird ab dem
  * ersten Tag der letzten Periode gezaehlt. Der errechnete Termin (ET) liegt
  * 280 Tage (40+0) danach. Aus dem ET laesst sich damit jederzeit auf das
  * Schwangerschaftsalter zurueckrechnen – auch wenn die letzte Periode nicht

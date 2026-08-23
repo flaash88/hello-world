@@ -23,7 +23,7 @@ Gemeinsames Spiel mit Absprachen entsteht. Rollen werden verteilt und eingehalte
 Ausgewogene Familienkost, feste Zeiten, Wasser als Hauptgetränk. Mehr braucht es nicht.
 
 ## Worauf zu achten ist
-Die Mutter-Kind-Pass-Untersuchung im 34. bis 38. Lebensmonat steht an, mit Seh- und Hörtest.
+Die Eltern-Kind-Pass-Untersuchung im 34. bis 38. Lebensmonat steht an, mit Seh- und Hörtest.
 
 ## Tipp für euch
 Lasst euer Kind bei der Untersuchung selbst antworten, wo es geht. Es kann mehr, als man ihm zutraut.

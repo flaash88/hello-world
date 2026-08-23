@@ -23,7 +23,7 @@ export const HOSPITAL_BAG_SECTIONS = [
 export const HOSPITAL_BAG_TEMPLATE: HospitalBagItem[] = [
   // ------------------------------------------------------------- Unterlagen
   { key: 'ecard', section: 'Unterlagen', label: 'e-card', note: 'Beider Elternteile, falls vorhanden' },
-  { key: 'mkp', section: 'Unterlagen', label: 'Mutter-Kind-Pass' },
+  { key: 'ekp', section: 'Unterlagen', label: 'Eltern-Kind-Pass' },
   { key: 'ausweis', section: 'Unterlagen', label: 'Lichtbildausweis' },
   { key: 'meldezettel', section: 'Unterlagen', label: 'Meldezettel', note: 'Für die Geburtsurkunde' },
   { key: 'heiratsurkunde', section: 'Unterlagen', label: 'Heirats- oder Geburtsurkunde', note: 'Je nach Familienstand' },

@@ -61,6 +61,11 @@ export async function buildBackup(
       prisma.customSound.findMany({ where: { householdId } }),
     ])
 
+  const vorsorge = await prisma.vorsorgeEntry.findMany({
+    where: { child: { householdId } },
+    orderBy: { doneAt: 'asc' },
+  })
+
   const privateJournal = options.includeOwnPrivate
     ? await prisma.parentJournalEntry.findMany({ where: { userId: options.includeOwnPrivate } })
     : []
@@ -85,6 +90,7 @@ export async function buildBackup(
     reminders,
     exerciseLogs,
     customSounds,
+    vorsorge,
     privateJournal,
   }
 }

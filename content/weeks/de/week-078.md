@@ -20,7 +20,7 @@ Selbsterkennung im Spiegel entsteht um diese Zeit – euer Kind begreift, dass e
 11 bis 14 Stunden, ein Nickerchen. Manche Kinder brauchen jetzt eine spätere Bettzeit, andere eine frühere – beobachtet, wann das Einschlafen leicht fällt.
 
 ## Ernährung
-Die Mutter-Kind-Pass-Untersuchung im 22. bis 26. Lebensmonat liegt noch etwas entfernt. Achtet weiter auf Eisen und Vielfalt.
+Die Eltern-Kind-Pass-Untersuchung im 22. bis 26. Lebensmonat liegt noch etwas entfernt. Achtet weiter auf Eisen und Vielfalt.
 
 ## Worauf zu achten ist
 Mit achtzehn Monaten sollten mindestens einige Wörter gesprochen werden, Zeigen sicher funktionieren und Interesse an anderen bestehen. Andernfalls: abklären lassen, früh und ohne Scheu.

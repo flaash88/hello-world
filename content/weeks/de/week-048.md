@@ -23,7 +23,7 @@ Konstante Zeiten sind jetzt besonders wertvoll. Ein Kind, das weiß, was kommt, 
 Kuhmilch als Getränk ist ab dem ersten Geburtstag möglich. Vorher bleibt Muttermilch oder Säuglingsnahrung die Basis.
 
 ## Worauf zu achten ist
-Die Mutter-Kind-Pass-Untersuchung im zehnten bis vierzehnten Lebensmonat steht bevor. Notiert, was euch aufgefallen ist.
+Die Eltern-Kind-Pass-Untersuchung im zehnten bis vierzehnten Lebensmonat steht bevor. Notiert, was euch aufgefallen ist.
 
 ## Tipp für euch
 Wenn euer Kind auf Ritualen besteht: mitmachen. Der Aufwand ist klein, der Gewinn an Ruhe groß.

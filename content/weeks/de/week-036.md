@@ -20,7 +20,7 @@ Winken, Klatschen und andere soziale Gesten werden gelernt und stolz vorgeführt
 11 bis 14 Stunden, zwei Nickerchen, Wachfenster 3 bis 4 Stunden. Ein Schlafmuster ist erkennbar, aber nicht in Stein gemeißelt.
 
 ## Ernährung
-Die Mutter-Kind-Pass-Untersuchung im siebten bis neunten Lebensmonat steht an. Ernährung und Entwicklung werden besprochen.
+Die Eltern-Kind-Pass-Untersuchung im siebten bis neunten Lebensmonat steht an. Ernährung und Entwicklung werden besprochen.
 
 ## Worauf zu achten ist
 Eisenmangel ist in diesem Alter nicht selten. Eisenreiche Beikost – Fleisch, Hülsenfrüchte, Getreide mit Vitamin C kombiniert – ist deshalb wichtig.

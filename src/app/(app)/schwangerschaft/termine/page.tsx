@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
-import { ensureMkpAppointments } from '@/lib/pregnancy/seed'
+import { ensureEkpAppointments } from '@/lib/pregnancy/seed'
 import { gestationalAge } from '@/lib/pregnancy/weeks'
 import { BackLink } from '@/components/layout/back-link'
 import { AppointmentList } from './appointment-list'
@@ -13,8 +13,8 @@ export default async function AppointmentsPage() {
   const ctx = await getAppContext()
   if (!ctx.pregnancy) redirect('/onboarding')
 
-  // Beim ersten Aufruf werden die Mutter-Kind-Pass-Termine aus dem ET erzeugt.
-  await ensureMkpAppointments(
+  // Beim ersten Aufruf werden die Eltern-Kind-Pass-Termine aus dem ET erzeugt.
+  await ensureEkpAppointments(
     ctx.household.id,
     ctx.pregnancy.id,
     ctx.pregnancy.dueDate,
@@ -47,7 +47,7 @@ export default async function AppointmentsPage() {
       <BackLink href="/schwangerschaft" label="Schwangerschaft" />
       <h1 className="font-display text-2xl font-bold">Termine</h1>
       <p className="text-muted-foreground">
-        Die Mutter-Kind-Pass-Untersuchungen sind mit ihrem üblichen Zeitfenster vorbelegt. Du bist
+        Die Eltern-Kind-Pass-Untersuchungen sind mit ihrem üblichen Zeitfenster vorbelegt. Du bist
         gerade in SSW {age.label}.
       </p>
       <AppointmentList currentWeek={age.week}

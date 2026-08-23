@@ -140,7 +140,7 @@ export const PREGNANCY_WEEKS: PregnancyWeekContent[] = [
     development:
       'Der Darm zieht sich vollständig in den Bauchraum zurück, wo er hingehört. Reflexe entstehen: Berührt etwas die Handfläche, schließt sich die Faust. Die Nieren produzieren erstmals Urin.',
     mother:
-      'Das Fehlgeburtsrisiko sinkt mit dem Ende des ersten Trimesters deutlich – für viele der Zeitpunkt, an dem sie es weitererzählen. Die Übelkeit lässt bei den meisten nach, die Energie kommt zurück. Der Mutter-Kind-Pass startet mit der ersten großen Untersuchung.',
+      'Das Fehlgeburtsrisiko sinkt mit dem Ende des ersten Trimesters deutlich – für viele der Zeitpunkt, an dem sie es weitererzählen. Die Übelkeit lässt bei den meisten nach, die Energie kommt zurück. Der Eltern-Kind-Pass startet mit der ersten großen Untersuchung.',
     partnerTip:
       'Besprecht gemeinsam, wem ihr wann erzählt. Es ist ihre Schwangerschaft, aber eure Nachricht – und niemand mag es, wenn andere es vor der eigenen Mutter wissen.',
   },
@@ -400,7 +400,7 @@ export const PREGNANCY_WEEKS: PregnancyWeekContent[] = [
     development:
       'Die meisten Kinder drehen sich in dieser Phase in die Schädellage – Kopf nach unten. Die Fingernägel reichen bis zu den Fingerkuppen. Das Immunsystem übernimmt Antikörper von der Mutter, ein Schutz, der nach der Geburt noch Monate hält.',
     mother:
-      'Die letzte reguläre Mutter-Kind-Pass-Untersuchung vor der Geburt steht an. Der Bauch drückt spürbar nach oben, Sodbrennen erreicht oft seinen Höhepunkt. Wenn das Kind noch nicht gedreht ist: Es hat noch Zeit.',
+      'Die letzte reguläre Eltern-Kind-Pass-Untersuchung vor der Geburt steht an. Der Bauch drückt spürbar nach oben, Sodbrennen erreicht oft seinen Höhepunkt. Wenn das Kind noch nicht gedreht ist: Es hat noch Zeit.',
     partnerTip:
       'Packt gemeinsam die Kliniktasche. Nicht, weil es jetzt losgeht, sondern damit ihr beide wisst, wo was liegt.',
   },

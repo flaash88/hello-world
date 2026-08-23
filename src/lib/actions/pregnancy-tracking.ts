@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { requireUser, type SessionUser } from '@/lib/auth/session'
 import { publish } from '@/lib/realtime'
-import { ensureHospitalBag, ensureMkpAppointments } from '@/lib/pregnancy/seed'
+import { ensureHospitalBag, ensureEkpAppointments } from '@/lib/pregnancy/seed'
 
 export type Result<T = unknown> = ({ ok: true } & T) | { error: string }
 
@@ -204,11 +204,11 @@ export async function deleteMaternalLogAction(id: string): Promise<Result> {
 
 // --------------------------------------------------------------- Termine ----
 
-/** Legt die MKP-Termine einmalig aus dem ET an. */
-export async function ensureMkpAppointmentsAction(): Promise<Result<{ created: number }>> {
+/** Legt die EKP-Termine einmalig aus dem ET an. */
+export async function ensureEkpAppointmentsAction(): Promise<Result<{ created: number }>> {
   const user = await requireUser()
   const pregnancy = await activePregnancy(user)
-  const created = await ensureMkpAppointments(
+  const created = await ensureEkpAppointments(
     user.householdId,
     pregnancy.id,
     pregnancy.dueDate,
@@ -223,7 +223,7 @@ export async function ensureMkpAppointmentsAction(): Promise<Result<{ created: n
 
 const appointmentSchema = z.object({
   title: z.string().trim().min(1, 'Bitte einen Titel eingeben.').max(120),
-  category: z.enum(['mkp', 'doctor', 'midwife', 'course', 'other']).default('other'),
+  category: z.enum(['ekp', 'doctor', 'midwife', 'course', 'other']).default('other'),
   scheduledAt: z.string().optional(),
   location: z.string().max(160).optional(),
   note: z.string().max(1000).optional(),

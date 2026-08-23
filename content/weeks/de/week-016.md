@@ -23,7 +23,7 @@ Gesamtschlaf 12 bis 16 Stunden. Drei bis vier Nickerchen. Wachfenster 90 bis 150
 Der Zungenstoßreflex, der feste Nahrung automatisch aus dem Mund schiebt, lässt bei manchen nach. Beikost kann ab dem vollendeten vierten Monat begonnen werden, muss aber nicht.
 
 ## Worauf zu achten ist
-Die Mutter-Kind-Pass-Untersuchung im dritten bis fünften Lebensmonat steht an. Motorik, Hörreaktion und Sehen werden dabei geprüft.
+Die Eltern-Kind-Pass-Untersuchung im dritten bis fünften Lebensmonat steht an. Motorik, Hörreaktion und Sehen werden dabei geprüft.
 
 ## Tipp für euch
 Wenn ihr über Beikost nachdenkt: Wartet lieber eine Woche zu lang als eine zu früh. Es gibt keinen Preis für den frühesten Löffel.

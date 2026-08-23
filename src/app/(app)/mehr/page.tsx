@@ -16,6 +16,7 @@ import {
   Ruler,
   Sparkles,
   SlidersHorizontal,
+  Syringe,
   UserPlus,
   Users,
 } from 'lucide-react'
@@ -36,6 +37,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
       { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
       { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
+      { href: '/vorsorge', label: 'Impfungen & Untersuchungen', icon: Syringe },
       { href: '/auswertung', label: 'Auswertung', icon: LineChart },
       { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
     ],

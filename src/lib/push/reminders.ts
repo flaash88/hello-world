@@ -2,11 +2,13 @@ import 'server-only'
 import { prisma } from '@/lib/db'
 import { formatTime } from '@/lib/time'
 import { analyseSleep } from '@/lib/sleep/analysis'
+import { syncVorsorgeReminders } from '@/lib/vorsorge/reminders'
 import { sendToHousehold, sendToUser } from './send'
 
 export type ReminderRun = {
   napAlerts: number
   dueReminders: number
+  vorsorgeReminders: number
   errors: string[]
 }
 
@@ -16,14 +18,32 @@ export type ReminderRun = {
  *
  * 1. Schlaffenster-Vorwarnung X Minuten vor dem naechsten Fenster
  * 2. faellige Erinnerungen (Medikamente, Termine, eigene)
+ * 3. Nachfuehren der Vorsorge-Erinnerungen, damit auch Fenster erfasst sind,
+ *    die erst nach dem letzten Abhaken aufgegangen sind
  */
 export async function runReminders(now: Date = new Date()): Promise<ReminderRun> {
-  const result: ReminderRun = { napAlerts: 0, dueReminders: 0, errors: [] }
+  const result: ReminderRun = { napAlerts: 0, dueReminders: 0, vorsorgeReminders: 0, errors: [] }
 
+  await syncVorsorge(now, result)
   await sendNapAlerts(now, result)
   await sendDueReminders(now, result)
 
   return result
+}
+
+async function syncVorsorge(now: Date, result: ReminderRun): Promise<void> {
+  const children = await prisma.child.findMany({
+    where: { archived: false, birthDate: { not: null } },
+    select: { id: true, householdId: true, birthDate: true, household: { select: { timezone: true } } },
+  })
+
+  for (const child of children) {
+    try {
+      result.vorsorgeReminders += await syncVorsorgeReminders(child, child.household.timezone, now)
+    } catch (error) {
+      result.errors.push(error instanceof Error ? error.message : 'Unbekannter Fehler')
+    }
+  }
 }
 
 async function sendNapAlerts(now: Date, result: ReminderRun): Promise<void> {
@@ -111,10 +131,13 @@ async function sendDueReminders(now: Date, result: ReminderRun): Promise<void> {
   for (const reminder of due) {
     try {
       const category = reminder.kind === 'medication' ? 'medication' : reminder.kind === 'appointment' ? 'appointment' : 'system'
+      const payload = reminder.payload as { body?: string; url?: string } | null
       const message = {
         title: reminder.title,
-        body: (reminder.payload as { body?: string } | null)?.body ?? 'Jetzt fällig.',
-        url: '/',
+        body: payload?.body ?? 'Jetzt fällig.',
+        // Erinnerungen, die zu einer bestimmten Seite gehoeren, tragen ihr
+        // Ziel in der Payload – sonst landet der Tap auf dem Dashboard.
+        url: payload?.url ?? '/',
         tag: `reminder-${reminder.id}`,
       }
 
