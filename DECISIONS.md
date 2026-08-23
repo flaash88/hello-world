@@ -663,3 +663,118 @@ Apple-Touch-Icon und der Titel; die alte Schreibweise
 `apple-mobile-web-app-capable` steht zusätzlich im Kopf, weil sie ältere Geräte
 noch brauchen und nichts kostet. Beides ist im E2E-Lauf gegen die ausgelieferte
 Seite geprüft, nicht nur behauptet.
+
+## Phase 11 – Zurückhaltung als Standard
+
+**Der Auslieferungszustand ist ein Protokoll.** `Household.featureLevel` steht
+für neue Haushalte auf `protokoll`, und die Stufe schaltet nichts ein.
+Mitschreiben, nachlesen, ausdrucken – Schlafrhythmus, Auswertung, Entwicklung,
+Perzentilkurven, Kreisuhr und Eltern-Check-in sind aus. Der Code ist
+vollständig da, er läuft nur nicht. Wer mehr will, findet es unter
+**Mehr → Was die App anzeigt** und schaltet es einzeln dazu.
+
+**Stufe plus Abweichung statt sechs loser Schalter.** Die Stufe (`protokoll`,
+`erweitert`, `voll`) ist eine Voreinstellung, `featureOverrides` hält fest, wo
+jemand davon abweicht. Deckt sich der Wunsch wieder mit der Stufe, verschwindet
+der Eintrag. So bleibt „zurück auf Protokoll" ein einziger Schalter und keine
+Rechnung, und die Einzelschalter behalten trotzdem Vorrang.
+
+**Nicht ausgrauen, nicht laden.** Ein abgeschalteter Bereich verschwindet aus
+der Tab-Leiste und aus dem Menü, seine Route leitet auf `/heute` um, seine
+Abfragen laufen nicht. Auch `/api/export/pdf` und das Vorhersagefeld in
+`/api/v1/status` prüfen den Schalter – sonst wäre er eine Attrappe, die man mit
+einer URL umgeht. Eine graue Kachel mit „nicht aktiv" wäre genau die Einladung,
+die diese Phase vermeiden soll.
+
+**Bestehende Haushalte ziehen mit.** Die Migration setzt die neuen Spalten mit
+ihrem Default, und `medicationAlerts` und `milkExpiryPush` werden auch dort
+zurückgenommen, wo sie schon eingeschaltet waren. Das ist gewollt: die App
+ändert ihr Verhalten, also fängt sie neu bei still an. Nichts davon löscht
+Daten.
+
+**Der Eltern-Tab bleibt, der Check-in geht.** Abgeschaltet wird die tägliche
+Frage nach Stimmung, Energie und Schlaf samt dem daraus abgeleiteten Signal –
+eine tägliche Selbstbenotung ist genau das Muster, das hier weg soll. Die
+Nachtschicht-Übergabe und das private Tagebuch bleiben: die bewerten niemanden
+und sind zu zweit nützlich.
+
+**Push ist eine Erlaubnisliste.** `src/lib/push/kategorien.ts` zählt auf, was
+überhaupt verschickt werden darf; `darfSenden` gibt für alles andere `false`
+zurück, auch wenn eine Einstellung danach aussieht. Erlaubt sind Terminfristen
+(standardmäßig an, weil daran Geld hängt) sowie Schlaffenster,
+Medikamenten-Intervall, Milchvorrat und Nachtschicht-Übergabe – alle vier
+standardmäßig aus und alle vier an etwas geknüpft, das die Eltern selbst
+eingetragen haben. Die alten Kategorien „Fütterung" und „Einträge der anderen
+Person" sind aus der Liste gefallen; sie hatten ohnehin keinen Absender, und
+eine Erinnerung, etwas zu tracken, soll es nicht geben. Eine unbekannte
+Erinnerungsart wird stumm abgehakt statt versendet.
+
+**Ruhezeit gilt für alles, auch für Termine.** Die Frage nach dem Zeitfenster
+kommt einmal, beim ersten Einschalten irgendeiner Benachrichtigung, und gilt
+danach als beantwortet – auch dann, wenn die Antwort „keine Ruhezeit" war.
+
+**Kein „überfällig" bei Meilensteinen.** Das Feld `concernAfterWeeks` und die
+Funktion `overdueMilestones` sind ersatzlos entfallen. Ob die Entwicklung
+altersgemäß läuft, beurteilt die Ärztin bei den Eltern-Kind-Pass-Untersuchungen;
+deren Fristen führt die App weiter, und das ist der richtige Ort dafür. Eine App,
+die zwischendurch „fehlt noch" sagt, macht Sorgen, die sie nicht auflösen kann.
+
+**Rot bleibt genau an einer Stelle.** Der Hinweis auf rötlichen oder weißlichen
+Stuhl in der Auswertung ist ein medizinisches Warnzeichen, keine Abweichung von
+einer Vorgabe. Alles andere – übermüdet, Zeitfenster vorbei, Tagesziel nicht
+erreicht – hat seine Signalfarbe verloren oder ist ganz verschwunden.
+
+**Zwei Fortschrittsbalken bleiben.** Der Ring zum errechneten Termin und die
+Kliniktasche zählen keine Leistung des Kindes: der eine läuft auf ein Datum zu,
+die andere ist eine Packliste. Der Balken im Sprungfenster und das Tagesziel im
+Schlaf sind weg.
+
+**Der Schlafdruck-Ring zeigt Zeit statt Prozent.** Eine Ampel, die auf Rot
+springt, sagt „ihr habt etwas verpasst". In der Mitte steht jetzt die Zeit
+seit dem Aufwachen, der Ring ist einfarbig, und über 100 % läuft ein zweiter
+dünner Ring in derselben Farbe weiter.
+
+**Vorhersagen sind Beobachtungen.** `src/lib/sleep/wording.ts` hält die Texte
+an einer Stelle, damit sie prüfbar sind: keine Anweisung, kein „jetzt", kein
+Countdown, keine Prozentzahl auf eine Vermutung. Tests im Modul lesen alle
+erzeugten Sätze gegen diese Regeln. Der feste Satz *„Das ist aus euren
+bisherigen Einträgen gerechnet. Euer Kind kennt seinen Rhythmus besser als die
+App."* steht unter jeder Ansicht mit Vorhersage und lässt sich nicht
+wegklicken.
+
+**Nachtragen ohne Zeitwähler.** Nachts merkt man sich „vor zwei Stunden" oder
+„halb drei", nicht 02:30 auf einem Rädchen. `zeitEingabe` versteht beides in
+derselben Zeile. Eine Angabe unter zwölf kann zwei Uhrzeiten meinen; gewählt
+wird der späteste Zeitpunkt, der noch in der Vergangenheit liegt – um 20 Uhr
+ist „halb drei" also der Nachmittag. Gerechnet wird über `zonedTimeToUtc`, nicht
+über Millisekunden, sonst läge der Zeitpunkt am Umstellungstag daneben.
+
+**Nachgetragenes wird nicht markiert.** Ob ein Eintrag sofort oder eine Stunde
+später erfasst wurde, ändert nichts daran, dass er stattgefunden hat. Eine
+Kennzeichnung würde nur eine zweite Klasse von Einträgen schaffen. Nachgetragene
+Zeilen gehen durch dieselbe Doppelerfassungs-Prüfung wie alles andere.
+
+**Ein-Tap-Vorschläge erst ab drei gleichen Werten.** Zwei verschiedene Mengen
+hintereinander sind kein Muster, sondern Zufall. Ohne Muster bleibt das Feld
+leer, statt zu raten.
+
+**Eine kaputte Zeile nimmt die anderen nicht mit.** Wer nachts vier Dinge
+nachträgt und bei einer die Zeit vertippt, bekommt die drei anderen gespeichert.
+Nachts ist ein Teilerfolg mehr wert als eine Fehlermeldung über allem.
+
+**Die Pause blendet aus, sie löscht nicht.** `featurePauseUntil` schaltet alles
+Zusätzliche ab und reduziert die Schnellaktionen auf Stillen, Flasche, Windel
+und Schlaf. Die Schalter bleiben stehen und gelten danach wieder; die
+Einstellungsseite zeigt während der Pause weiter, was zurückkommt. Die
+Notfallkarte und das Stillprotokoll bleiben auch in der Pause erreichbar – etwas
+zu verstecken, das im Ernstfall gebraucht wird, wäre der falsche Preis für Ruhe.
+
+**Die Begrüßung erklärt den Zustand, nicht die Funktionen.** `/willkommen`
+kommt einmal pro Haushalt und beschreibt, was die App gerade tut und wo mehr
+steht. Kein Rundgang: die Aufzählung dessen, was es noch gäbe, wäre selbst
+schon der Sog, den die Phase vermeiden soll.
+
+**Kein Prettier in diesem Repo.** Es gibt keine Prettier-Konfiguration, und der
+Quelltext ist von Hand gesetzt – ein Lauf über eine bestehende Datei formatiert
+sie gegen den Hausstil um. Formatiert wird beim Schreiben, geprüft wird mit
+ESLint.

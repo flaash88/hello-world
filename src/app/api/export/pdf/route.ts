@@ -7,6 +7,7 @@ import { evaluateGrowth, shortPercentile, type Sex } from '@/lib/growth'
 import { formatUnit, unitPrefsFrom } from '@/lib/units'
 import { correctedAgeDays } from '@/lib/sleep/windows'
 import { ageInDays, formatAge, localDateKey } from '@/lib/time'
+import { featureState } from '@/lib/settings/features'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -22,8 +23,23 @@ export async function GET(request: Request): Promise<Response> {
 
   const household = await prisma.household.findUniqueOrThrow({
     where: { id: user.householdId },
-    select: { name: true, timezone: true, settings: true },
+    select: {
+      name: true,
+      timezone: true,
+      settings: true,
+      featureLevel: true,
+      featureOverrides: true,
+      featurePauseUntil: true,
+    },
   })
+  // Der Wochenbericht ist eine Auswertung. Ist die aus, gibt es ihn nicht –
+  // auch nicht ueber die URL an der Oberflaeche vorbei.
+  const features = featureState({
+    level: household.featureLevel,
+    overrides: household.featureOverrides,
+    pauseUntil: household.featurePauseUntil,
+  })
+  if (!features.aktiv.has('auswertung')) return new Response('Nicht verfügbar', { status: 404 })
   const child = childId
     ? await prisma.child.findFirst({ where: { id: childId, householdId: user.householdId } })
     : await prisma.child.findFirst({ where: { householdId: user.householdId, archived: false } })

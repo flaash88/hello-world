@@ -22,12 +22,17 @@ import {
   Sparkles,
   Smile,
   SlidersHorizontal,
+  SquareDashedBottom,
   Syringe,
   Thermometer,
   UserPlus,
   Users,
+  CopyCheck,
 } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
+import { currentFeatures } from '@/lib/settings/features-server'
+import { offeneDuplikate } from '@/lib/events/duplicate-service'
+import { routeErlaubt } from '@/lib/settings/features'
 import { logoutAction } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,7 +49,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
       { href: '/wissen', label: 'Wissen & Nachschlagen', icon: BookOpen },
       { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
-      { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
+      { href: '/wachstum', label: 'Wachstum', icon: Ruler },
       { href: '/vorsorge', label: 'Impfungen & Untersuchungen', icon: Syringe },
       { href: '/zaehne', label: 'Zähne', icon: Smile },
       { href: '/gesundheit/fieber', label: 'Fieberverlauf', icon: Thermometer },
@@ -61,6 +66,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
       { href: '/mehr/notfall', label: 'Notfalldaten', icon: ShieldAlert },
       { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
       { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
+      { href: '/mehr/anzeige', label: 'Was die App anzeigt', icon: SquareDashedBottom },
       { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
       { href: '/mehr/darstellung', label: 'Einheiten & Startbildschirm', icon: SlidersHorizontal },
     ],
@@ -77,6 +83,22 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
 
 export default async function MorePage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
+  // Abgeschaltete Bereiche stehen nicht als graue Zeile da, sondern gar nicht.
+  // Ohne Auswertung gaebe es sonst keinen Weg mehr zu den offenen Verdachts-
+  // faellen. Der Eintrag kommt nur, wenn wirklich etwas offen ist – und ohne
+  // Zahl daneben.
+  const duplikate = ctx.activeChild ? await offeneDuplikate(ctx.activeChild.id) : 0
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    links: group.links
+      .filter((link) => routeErlaubt(features, link.href))
+      .concat(
+        group.title === 'Für euch' && duplikate > 0
+          ? [{ href: '/duplikate', label: 'Doppelte Einträge', icon: CopyCheck }]
+          : [],
+      ),
+  })).filter((group) => group.links.length > 0)
 
   return (
     <div className="flex flex-col gap-4">
@@ -102,7 +124,7 @@ export default async function MorePage() {
         </CardContent>
       </Card>
 
-      {GROUPS.map((group) => (
+      {groups.map((group) => (
         <nav key={group.title} aria-label={group.title}>
           <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
             {group.title}

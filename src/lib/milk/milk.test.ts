@@ -222,13 +222,11 @@ describe('statistik', () => {
     expect(s.verworfenMl30Tage).toBe(50)
     expect(s.abgepumptMl30Tage).toBe(500)
     expect(s.schnittMl).toBe(125)
-    expect(s.verwurfProzent).toBe(10)
   })
 
   it('bleibt ohne Daten still, statt durch null zu teilen', () => {
     const s = statistik([], HALTBARKEIT_VORGABE)
     expect(s.schnittMl).toBeNull()
-    expect(s.verwurfProzent).toBeNull()
     expect(s.vorratMl).toBe(0)
   })
 })

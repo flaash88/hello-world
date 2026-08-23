@@ -35,7 +35,7 @@ async function seedSleep(email: string, count: number, wakeMin: number, sleepMin
 }
 
 test.describe('Schlaf-Dashboard', () => {
-  test('sagt ehrlich "Kalibriert noch", solange Daten fehlen', async ({ page }) => {
+  test('sagt ehrlich, dass der Rhythmus noch nicht bekannt ist', async ({ page }) => {
     const code = await createHouseholdInvite()
     const email = uniqueEmail('kalib')
     await register(page, { name: 'Mama', email, code })
@@ -44,13 +44,16 @@ test.describe('Schlaf-Dashboard', () => {
     await seedSleep(email, 3, 100)
     await page.goto('/')
 
-    await expect(page.getByText('Kalibriert noch')).toBeVisible()
-    await expect(page.getByText(/von 5 nötigen Messungen/)).toBeVisible()
-    // Keine erfundene Uhrzeit, solange die Datenlage das nicht hergibt.
+    await expect(page.getByText('Euren Rhythmus kennt die App noch nicht.')).toBeVisible()
+    // Keine erfundene Uhrzeit und keine Fortschrittszahl, solange die Datenlage
+    // das nicht hergibt.
+    await expect(page.getByText(/von 5 nötigen Messungen/)).toHaveCount(0)
     await expect(page.getByText('Konfidenz', { exact: false })).toHaveCount(0)
   })
 
-  test('sagt mit genug Daten ein Zeitfenster mit Konfidenz vorher', async ({ page }) => {
+  test('nennt mit genug Daten ein Zeitfenster – als Beobachtung, nicht als Anweisung', async ({
+    page,
+  }) => {
     const code = await createHouseholdInvite()
     const email = uniqueEmail('vorhersage')
     await register(page, { name: 'Mama', email, code })
@@ -59,14 +62,17 @@ test.describe('Schlaf-Dashboard', () => {
     await seedSleep(email, 20, 110)
     await page.goto('/')
 
-    await expect(page.getByText('Kalibriert noch')).toHaveCount(0)
-    await expect(page.getByText(/Nächstes Nickerchen|Bettzeit/)).toBeVisible()
-    await expect(page.getByText(/^\d{2}:\d{2}–\d{2}:\d{2}$/)).toBeVisible()
-    await expect(page.getByText(/Konfidenz \d+ %/)).toBeVisible()
-    await expect(page.getByText(/Wachfenster aktuell rund/)).toBeVisible()
+    await expect(page.getByText('Euren Rhythmus kennt die App noch nicht.')).toHaveCount(0)
+    await expect(page.getByText(/könnte Müdigkeit kommen|ging es zuletzt in die Nacht/)).toBeVisible()
+    await expect(page.getByText(/Zuletzt lagen zwischen Aufwachen und Einschlafen/)).toBeVisible()
+    // Der feste Hinweis steht darunter und ist nicht wegklickbar.
+    await expect(page.getByText('Euer Kind kennt seinen Rhythmus besser als die App.')).toBeVisible()
+    // Keine Konfidenz in Prozent, kein Imperativ.
+    await expect(page.getByText(/Konfidenz/)).toHaveCount(0)
+    await expect(page.getByText(/Zeit für/)).toHaveCount(0)
   })
 
-  test('zeigt Schlafdruck und Tagesziel', async ({ page }) => {
+  test('zeigt die Wachzeit ohne Ampel und ohne Sollwert', async ({ page }) => {
     const code = await createHouseholdInvite()
     const email = uniqueEmail('druck')
     await register(page, { name: 'Mama', email, code })
@@ -75,9 +81,12 @@ test.describe('Schlaf-Dashboard', () => {
     await seedSleep(email, 20, 110)
     await page.goto('/')
 
-    await expect(page.getByLabel(/Schlafdruck \d+ Prozent/)).toBeVisible()
-    await expect(page.getByText('Tagesziel')).toBeVisible()
-    await expect(page.getByText(/Üblich in diesem Alter/)).toBeVisible()
+    await expect(page.getByRole('img', { name: /Wach seit/ })).toBeVisible()
+    await expect(page.getByText('Schlaf heute')).toBeVisible()
+    await expect(page.getByText(/Die Spanne ist breit, und eures muss sie nicht treffen/)).toBeVisible()
+    // Kein Tagesziel, kein Fortschrittsbalken, keine Prozentzahl im Ring.
+    await expect(page.getByText('Tagesziel')).toHaveCount(0)
+    await expect(page.getByText(/im Zielbereich|noch \d/)).toHaveCount(0)
   })
 
   test('zeigt die 24-Stunden-Uhr und lässt zurückblättern', async ({ page }) => {

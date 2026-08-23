@@ -2,6 +2,7 @@ import 'server-only'
 import webpush from 'web-push'
 import { prisma } from '@/lib/db'
 import { isWithinWindow } from '@/lib/time'
+import { darfSenden, type PushKategorie } from './kategorien'
 import { absoluteUrl } from './urls'
 
 export type PushMessage = {
@@ -36,21 +37,26 @@ export function pushConfigured(): boolean {
 export type DeliveryResult = { sent: number; removed: number; skipped: string[] }
 
 /**
- * Schickt eine Nachricht an alle Geraete eines Users – sofern die jeweilige
- * Kategorie eingeschaltet ist und gerade keine Ruhezeit gilt.
+ * Schickt eine Nachricht an alle Geraete eines Users – sofern die Kategorie
+ * ueberhaupt versendet werden darf, sie eingeschaltet ist und gerade keine
+ * Ruhezeit gilt.
+ *
+ * Die Reihenfolge ist Absicht: Erst die Erlaubnisliste, dann der Schalter,
+ * dann die Ruhezeit. Was in `kategorien.ts` nicht steht, geht nie raus.
  */
 export async function sendToUser(
   userId: string,
   message: PushMessage,
-  category: 'nap' | 'feed' | 'medication' | 'appointment' | 'partner' | 'system' = 'system',
+  category: PushKategorie = 'system',
 ): Promise<DeliveryResult> {
   const result: DeliveryResult = { sent: 0, removed: 0, skipped: [] }
 
   const prefs = await prisma.notificationPreference.findUnique({ where: { userId } })
-  if (prefs && !categoryEnabled(prefs, category)) {
+  if (!darfSenden(category, prefs)) {
     result.skipped.push('kategorie-aus')
     return result
   }
+  // Ruhezeit gilt fuer alles, auch fuer Termine.
   if (prefs?.quietFrom && prefs.quietTo && isWithinWindow(new Date(), prefs.quietFrom, prefs.quietTo)) {
     result.skipped.push('ruhezeit')
     return result
@@ -95,32 +101,6 @@ export async function sendToUser(
     }
   }
   return result
-}
-
-function categoryEnabled(
-  prefs: {
-    napAlerts: boolean
-    feedAlerts: boolean
-    medicationAlerts: boolean
-    appointmentAlerts: boolean
-    partnerActivity: boolean
-  },
-  category: string,
-): boolean {
-  switch (category) {
-    case 'nap':
-      return prefs.napAlerts
-    case 'feed':
-      return prefs.feedAlerts
-    case 'medication':
-      return prefs.medicationAlerts
-    case 'appointment':
-      return prefs.appointmentAlerts
-    case 'partner':
-      return prefs.partnerActivity
-    default:
-      return true
-  }
 }
 
 /**

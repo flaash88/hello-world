@@ -8,6 +8,7 @@ import { eventDetail, eventTitle } from '@/lib/events/format'
 import { unitPrefsFrom, DEFAULT_UNITS, type UnitPrefs } from '@/lib/units'
 import { toDaySegments, type DaySegment } from '@/lib/dashboard/day-segments'
 import { analyseSleep } from '@/lib/sleep/analysis'
+import { featureState } from '@/lib/settings/features'
 import type { PlannedWindow } from '@/components/dashboard/day-clock'
 
 export type DayClockData = {
@@ -29,9 +30,31 @@ export async function loadDaySegmentsAction(
   const child = await assertChildInHousehold(childId, user.householdId)
   const household = await prisma.household.findUniqueOrThrow({
     where: { id: user.householdId },
-    select: { timezone: true, settings: true },
+    select: {
+      timezone: true,
+      settings: true,
+      featureLevel: true,
+      featureOverrides: true,
+      featurePauseUntil: true,
+    },
   })
-  return buildDayClockData(child.id, household.timezone, dayOffset, new Date(), unitPrefsFrom(household.settings))
+  // Ist die Kreisuhr abgeschaltet, wird sie auch nicht nachgeladen.
+  const features = featureState({
+    level: household.featureLevel,
+    overrides: household.featureOverrides,
+    pauseUntil: household.featurePauseUntil,
+  })
+  if (!features.aktiv.has('kreisuhr')) {
+    return { segments: [], planned: null, nowMinutes: null, label: '' }
+  }
+  return buildDayClockData(
+    child.id,
+    household.timezone,
+    dayOffset,
+    new Date(),
+    unitPrefsFrom(household.settings),
+    features.aktiv.has('schlafanalyse'),
+  )
 }
 
 export async function buildDayClockData(
@@ -40,6 +63,11 @@ export async function buildDayClockData(
   dayOffset: number,
   now: Date = new Date(),
   units: UnitPrefs = DEFAULT_UNITS,
+  /**
+   * Das erwartete Fenster gehoert zum Schlafrhythmus, nicht zur Uhr. Wer die
+   * Uhr will, aber keine Vorhersage, bekommt die Uhr ohne Schattierung.
+   */
+  mitVorhersage = true,
 ): Promise<DayClockData> {
   const dayStart = addDays(startOfLocalDay(now, timezone), Math.min(0, dayOffset), timezone)
   const dayEnd = addDays(dayStart, 1, timezone)
@@ -54,17 +82,19 @@ export async function buildDayClockData(
 
   // Das geplante Fenster gibt es nur fuer heute – für Vortage wäre es sinnlos.
   let planned: PlannedWindow | null = null
-  if (dayOffset === 0) {
+  if (dayOffset === 0 && mitVorhersage) {
     const child = await prisma.child.findUniqueOrThrow({ where: { id: childId } })
     const analysis = await analyseSleep(child, timezone, now)
     if (analysis.forecast && !analysis.forecast.calibrating) {
       planned = {
         fromMin: minutesSinceLocalMidnight(analysis.forecast.from, timezone),
         toMin: minutesSinceLocalMidnight(analysis.forecast.to, timezone),
+        // Beobachtung, keine Planung: die Uhr zeigt, wann zuletzt Muedigkeit
+        // kam, nicht wann etwas zu geschehen haette.
         label:
           analysis.forecast.kind === 'bedtime'
-            ? 'Geplantes Bettzeit-Fenster'
-            : 'Geplantes Nickerchen-Fenster',
+            ? 'Um diese Zeit ging es zuletzt in die Nacht'
+            : 'Um diese Zeit kam zuletzt Müdigkeit',
       }
       // Ein Fenster ueber Mitternacht wird am Tagesende abgeschnitten.
       if (planned.toMin < planned.fromMin) planned.toMin = 1440

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { pushConfigured } from '@/lib/push/send'
+import { standardPrefs } from '@/lib/push/kategorien'
 import { BackLink } from '@/components/layout/back-link'
 import { NotificationSettings } from './notification-settings'
 
@@ -21,16 +22,18 @@ export default async function NotificationsPage() {
         serverConfigured={pushConfigured()}
         deviceCount={devices}
         prefs={{
-          napAlerts: prefs?.napAlerts ?? true,
-          napLeadMinutes: prefs?.napLeadMinutes ?? 15,
-          feedAlerts: prefs?.feedAlerts ?? false,
-          medicationAlerts: prefs?.medicationAlerts ?? true,
+          ...standardPrefs(),
           appointmentAlerts: prefs?.appointmentAlerts ?? true,
-          partnerActivity: prefs?.partnerActivity ?? false,
+          sleepWindowAlerts: prefs?.sleepWindowAlerts ?? false,
+          medicationAlerts: prefs?.medicationAlerts ?? false,
+          milkStockAlerts: prefs?.milkStockAlerts ?? false,
+          nightShiftAlerts: prefs?.nightShiftAlerts ?? false,
+          napLeadMinutes: prefs?.napLeadMinutes ?? 15,
           quietFrom: prefs?.quietFrom ?? null,
           quietTo: prefs?.quietTo ?? null,
           ntfyEnabled: prefs?.ntfyEnabled ?? false,
         }}
+        quietAsked={Boolean(prefs?.quietAskedAt)}
         ntfy={{
           serverUrl: ctx.household.settings?.ntfyServerUrl ?? '',
           topic: ctx.household.settings?.ntfyTopic ?? '',

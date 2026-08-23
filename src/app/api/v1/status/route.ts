@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import { apiAntwort } from '@/lib/api/auth'
 import { mitApi } from '@/lib/api/handler'
 import { analyseSleep } from '@/lib/sleep/analysis'
+import { featureState } from '@/lib/settings/features'
 import { lastEventPerType } from '@/lib/events/queries'
 import { addDays, startOfLocalDay } from '@/lib/time'
 import { episode, intervalle, type HealthEvent } from '@/lib/fever/episode'
@@ -22,9 +23,19 @@ export async function GET(request: Request): Promise<Response> {
     const child = await prisma.child.findUniqueOrThrow({ where: { id: ctx.childId } })
     const household = await prisma.household.findUniqueOrThrow({
       where: { id: ctx.householdId },
-      select: { timezone: true },
+      select: { timezone: true, featureLevel: true, featureOverrides: true, featurePauseUntil: true },
     })
     const tz = household.timezone
+    // Die API zeigt nur, was die App auch zeigt: ist der Schlafrhythmus aus,
+    // gibt es hier keine Vorhersage – sonst waere der Schalter eine Attrappe.
+    const features = featureState(
+      {
+        level: household.featureLevel,
+        overrides: household.featureOverrides,
+        pauseUntil: household.featurePauseUntil,
+      },
+      now,
+    )
 
     const tagBeginn = startOfLocalDay(now, tz)
     const [analyse, letzte, windelnHeute, gesundheit] = await Promise.all([
@@ -88,14 +99,15 @@ export async function GET(request: Request): Promise<Response> {
         analyse.sleepingSince !== null || analyse.lastWakeAt === null
           ? null
           : Math.round((now.getTime() - analyse.lastWakeAt.getTime()) / 60_000),
-      naechstesSchlaffenster: analyse.forecast
-        ? {
-            von: analyse.forecast.from.toISOString(),
-            bis: analyse.forecast.to.toISOString(),
-            konfidenz: Math.round(analyse.forecast.confidence * 100) / 100,
-            kalibriert: !analyse.forecast.calibrating,
-          }
-        : null,
+      naechstesSchlaffenster:
+        analyse.forecast && features.aktiv.has('schlafanalyse')
+          ? {
+              von: analyse.forecast.from.toISOString(),
+              bis: analyse.forecast.to.toISOString(),
+              konfidenz: Math.round(analyse.forecast.confidence * 100) / 100,
+              kalibriert: !analyse.forecast.calibrating,
+            }
+          : null,
       windelnHeute,
       fieber: letzteTemperatur
         ? {

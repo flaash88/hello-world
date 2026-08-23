@@ -152,8 +152,8 @@ export function NotfallAnsicht({
 
           {!istBefuellt(karte) && (
             <p className="text-base">
-              Auf der Karte steht bisher nur, was ohnehin gilt. Trag Blutgruppe, Vorerkrankungen,
-              Adresse und die wichtigsten Nummern ein – im Notfall sucht sie sonst niemand.
+              Auf der Karte steht bisher nur, was ohnehin gilt. Blutgruppe, Vorerkrankungen,
+              Adresse und die eigenen Nummern stehen in den Einstellungen unter Notfalldaten.
             </p>
           )}
         </>

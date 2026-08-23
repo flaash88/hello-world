@@ -10,11 +10,13 @@ import { DuplicateBanner } from '@/components/tracker/duplicate-banner'
 import { OfflineSync } from '@/components/offline/offline-sync'
 import { RunningTimerBar } from '@/components/tracker/running-timer-bar'
 import { runningTimers } from '@/lib/events/service'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { unitPrefsFrom } from '@/lib/units'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getAppContext()
   const settings = ctx.household.settings
+  const features = await currentFeatures()
   const timers = ctx.activeChild ? await runningTimers(ctx.activeChild.id) : []
 
   return (
@@ -44,6 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 items={navItemsFor({
                   hasChild: ctx.children.length > 0,
                   hasPregnancy: Boolean(ctx.pregnancy),
+                  entwicklung: features.aktiv.has('entwicklung'),
                 })}
               />
             </div>

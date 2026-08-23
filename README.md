@@ -18,6 +18,17 @@ auch ohne Netz steht. Dazu Doppelerfassungs-Erkennung für den Zwei-Personen-
 Betrieb, PWA-Verknüpfungen samt Share Target und eine REST-Schnittstelle für
 Home Assistant (siehe `docs/homeassistant.md`).
 
+> **Das meiste davon ist ab Werk aus.** Sprössling startet im Modus „Nur
+> Protokoll": eintragen, nachlesen, ausdrucken. Schlafrhythmus und Vorhersage,
+> die 24-Stunden-Kreisuhr, alle Auswertungen, die Entwicklungsinhalte, die
+> WHO-Perzentilkurven und der Eltern-Check-in sind abgeschaltet, ebenso alle
+> Benachrichtigungen außer den Eltern-Kind-Pass-Fristen. Das ist Absicht: eine
+> Tracking-App, die im Wochenbett Vorgaben macht, richtet mehr Schaden an als
+> ihr Nutzen wert ist. Einschalten lässt sich alles einzeln unter
+> **Mehr → Was die App anzeigt**, und genauso einfach wieder ab. Abgeschaltete
+> Bereiche verschwinden vollständig – es gibt keine graue Kachel, die daran
+> erinnert. Eure Daten bleiben in jedem Fall erhalten.
+
 > **Vorsorgedaten prüfen.** Impfplan und Eltern-Kind-Pass-Untersuchungen liegen
 > als versionierte JSON-Dateien unter `content/vorsorge/`. Sie tragen derzeit
 > `"geprueft": false` – die Termine stammen aus Zusammenfassungen der offiziellen
@@ -258,6 +269,20 @@ Danach:
 - **Drucken:** Stillprotokoll und Arzt-Zettel sind auf A4 hochkant ausgelegt,
   schwarzweiß und ohne Navigation. Über das Browser-Menü drucken oder als PDF
   herunterladen.
+- **Umfang der App:** Unter **Mehr → Was die App anzeigt** liegen drei Stufen
+  („Nur Protokoll", „Erweitert", „Alles") und darunter ein Schalter je Bereich –
+  wer nur die Tagesuhr will, schaltet nur die ein. Dieselbe Seite hat „App auf
+  Protokollmodus zurücksetzen" (schaltet alles Zusätzliche ab, ohne Daten zu
+  löschen) und eine **Pause** für einen Tag bis einen Monat, die alles außer
+  Stillen, Flasche, Windel und Schlaf ausblendet und danach von selbst endet.
+  Der Zustand gilt für den ganzen Haushalt, nicht je Gerät.
+- **Benachrichtigungen** sind ab Werk aus, bis auf die Fristen im
+  Eltern-Kind-Pass. Was es überhaupt geben kann, steht unter
+  **Mehr → Benachrichtigungen**: Schlaffenster, Medikamenten-Intervall,
+  Milchvorrat und Nachtschicht-Übergabe. Aufforderungen, etwas einzutragen, und
+  Wochenrückblicke gibt es nicht – die stehen nicht in der Erlaubnisliste in
+  `src/lib/push/kategorien.ts` und lassen sich auch nicht einschalten. Die
+  Ruhezeit gilt für alles, auch für Termine.
 
 ## Entwicklung
 

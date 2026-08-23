@@ -63,7 +63,8 @@ src/
                        Ernährung, Lebensmittel-Check, Geburtsvorbereitung,
                        Behördenwege AT, Stillen, Wochenbett, Rezepte
     parents/           Eltern-Signal und Unterstützungskontakte
-    settings/          Startbildschirm, Schnellaktionen, Bestätigungswort
+    settings/          Startbildschirm, Schnellaktionen, Bestätigungswort,
+                       Feature-Schalter (`features.ts`, Auslieferung = Protokoll)
     backup/            Lesezugriff auf das Backup-Volume
     units.ts           Einheiten-Umrechnung für die Anzeige (Speicher: metrisch)
     i18n.ts            Sprache und Regionsformat (nur `de` ausgeliefert)
@@ -93,6 +94,21 @@ e2e/                   Playwright-Tests
 - **Server Actions** geben `{ error: string }` statt zu werfen, wenn der Fehler
   in der UI landen soll. Alle Eingaben werden mit zod validiert.
 - **Kein Placeholder-Code.** Was in einer Phase steht, ist fertig.
+- **Neue Bereiche werden ausgeschaltet ausgeliefert.** Der Auslieferungszustand
+  ist der Modus „Nur Protokoll" (`Household.featureLevel`). Alles, was rechnet,
+  vergleicht, vorhersagt oder von selbst eine Benachrichtigung auslöst, bekommt
+  einen Schalter in `src/lib/settings/features.ts` und steht dort ab Werk auf
+  aus. Abgeschaltet heißt: aus der Navigation raus, Route leitet auf `/heute`,
+  Berechnung läuft nicht – keine graue Kachel.
+- **Push nur über die Erlaubnisliste.** Eine neue Benachrichtigung muss in
+  `src/lib/push/kategorien.ts` eingetragen werden, sonst wird sie nie
+  verschickt. Standardmäßig an ist ausschließlich die Terminfrist.
+- **Sprachregister:** beschreibend statt anweisend, Spannen statt Punktwerte,
+  kein Soll, keine Wertung, keine Ausrufezeichen. Der Absatz in `DESIGN.md`
+  ist verbindlich, auch für Bestandstexte.
+- **Kein Prettier.** Das Repo hat keine Prettier-Konfiguration und ist von Hand
+  gesetzt; ein Lauf über eine bestehende Datei formatiert sie um. Geprüft wird
+  mit `npm run lint`.
 - **Keine externen Requests zur Laufzeit** – keine CDNs, keine Tracker,
   Schriften liegen unter `public/fonts`.
 

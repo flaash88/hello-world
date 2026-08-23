@@ -75,7 +75,6 @@ export default async function ZaehnePage() {
       hatGeburtsdatum={Boolean(child.birthDate)}
       zaehne={zaehne}
       anzahlDa={summe.anzahlDa}
-      anzahlGesamt={summe.anzahlGesamt}
       anzahlAusgefallen={summe.anzahlAusgefallen}
       erster={
         summe.erster

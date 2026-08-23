@@ -33,7 +33,6 @@ export type StatistikView = {
   verworfenMl30Tage: number
   abgepumptMl30Tage: number
   schnittMl: number | null
-  verwurfProzent: number | null
 }
 
 export type EinstellungenView = {

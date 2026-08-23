@@ -3,53 +3,56 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { BellRing, Send, Smartphone } from 'lucide-react'
 import {
+  answerQuietHoursAction,
   sendTestNotificationAction,
   updateNotificationPrefsAction,
   updateNtfyAction,
 } from '@/lib/actions/notifications'
+import {
+  RUHEZEIT_VORSCHLAG,
+  SCHALTBARE_KATEGORIEN,
+  type PrefFeld,
+} from '@/lib/push/kategorien'
 import { currentSubscription, disablePush, enablePush, pushStatus } from '@/lib/push/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { NumberStepper } from '@/components/tracker/number-stepper'
 import { useToast } from '@/components/ui/toast'
 
-type Prefs = {
-  napAlerts: boolean
+type Prefs = Record<PrefFeld, boolean> & {
   napLeadMinutes: number
-  feedAlerts: boolean
-  medicationAlerts: boolean
-  appointmentAlerts: boolean
-  partnerActivity: boolean
   quietFrom: string | null
   quietTo: string | null
   ntfyEnabled: boolean
 }
-
-const TOGGLES: { key: keyof Prefs; label: string; hint: string }[] = [
-  { key: 'napAlerts', label: 'Schlaffenster', hint: 'Kurz bevor das nächste Fenster beginnt' },
-  { key: 'medicationAlerts', label: 'Medikamente', hint: 'Wenn die nächste Gabe fällig ist' },
-  { key: 'appointmentAlerts', label: 'Termine', hint: 'Erinnerung an anstehende Termine' },
-  { key: 'feedAlerts', label: 'Fütterung', hint: 'Wenn länger nichts eingetragen wurde' },
-  { key: 'partnerActivity', label: 'Einträge der anderen Person', hint: 'Kann schnell zu viel werden' },
-]
 
 export function NotificationSettings({
   vapidPublicKey,
   serverConfigured,
   deviceCount,
   prefs: initialPrefs,
+  quietAsked: initialQuietAsked,
   ntfy: initialNtfy,
 }: {
   vapidPublicKey: string
   serverConfigured: boolean
   deviceCount: number
   prefs: Prefs
+  /** Wurde die Ruhezeit-Frage schon einmal gestellt? */
+  quietAsked: boolean
   ntfy: { serverUrl: string; topic: string }
 }) {
   const [prefs, setPrefs] = useState(initialPrefs)
+  const [quietAsked, setQuietAsked] = useState(initialQuietAsked)
+  const [quietFrage, setQuietFrage] = useState(false)
+  const [quietEntwurf, setQuietEntwurf] = useState({
+    von: initialPrefs.quietFrom ?? RUHEZEIT_VORSCHLAG.von,
+    bis: initialPrefs.quietTo ?? RUHEZEIT_VORSCHLAG.bis,
+  })
   const [ntfy, setNtfy] = useState(initialNtfy)
   const [subscribed, setSubscribed] = useState<boolean | null>(null)
   const [status, setStatus] = useState<ReturnType<typeof pushStatus>>('default')
@@ -61,6 +64,29 @@ export function NotificationSettings({
     setStatus(pushStatus())
     void currentSubscription().then((subscription) => setSubscribed(Boolean(subscription)))
   }, [])
+
+  /**
+   * Beim ersten Einschalten irgendeiner Benachrichtigung kommt einmal die
+   * Frage nach dem Zeitfenster. Danach nie wieder – auch nicht, wenn die
+   * Antwort "keine Ruhezeit" war.
+   */
+  function schalte(feld: PrefFeld, an: boolean) {
+    savePrefs({ ...prefs, [feld]: an })
+    if (an && !quietAsked) setQuietFrage(true)
+  }
+
+  function speichereRuhezeit(von: string | null, bis: string | null) {
+    setPrefs({ ...prefs, quietFrom: von, quietTo: bis })
+    setQuietAsked(true)
+    setQuietFrage(false)
+    startTransition(async () => {
+      const result = await answerQuietHoursAction({ quietFrom: von, quietTo: bis })
+      if ('error' in result) {
+        toast({ title: 'Nicht gespeichert', description: result.error, variant: 'destructive' })
+      }
+      router.refresh()
+    })
+  }
 
   function savePrefs(next: Prefs) {
     setPrefs(next)
@@ -164,21 +190,25 @@ export function NotificationSettings({
           <CardDescription>Gilt nur für dich, nicht für die andere Person.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {TOGGLES.map((toggle) => (
-            <div key={toggle.key} className="flex items-center justify-between gap-4">
-              <Label htmlFor={toggle.key}>
-                <span className="block">{toggle.label}</span>
-                <span className="block text-xs font-normal">{toggle.hint}</span>
-              </Label>
-              <Switch
-                id={toggle.key}
-                checked={Boolean(prefs[toggle.key])}
-                onCheckedChange={(checked) => savePrefs({ ...prefs, [toggle.key]: checked })}
-              />
-            </div>
-          ))}
+          {SCHALTBARE_KATEGORIEN.map((kategorie) => {
+            const feld = kategorie.feld
+            if (!feld) return null
+            return (
+              <div key={kategorie.key} className="flex items-center justify-between gap-4">
+                <Label htmlFor={feld}>
+                  <span className="block">{kategorie.label}</span>
+                  <span className="block text-xs font-normal">{kategorie.hint}</span>
+                </Label>
+                <Switch
+                  id={feld}
+                  checked={prefs[feld]}
+                  onCheckedChange={(checked) => schalte(feld, checked)}
+                />
+              </div>
+            )
+          })}
 
-          {prefs.napAlerts && (
+          {prefs.sleepWindowAlerts && (
             <NumberStepper
               id="napLead"
               label="Vorwarnzeit vor dem Schlaffenster"
@@ -196,7 +226,9 @@ export function NotificationSettings({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Ruhezeiten</CardTitle>
-          <CardDescription>In diesem Zeitraum bleibt das Handy still.</CardDescription>
+          <CardDescription>
+            In diesem Zeitraum bleibt das Handy still – für alles, auch für Termine.
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
@@ -219,6 +251,53 @@ export function NotificationSettings({
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={quietFrage} onOpenChange={(open) => !open && speichereRuhezeit(null, null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Wann darf sie kommen?</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              In der Ruhezeit bleibt das Handy still. Die Frage kommt einmal; ändern lässt sich das
+              danach hier auf der Seite.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="quietAskFrom">Still ab</Label>
+                <Input
+                  id="quietAskFrom"
+                  type="time"
+                  value={quietEntwurf.von}
+                  onChange={(event) =>
+                    setQuietEntwurf({ ...quietEntwurf, von: event.target.value })
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="quietAskTo">Wieder ab</Label>
+                <Input
+                  id="quietAskTo"
+                  type="time"
+                  value={quietEntwurf.bis}
+                  onChange={(event) =>
+                    setQuietEntwurf({ ...quietEntwurf, bis: event.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => speichereRuhezeit(quietEntwurf.von || null, quietEntwurf.bis || null)}
+            >
+              Ruhezeit übernehmen
+            </Button>
+            <Button variant="ghost" onClick={() => speichereRuhezeit(null, null)}>
+              Keine Ruhezeit
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>

@@ -97,6 +97,14 @@ function displayCurve(indicator: Indicator, curve: CurvePoint[], units: UnitPref
   })
 }
 
+/** Der gemessene Wert eines Punktes – unabhaengig von jeder Einordnung. */
+function rohwert(point: Point, indicator: Indicator): number | null {
+  if (indicator === 'weight') return point.weightKg
+  if (indicator === 'length') return point.lengthCm
+  if (indicator === 'head') return point.headCm
+  return point.bmi
+}
+
 export function GrowthView({
   childId,
   childName,
@@ -105,6 +113,7 @@ export function GrowthView({
   currentAgeDays,
   points,
   curves,
+  perzentile,
 }: {
   childId: string
   childName: string
@@ -113,6 +122,11 @@ export function GrowthView({
   currentAgeDays: number
   points: Point[]
   curves: Record<Indicator, CurvePoint[]>
+  /**
+   * Sind die WHO-Kurven eingeschaltet? Ohne sie bleiben die Messwerte selbst
+   * sichtbar – nur die Einordnung dazu faellt weg.
+   */
+  perzentile: boolean
 }) {
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Point | null>(null)
@@ -144,7 +158,7 @@ export function GrowthView({
         Messung eintragen
       </Button>
 
-      {!sexKnown && (
+      {!sexKnown && perzentile && (
         <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
           Für {childName} ist kein Geschlecht hinterlegt. Die Kurven zeigen deshalb die
           Mädchen-Referenz – die Perzentile stimmen für einen Buben dann nicht.
@@ -171,7 +185,7 @@ export function GrowthView({
                     : indicator === 'head'
                       ? latest.headCm
                       : latest.bmi
-              if (raw === null || !result) return null
+              if (raw === null) return null
               return (
                 <div key={indicator} className="rounded-xl border border-border p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -180,10 +194,12 @@ export function GrowthView({
                   <p className="tabular font-display text-xl font-bold">
                     {formatIndicator(indicator, raw, units)}
                   </p>
-                  <Badge variant="secondary" className="mt-1">
-                    {shortPercentile(result.percentile)}
-                  </Badge>
-                  {result.outOfRange && (
+                  {result && (
+                    <Badge variant="secondary" className="mt-1">
+                      {shortPercentile(result.percentile)}
+                    </Badge>
+                  )}
+                  {result?.outOfRange && (
                     <p className="mt-1 text-xs text-muted-foreground">außerhalb der WHO-Tabelle</p>
                   )}
                 </div>
@@ -197,7 +213,7 @@ export function GrowthView({
         <EmptyState
           icon={Ruler}
           title="Noch keine Messung"
-          description="Trage Gewicht, Länge oder Kopfumfang ein – meist gibt es die Werte beim Eltern-Kind-Pass-Termin."
+          description="Gewicht, Länge und Kopfumfang gibt es meist beim Eltern-Kind-Pass-Termin."
         />
       ) : (
         <Tabs defaultValue="weight">
@@ -211,31 +227,39 @@ export function GrowthView({
 
           {INDICATORS.map((indicator) => {
             const measured = points
-              .filter((point) => point.results[indicator] !== null)
+              .filter((point) => rohwert(point, indicator) !== null)
               .map((point) => ({
                 ageDays: point.ageDays,
                 value: (() => {
                   const kind = indicatorKind(indicator)
-                  const value = point.results[indicator]!.value
+                  const value = rohwert(point, indicator) as number
                   return kind ? toDisplay(kind, value, units) : value
                 })(),
               }))
+            if (measured.length === 0) return null
 
             return (
               <TabsContent key={indicator} value={indicator}>
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">
-                      {INDICATOR_LABEL[indicator]} nach WHO-Standard
+                      {perzentile
+                        ? `${INDICATOR_LABEL[indicator]} nach WHO-Standard`
+                        : INDICATOR_LABEL[indicator]}
                     </CardTitle>
                     <CardDescription>
-                      Kurven P3, P15, P50, P85 und P97 · eure Messungen als Punkte
+                      {perzentile
+                        ? 'Kurven P3, P15, P50, P85 und P97 · eure Messungen als Punkte'
+                        : 'Eure Messungen'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart
-                        data={displayCurve(indicator, curves[indicator], units)}
+                        // Ohne Kurven traegt die Messreihe selbst die Achsen.
+                        data={
+                          perzentile ? displayCurve(indicator, curves[indicator], units) : measured
+                        }
                         margin={{ top: 4, right: 8, bottom: 4, left: -22 }}
                       >
                         <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
@@ -267,19 +291,20 @@ export function GrowthView({
                             String(name),
                           ]}
                         />
-                        {CURVE_PERCENTILES.map((percentile) => (
-                          <Line
-                            key={percentile}
-                            type="monotone"
-                            dataKey={`p${percentile}`}
-                            name={`P${percentile}`}
-                            stroke={CURVE_STYLE[percentile]!.color}
-                            strokeDasharray={CURVE_STYLE[percentile]!.dash}
-                            strokeWidth={percentile === 50 ? 2 : 1}
-                            dot={false}
-                            isAnimationActive={false}
-                          />
-                        ))}
+                        {perzentile &&
+                          CURVE_PERCENTILES.map((percentile) => (
+                            <Line
+                              key={percentile}
+                              type="monotone"
+                              dataKey={`p${percentile}`}
+                              name={`P${percentile}`}
+                              stroke={CURVE_STYLE[percentile]!.color}
+                              strokeDasharray={CURVE_STYLE[percentile]!.dash}
+                              strokeWidth={percentile === 50 ? 2 : 1}
+                              dot={false}
+                              isAnimationActive={false}
+                            />
+                          ))}
                         <Scatter
                           data={measured}
                           dataKey="value"
@@ -333,7 +358,7 @@ export function GrowthView({
                         .filter(Boolean)
                         .join(' · ')}
                     </p>
-                    {point.results.weight && (
+                    {perzentile && point.results.weight && (
                       <p className="text-xs text-muted-foreground">
                         Gewicht {describePercentile(point.results.weight.percentile)}
                       </p>
@@ -357,9 +382,9 @@ export function GrowthView({
       )}
 
       <MedicalDisclaimer>
-        Perzentile sind eine Einordnung, keine Bewertung. Ein Kind auf P5 ist genauso gesund wie
-        eines auf P95, solange es seiner eigenen Kurve folgt. Auffällig ist der Verlauf, nicht der
-        einzelne Punkt – besprecht das bei der Vorsorgeuntersuchung.
+        {perzentile
+          ? 'Perzentile sind eine Einordnung, keine Bewertung. Ein Kind auf P5 ist genauso gesund wie eines auf P95, solange es seiner eigenen Kurve folgt. Auffällig ist der Verlauf, nicht der einzelne Punkt – besprecht das bei der Vorsorgeuntersuchung.'
+          : 'Die Werte stehen hier so, wie ihr sie gemessen habt. Eingeordnet werden sie beim Eltern-Kind-Pass-Termin.'}
         {hasCorrectedAge && ' Bei Frühgeburt rechnet Sprössling bis zwei Jahre mit dem korrigierten Alter.'}
       </MedicalDisclaimer>
 

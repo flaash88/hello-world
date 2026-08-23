@@ -20,6 +20,25 @@ model Household {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /**
+   * Was die App anzeigt. Neue Haushalte starten auf "protokoll": mitschreiben,
+   * nachlesen, ausdrucken – nichts, was rechnet oder vergleicht. Siehe
+   * src/lib/settings/features.ts.
+   */
+  featureLevel      String    @default("protokoll") // protokoll | erweitert | voll
+  /**
+   * Einzelschalter als Abweichung von der Stufe: { "kreisuhr": true }.
+   */
+  featureOverrides  Json      @default("{}")
+  /**
+   * Laeuft eine Pause, ist alles Zusaetzliche bis dahin aus.
+   */
+  featurePauseUntil DateTime?
+  /**
+   * Wurde die Erklaerung zum Protokollmodus schon gezeigt?
+   */
+  introSeenAt       DateTime?
+
   users             User[]
   children          Child[]
   invites           Invite[]
@@ -140,7 +159,7 @@ model HouseholdSettings {
   milkFreezerHours    Int     @default(4320)
   milkDeepFreezeHours Int     @default(8640)
   milkThawedHours     Int     @default(24)
-  milkExpiryPush      Boolean @default(true)
+  milkExpiryPush      Boolean @default(false)
 
   // Wohnadresse fuer die Notfallkarte – im Notruf wird zuerst danach gefragt.
   emergencyAddress String?
@@ -696,19 +715,50 @@ model PushSubscription {
   @@index([userId])
 }
 
+/**
+ * Was ueberhaupt aufs Handy darf. Alles ausser Terminfristen ist ab Werk aus –
+ * die Liste der erlaubten Kategorien steht in src/lib/push/kategorien.ts, und
+ * was dort nicht steht, wird nie verschickt.
+ */
 model NotificationPreference {
-  userId            String   @id
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  napAlerts         Boolean  @default(true)
-  napLeadMinutes    Int      @default(15)
-  feedAlerts        Boolean  @default(false)
-  medicationAlerts  Boolean  @default(true)
-  appointmentAlerts Boolean  @default(true)
-  partnerActivity   Boolean  @default(false)
-  quietFrom         String? // "22:00"
-  quietTo           String? // "06:00"
-  ntfyEnabled       Boolean  @default(false)
-  updatedAt         DateTime @updatedAt
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /**
+   * Fristen im Eltern-Kind-Pass. Der einzige Standard – daran haengt Geld.
+   */
+  appointmentAlerts Boolean @default(true)
+  /**
+   * Hinweis, dass sich ein Schlaffenster naehert.
+   */
+  sleepWindowAlerts Boolean @default(false)
+  napLeadMinutes    Int     @default(15)
+  /**
+   * Selbst eingetragene Medikamenten-Intervalle.
+   */
+  medicationAlerts  Boolean @default(false)
+  /**
+   * Abgepumpte Milch laeuft ab.
+   */
+  milkStockAlerts   Boolean @default(false)
+  /**
+   * Die andere Person hat die Nachtschicht eingetragen.
+   */
+  nightShiftAlerts  Boolean @default(false)
+
+  /**
+   * Ruhezeit. Gilt fuer alles, auch fuer Termine.
+   */
+  quietFrom    String? // "21:00"
+  quietTo      String? // "07:00"
+  /**
+   * Wann zuletzt nach dem Zeitfenster gefragt wurde. Die Frage kommt einmal,
+   * beim ersten Einschalten einer Benachrichtigung.
+   */
+  quietAskedAt DateTime?
+
+  ntfyEnabled Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
 }
 
 // ------------------------------------------------------------ Eigene Sounds --

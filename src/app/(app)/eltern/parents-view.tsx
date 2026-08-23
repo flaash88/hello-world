@@ -41,6 +41,7 @@ export function ParentsView({
   journal,
   shift,
   recentShifts,
+  checkin,
 }: {
   userId: string
   userName: string
@@ -61,6 +62,12 @@ export function ParentsView({
   journal: { id: string; body: string; mood: number | null; createdAt: string }[]
   shift: { userId: string | null; handoverNote: string | null }
   recentShifts: { date: string; userId: string | null; handoverNote: string | null }[]
+  /**
+   * Ist der Eltern-Check-in eingeschaltet? Ohne ihn bleibt der Tab, was er
+   * ohnehin sein soll: Nachtschicht, privates Tagebuch und die Nummern, wenn
+   * es zu viel wird. Niemand wird taeglich nach einer Note gefragt.
+   */
+  checkin: boolean
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -71,20 +78,22 @@ export function ParentsView({
         </p>
       </div>
 
-      <CheckinCard todayKey={todayKey} today={today} />
+      {checkin && <CheckinCard todayKey={todayKey} today={today} />}
 
-      {signal.show && signal.reason && <SupportCard reason={signal.reason} />}
+      {checkin && signal.show && signal.reason && <SupportCard reason={signal.reason} />}
 
-      <Tabs defaultValue="verlauf">
+      <Tabs defaultValue={checkin ? 'verlauf' : 'nacht'}>
         <TabsList className="w-full">
-          <TabsTrigger value="verlauf">Verlauf</TabsTrigger>
+          {checkin && <TabsTrigger value="verlauf">Verlauf</TabsTrigger>}
           <TabsTrigger value="nacht">Nachtschicht</TabsTrigger>
           <TabsTrigger value="journal">Privat</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="verlauf">
-          <HistoryCard days={days} childWakes={childWakes} />
-        </TabsContent>
+        {checkin && (
+          <TabsContent value="verlauf">
+            <HistoryCard days={days} childWakes={childWakes} />
+          </TabsContent>
+        )}
         <TabsContent value="nacht">
           <NightShiftCard
             userId={userId}

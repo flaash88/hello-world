@@ -13,6 +13,7 @@ import {
 } from '@/lib/growth'
 import { istNeugeborenes, neugeborenenVerlauf } from '@/lib/growth/newborn'
 import { correctedAgeDays } from '@/lib/sleep/windows'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { EmptyState } from '@/components/ui/empty-state'
 import { GrowthView } from './growth-view'
 import { NewbornView, type NewbornPunkt } from './newborn-view'
@@ -21,6 +22,8 @@ export const metadata: Metadata = { title: 'Wachstum' }
 
 export default async function GrowthPage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
+  const perzentile = features.aktiv.has('perzentile')
   const child = ctx.activeChild
 
   if (!child?.birthDate) {
@@ -28,7 +31,7 @@ export default async function GrowthPage() {
       <EmptyState
         icon={Baby}
         title="Noch kein Geburtsdatum hinterlegt"
-        description="Für Perzentile braucht Sprössling das Geburtsdatum und das Geschlecht des Kindes."
+        description="Ohne Geburtsdatum lässt sich das Alter zu einer Messung nicht bestimmen."
       />
     )
   }
@@ -94,8 +97,9 @@ export default async function GrowthPage() {
         ? bmiOf(measurement.weightKg, measurement.lengthCm)
         : null
 
+    // Sind die Kurven aus, wird gar nicht erst eingeordnet.
     const evaluate = (indicator: Indicator, value: number | null) =>
-      value === null ? null : evaluateGrowth(indicator, sex, value, age)
+      value === null || !perzentile ? null : evaluateGrowth(indicator, sex, value, age)
 
     return {
       id: measurement.id,
@@ -124,12 +128,15 @@ export default async function GrowthPage() {
   // Die Kurven reichen etwas über das heutige Alter hinaus, damit der letzte
   // Punkt nicht am Diagrammrand klebt.
   const curveTo = Math.min(maxAgeDays(), Math.max(90, currentAge * 1.25))
-  const curves = {
-    weight: growthCurves('weight', sex, 0, curveTo),
-    length: growthCurves('length', sex, 0, curveTo),
-    head: growthCurves('head', sex, 0, curveTo),
-    bmi: growthCurves('bmi', sex, 0, curveTo),
-  }
+  const leer: ReturnType<typeof growthCurves> = []
+  const curves = perzentile
+    ? {
+        weight: growthCurves('weight', sex, 0, curveTo),
+        length: growthCurves('length', sex, 0, curveTo),
+        head: growthCurves('head', sex, 0, curveTo),
+        bmi: growthCurves('bmi', sex, 0, curveTo),
+      }
+    : { weight: leer, length: leer, head: leer, bmi: leer }
 
   return (
     <GrowthView
@@ -140,6 +147,7 @@ export default async function GrowthPage() {
       currentAgeDays={currentAge}
       points={points}
       curves={curves}
+      perzentile={perzentile}
     />
   )
 }
