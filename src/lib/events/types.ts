@@ -161,12 +161,20 @@ export const MOOD_REASON_LABEL: Record<string, string> = {
 
 // -------------------------------------------------------- Gesundheit -------
 
-export const HEALTH_KINDS = ['temperature', 'medication', 'symptom', 'vaccination', 'appointment'] as const
+export const HEALTH_KINDS = [
+  'temperature',
+  'medication',
+  'symptom',
+  'allergy',
+  'vaccination',
+  'appointment',
+] as const
 export type HealthKind = (typeof HEALTH_KINDS)[number]
 export const HEALTH_KIND_LABEL: Record<HealthKind, string> = {
   temperature: 'Temperatur',
   medication: 'Medikament',
   symptom: 'Symptom',
+  allergy: 'Allergie',
   vaccination: 'Impfung',
   appointment: 'Arzttermin',
 }

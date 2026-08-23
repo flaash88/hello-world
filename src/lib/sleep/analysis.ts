@@ -3,6 +3,7 @@ import type { Child, Event } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { addDays, ageInDays, minutesSinceLocalMidnight, startOfLocalDay } from '@/lib/time'
 import { eventsBetween } from '@/lib/events/queries'
+import { offeneDuplikatIds } from '@/lib/events/duplicate-service'
 import {
   buildWakeWindowModel,
   forecastNextSleep,
@@ -72,7 +73,14 @@ export async function analyseSleep(
   const table = wakeWindowFor(correctedDays)
 
   const lookbackFrom = addDays(startOfLocalDay(now, timezone), -LOOKBACK_DAYS, timezone)
-  const sleepEvents = await eventsBetween(child.id, lookbackFrom, now, ['sleep'])
+  const alleSleepEvents = await eventsBetween(child.id, lookbackFrom, now, ['sleep'])
+
+  // Offene Doppelerfassungen wuerden den Wachfenster-Median verziehen: zwei
+  // Eintraege fuer denselben Schlaf ergeben ein Wachfenster von null Minuten.
+  // Bis jemand entschieden hat, zaehlt der neuere nicht mit.
+  const duplikate = await offeneDuplikatIds(child.id)
+  const sleepEvents = alleSleepEvents.filter((event) => !duplikate.has(event.id))
+
   const blocks = toBlocks(sleepEvents)
 
   const model = buildWakeWindowModel(correctedDays, blocks, now)

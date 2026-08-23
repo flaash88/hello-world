@@ -132,3 +132,25 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - `/tagebuch/toene`: Aufnahme bis drei Minuten, Transkodierung nach Opus, Wellenform,
   gemerkte Abspielstelle, Schlagworte, Meilenstein-Verknüpfung, Offline-Queue.
 - Grün: lint, typecheck, 510 Unit-Tests (94,6 % Coverage), 103 E2E-Tests, build.
+
+## Phase 10 – Wochenbett & Zwei-Personen-Betrieb (abgeschlossen)
+
+- `/wachstum` zeigt bis Lebenswoche sechs den Weg zurück aufs Geburtsgewicht statt der Perzentile:
+  Differenz in Gramm und Prozent, Verlauf über 28 Tage, Marken bei −7 und −10 %.
+- Der Hinweis auf die Hebamme kommt einmal, in Grau: mehr als 10 % Verlust oder Geburtsgewicht
+  bis Lebenstag 14 nicht wieder erreicht. Ist es wieder da, tritt die Prozentanzeige zurück.
+- `/protokoll`: eine Zeile je Tag mit Lebenstag, Anlegen, ⌀ Dauer, Flasche, ml, Windeln, Schlaf und
+  Gewicht; 1/3/7/14 Tage, Durchschnitt in der Fußzeile, Tag antippen zeigt die Einzelereignisse.
+- Beide Druckansichten teilen sich Kopfzeile und Layout über `src/lib/print/`; A4 hochkant,
+  schwarzweiß, ohne Navigation – nachgeprüft: je genau eine Seite.
+- `/notfall`: feste Notrufnummern (144, Vergiftungszentrale, 1450), Kontakte als `tel:`-Links,
+  Adresse groß und kopierbar. Ohne Netz vollständig aus IndexedDB.
+- Die Karte liest Allergien, Dauermedikamente, Gewicht und Impfungen aus den vorhandenen Quellen;
+  neu gepflegt werden nur Blutgruppe, Vorerkrankungen, Adresse und Kontakte.
+- Doppelerfassung: tragen beide dasselbe ein, kommt ein nicht-modaler Hinweis mit drei Wegen.
+  Offene Fälle zählen nicht in den Wachfenster-Median; ab vier steht der Hinweis auf `/auswertung`.
+- Vier PWA-Verknüpfungen mit eigenen Icons (die alten zeigten auf Routen, die es nie gab),
+  Share Target für Bilder und Ton, offline über die bestehende Schreib-Queue.
+- `/api/v1` für Home Assistant: eigene Tokens, 60 Anfragen pro Minute, Audit-Log, Webhooks,
+  `docs/homeassistant.md` mit fertigen Snippets. Der Typ-Enum kommt aus der Ereignis-Registry.
+- Grün: lint, typecheck, 600 Unit-Tests (88,2 % Coverage), 154 E2E-Tests, build.

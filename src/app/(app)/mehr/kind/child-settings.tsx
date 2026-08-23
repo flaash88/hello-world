@@ -18,9 +18,17 @@ export type ChildProfile = {
   birthDate: string
   dueDate: string
   sex: 'male' | 'female' | 'unknown'
+  birthWeightG: string
+  dischargeWeightG: string
   ageLabel: string | null
   correctedWeeks: number | null
   isActive: boolean
+}
+
+/** Leeres Feld heisst "nicht eingetragen" – nicht null Gramm. */
+function gramm(value: string): number | null {
+  const zahl = Number(value)
+  return value.trim() === '' || !Number.isFinite(zahl) ? null : Math.round(zahl)
 }
 
 export function ChildSettings({ profiles }: { profiles: ChildProfile[] }) {
@@ -53,13 +61,22 @@ function ChildCard({ profile, multiple }: { profile: ChildProfile; multiple: boo
   const [birthDate, setBirthDate] = useState(profile.birthDate)
   const [dueDate, setDueDate] = useState(profile.dueDate)
   const [sex, setSex] = useState(profile.sex)
+  const [birthWeightG, setBirthWeightG] = useState(profile.birthWeightG)
+  const [dischargeWeightG, setDischargeWeightG] = useState(profile.dischargeWeightG)
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
 
   function save() {
     startTransition(async () => {
-      const result = await updateChildAction(profile.id, { name, birthDate, dueDate, sex })
+      const result = await updateChildAction(profile.id, {
+        name,
+        birthDate,
+        dueDate,
+        sex,
+        birthWeightG: gramm(birthWeightG),
+        dischargeWeightG: gramm(dischargeWeightG),
+      })
       if ('error' in result) {
         toast({ title: 'Nicht gespeichert', description: result.error, variant: 'destructive' })
         return
@@ -111,6 +128,38 @@ function ChildCard({ profile, multiple }: { profile: ChildProfile; multiple: boo
           <p className="text-xs text-muted-foreground">
             Ist der Termin hinterlegt, rechnen Schlaffenster, Wocheninhalte und Perzentile bis
             zwei Jahre mit dem korrigierten Alter.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`bw-${profile.id}`}>Geburtsgewicht (g)</Label>
+            <Input
+              id={`bw-${profile.id}`}
+              type="number"
+              inputMode="numeric"
+              min={200}
+              max={8000}
+              value={birthWeightG}
+              placeholder="3400"
+              onChange={(event) => setBirthWeightG(event.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor={`dw-${profile.id}`}>Bei Entlassung (g)</Label>
+            <Input
+              id={`dw-${profile.id}`}
+              type="number"
+              inputMode="numeric"
+              min={200}
+              max={8000}
+              value={dischargeWeightG}
+              placeholder="3210"
+              onChange={(event) => setDischargeWeightG(event.target.value)}
+            />
+          </div>
+          <p className="col-span-2 text-xs text-muted-foreground">
+            Mit dem Geburtsgewicht zeigt „Wachstum“ in den ersten sechs Wochen den Verlauf der
+            ersten Tage statt der Perzentilkurven.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -168,6 +217,7 @@ function NewChildDialog({
         birthDate: String(formData.get('birthDate') ?? ''),
         dueDate: String(formData.get('dueDate') ?? ''),
         sex: (String(formData.get('sex') ?? 'unknown') || 'unknown') as ChildProfile['sex'],
+        birthWeightG: gramm(String(formData.get('birthWeightG') ?? '')),
       })
       if ('error' in result) {
         setError(result.error)
@@ -196,6 +246,18 @@ function NewChildDialog({
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="newDue">Errechneter Termin (bei Frühgeburt)</Label>
             <Input id="newDue" name="dueDate" type="date" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="newBirthWeight">Geburtsgewicht (g)</Label>
+            <Input
+              id="newBirthWeight"
+              name="birthWeightG"
+              type="number"
+              inputMode="numeric"
+              min={200}
+              max={8000}
+              placeholder="3400"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="newSex">Geschlecht</Label>

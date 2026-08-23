@@ -61,13 +61,22 @@ export async function buildBackup(
       prisma.customSound.findMany({ where: { householdId } }),
     ])
 
-  const [vorsorge, teeth, milkPortions, audioNotes] = await Promise.all([
+  const childIds = children.map((child) => child.id)
+
+  const [vorsorge, teeth, milkPortions, audioNotes, emergencyContacts, duplicates, webhooks] =
+    await Promise.all([
     prisma.vorsorgeEntry.findMany({ where: { child: { householdId } }, orderBy: { doneAt: 'asc' } }),
     prisma.tooth.findMany({ where: { child: { householdId } } }),
     prisma.milkPortion.findMany({ where: { householdId }, orderBy: { abgepumptAm: 'asc' } }),
     // Wie bei den Klaengen: die Tondateien liegen im Upload-Volume, hier steht
     // nur, welche es gab – sonst waere das Backup schnell dreistellig gross.
     prisma.audioNote.findMany({ where: { child: { householdId } }, orderBy: { recordedAt: 'asc' } }),
+    prisma.emergencyContact.findMany({ where: { householdId }, orderBy: { sortOrder: 'asc' } }),
+    // EventDuplicate haengt am Kind ueber die Id, nicht ueber eine Relation.
+    prisma.eventDuplicate.findMany({ where: { childId: { in: childIds } } }),
+    // Webhooks ja, Tokens nein: die stehen nur gehasht da und waeren im
+    // Backup wertlos – neu anlegen ist der ehrlichere Weg.
+    prisma.webhook.findMany({ where: { householdId } }),
   ])
 
   const privateJournal = options.includeOwnPrivate
@@ -98,6 +107,9 @@ export async function buildBackup(
     teeth,
     milkPortions,
     audioNotes,
+    emergencyContacts,
+    duplicates,
+    webhooks,
     privateJournal,
   }
 }

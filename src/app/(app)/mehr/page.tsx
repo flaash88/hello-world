@@ -7,14 +7,18 @@ import {
   BookHeart,
   BookOpen,
   ChevronRight,
+  ClipboardList,
   Download,
   HardDriveDownload,
+  KeyRound,
   LineChart,
   LogOut,
   Milk,
   Moon,
   Music,
   Ruler,
+  ShieldAlert,
+  Siren,
   Sparkles,
   Smile,
   SlidersHorizontal,
@@ -36,6 +40,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
   {
     title: 'Für euch',
     links: [
+      { href: '/notfall', label: 'Notfallkarte', icon: Siren },
       { href: '/wissen', label: 'Wissen & Nachschlagen', icon: BookOpen },
       { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
@@ -43,6 +48,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
       { href: '/vorsorge', label: 'Impfungen & Untersuchungen', icon: Syringe },
       { href: '/zaehne', label: 'Zähne', icon: Smile },
       { href: '/gesundheit/fieber', label: 'Fieberverlauf', icon: Thermometer },
+      { href: '/protokoll', label: 'Stillprotokoll für die Hebamme', icon: ClipboardList },
       { href: '/vorrat', label: 'Milchvorrat', icon: Milk },
       { href: '/auswertung', label: 'Auswertung', icon: LineChart },
       { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
@@ -52,6 +58,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
     title: 'Einstellungen',
     links: [
       { href: '/mehr/kind', label: 'Kindprofil', icon: Baby },
+      { href: '/mehr/notfall', label: 'Notfalldaten', icon: ShieldAlert },
       { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
       { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
       { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
@@ -63,6 +70,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
     links: [
       { href: '/mehr/export', label: 'Export', icon: Download },
       { href: '/mehr/daten', label: 'Backup & Daten', icon: HardDriveDownload },
+      { href: '/mehr/integrationen', label: 'Automationen & API', icon: KeyRound },
     ],
   },
 ]

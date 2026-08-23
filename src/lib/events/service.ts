@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/db'
 import { publish } from '@/lib/realtime'
 import { planeIntervallErinnerung } from '@/lib/fever/reminder'
+import { pruefeDuplikat, type DuplikatHinweis } from './duplicate-service'
 import { eventInputSchema, parsePayload } from './schemas'
 import { EVENT_CATEGORIES, type EventType } from './types'
 
@@ -50,12 +51,14 @@ export type CreateEventInput = {
   clientId?: string
   /** Timer laeuft weiter, bis er beendet wird. */
   running?: boolean
+  /** Woher der Eintrag kam. "automation" fuer Eintraege ueber /api/v1. */
+  source?: string | null
 }
 
 export async function createEvent(
   ctx: ServiceContext,
   input: CreateEventInput,
-): Promise<ServiceResult<{ id: string; created: boolean }>> {
+): Promise<ServiceResult<{ id: string; created: boolean; duplikat?: DuplikatHinweis }>> {
   await assertChild(input.childId, ctx.householdId)
 
   const parsed = eventInputSchema.safeParse(input)
@@ -87,6 +90,7 @@ export async function createEvent(
         note: parsed.data.note?.trim() || null,
         running,
         createdById: ctx.userId,
+        source: input.source ?? null,
         clientId: parsed.data.clientId ?? null,
       },
     })
@@ -111,7 +115,24 @@ export async function createEvent(
 
   await planeMedikamentErinnerung(ctx.householdId, input.childId, event.startedAt, payload.data)
 
-  return { ok: true, data: { id: event.id, created: true } }
+  // Hat die andere Person kurz davor dasselbe eingetragen? Der Eintrag steht
+  // in jedem Fall – gefragt wird danach, nicht davor.
+  const duplikat = await pruefeDuplikat(
+    {
+      id: event.id,
+      type: event.type,
+      startedAt: event.startedAt,
+      endedAt: event.endedAt,
+      payload: event.payload,
+      createdById: event.createdById,
+    },
+    input.childId,
+  )
+
+  return {
+    ok: true,
+    data: { id: event.id, created: true, ...(duplikat ? { duplikat } : {}) },
+  }
 }
 
 /**
@@ -287,7 +308,8 @@ export async function startTimer(
   type: EventType,
   payload: unknown = {},
   clientId?: string,
-): Promise<ServiceResult<{ id: string; created: boolean }>> {
+  source?: string | null,
+): Promise<ServiceResult<{ id: string; created: boolean; duplikat?: DuplikatHinweis }>> {
   const category = EVENT_CATEGORIES[type]
   if (!category?.timed) return { ok: false, error: 'Für diesen Eintrag gibt es keinen Timer.' }
 
@@ -303,6 +325,7 @@ export async function startTimer(
     payload,
     running: true,
     clientId,
+    source,
   })
 }
 

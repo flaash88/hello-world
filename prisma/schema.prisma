@@ -20,13 +20,97 @@ model Household {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users        User[]
-  children     Child[]
-  invites      Invite[]
-  pregnancies  Pregnancy[]
-  settings     HouseholdSettings?
-  customSounds CustomSound[]
-  milkPortions MilkPortion[]
+  users             User[]
+  children          Child[]
+  invites           Invite[]
+  pregnancies       Pregnancy[]
+  settings          HouseholdSettings?
+  customSounds      CustomSound[]
+  milkPortions      MilkPortion[]
+  emergencyContacts EmergencyContact[]
+  integrationTokens IntegrationToken[]
+  webhooks          Webhook[]
+}
+
+/**
+ * Kontakte der Notfallkarte. Die festen Nummern (144, Vergiftungsinformations-
+ * zentrale, 1450) stehen im Code und nicht hier – sie sollen sich nicht
+ * loeschen lassen.
+ */
+/**
+ * Token fuer Automationen (Home Assistant, NFC-Tag am Wickeltisch).
+ * Bewusst getrennt von der Session: ein Token haengt an genau einem Haushalt
+ * und einem User, ist einzeln widerrufbar und steht nur einmal im Klartext da.
+ * In der DB liegt nur der Hash.
+ */
+model IntegrationToken {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  tokenHash   String    @unique
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  auditEntries ApiAuditLog[]
+
+  @@index([householdId, createdAt])
+}
+
+/**
+ * Jeder Zugriff ueber die API, damit nachvollziehbar bleibt, wer was tat.
+ */
+model ApiAuditLog {
+  id          String            @id @default(cuid())
+  householdId String
+  tokenId     String?
+  token       IntegrationToken? @relation(fields: [tokenId], references: [id], onDelete: SetNull)
+  method      String
+  path        String
+  status      Int
+  detail      String?
+  createdAt   DateTime          @default(now())
+
+  @@index([householdId, createdAt])
+}
+
+/**
+ * Ausgehender Webhook bei neuen Ereignissen.
+ */
+model Webhook {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  url         String
+  /**
+   * Ereignistypen, auf die der Webhook reagiert. Leer = alle.
+   */
+  eventTypes  Json      @default("[]")
+  active      Boolean   @default(true)
+  lastSentAt  DateTime?
+  lastError   String?
+  failures    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId])
+}
+
+model EmergencyContact {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  role        String // kinderarzt | hebamme | klinik | frei
+  name        String
+  phone       String
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId, sortOrder])
 }
 
 model HouseholdSettings {
@@ -57,6 +141,9 @@ model HouseholdSettings {
   milkDeepFreezeHours Int     @default(8640)
   milkThawedHours     Int     @default(24)
   milkExpiryPush      Boolean @default(true)
+
+  // Wohnadresse fuer die Notfallkarte – im Notruf wird zuerst danach gefragt.
+  emergencyAddress String?
 
   updatedAt DateTime @updatedAt
 }
@@ -94,6 +181,7 @@ model User {
   exerciseLogs      ExerciseLog[]
   customSounds      CustomSound[]
   vorsorgeEntries   VorsorgeEntry[]
+  integrationTokens IntegrationToken[]
   teethEntries      Tooth[]
   milkPortions      MilkPortion[]
   audioNotes        AudioNote[]
@@ -143,17 +231,27 @@ model LoginAttempt {
 // ------------------------------------------------------------------- Kinder --
 
 model Child {
-  id          String    @id @default(cuid())
-  householdId String
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  name        String
-  birthDate   DateTime?
-  dueDate     DateTime? // fuer korrigiertes Alter bei Fruehgeburt
-  sex         String    @default("unknown") // male | female | unknown
-  avatarPath  String?
-  archived    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  householdId      String
+  household        Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name             String
+  birthDate        DateTime?
+  dueDate          DateTime? // fuer korrigiertes Alter bei Fruehgeburt
+  sex              String    @default("unknown") // male | female | unknown
+  // Geburts- und Entlassungsgewicht in Gramm. Bewusst ganzzahlig und nicht in
+  // Kilogramm wie GrowthMeasurement: in den ersten Wochen zaehlen zehn Gramm,
+  // und die Waage in der Klinik zeigt Gramm an.
+  birthWeightG     Int?
+  dischargeWeightG Int?
+  // Fuer die Notfallkarte. Alles andere dort kommt aus vorhandenen Quellen –
+  // Allergien und Dauermedikamente aus der Gesundheitskategorie, das Gewicht
+  // aus GrowthMeasurement, die Impfungen aus VorsorgeEntry.
+  bloodGroup       String?
+  conditions       String?
+  avatarPath       String?
+  archived         Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   events       Event[]
   measurements GrowthMeasurement[]
@@ -338,6 +436,10 @@ model Event {
   pausedSec   Int       @default(0)
   createdById String
   createdBy   User      @relation("EventCreatedBy", fields: [createdById], references: [id])
+  /**
+   * Woher der Eintrag kam. null = App, "automation" = ueber /api/v1.
+   */
+  source      String?
   clientId    String?   @unique // Idempotenz fuer die Offline-Queue
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())
@@ -348,6 +450,26 @@ model Event {
   @@index([childId, type, startedAt])
   @@index([childId, startedAt])
   @@index([childId, running])
+}
+
+/**
+ * Verdacht auf Doppelerfassung: beide haben dasselbe eingetragen.
+ * Der Eintrag bleibt stehen, bis jemand entscheidet. `beide` heisst
+ * "ausdruecklich zwei verschiedene Ereignisse" – so ein Paar wird nicht erneut
+ * gemeldet und zaehlt auch nicht mehr als offener Verdacht.
+ */
+model EventDuplicate {
+  id           String    @id @default(cuid())
+  childId      String
+  olderEventId String
+  newerEventId String
+  status       String    @default("offen") // offen | zusammengefuehrt | beide | geloescht
+  detectedAt   DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  @@unique([olderEventId, newerEventId])
+  @@index([childId, status])
 }
 
 model EventRevision {

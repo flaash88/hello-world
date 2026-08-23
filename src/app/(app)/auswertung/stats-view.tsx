@@ -52,10 +52,13 @@ export function StatsView({
   heatmapDays,
   childId,
   review,
+  offeneDuplikate,
 }: {
   childName: string
   childId: string
   review: string[]
+  /** Offene Verdachtsfaelle auf Doppelerfassung im gezeigten Zeitraum. */
+  offeneDuplikate: number
   period: Period
   offset: number
   periodDays: number
@@ -137,6 +140,19 @@ export function StatsView({
         </Card>
       ) : (
         <>
+          {offeneDuplikate > 3 && (
+            <Link
+              href="/duplikate"
+              className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+            >
+              <span>
+                {offeneDuplikate} Einträge könnten doppelt sein und zählen gerade nicht in die
+                Wachfenster-Berechnung.
+              </span>
+              <ChevronRight className="size-4 shrink-0" aria-hidden />
+            </Link>
+          )}
+
           {period === 'week' && <WeeklyReviewCard lines={review} childId={childId} />}
 
           <section>

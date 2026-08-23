@@ -13,6 +13,8 @@ export type EventRow = {
   payload: unknown
   note: string | null
   createdBy: { id: string; displayName: string; initials: string; color: string } | null
+  /** null = in der App eingetragen, "automation" = ueber /api/v1. */
+  source?: string | null
 }
 
 type Member = { id: string; displayName: string; initials: string; color: string }
@@ -41,6 +43,7 @@ function toRow(
     payload: event.payload,
     note: event.note,
     createdBy: members.get(event.createdById) ?? null,
+    source: 'source' in event ? ((event as { source?: string | null }).source ?? null) : null,
   }
 }
 

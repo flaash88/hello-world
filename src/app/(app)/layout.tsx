@@ -6,6 +6,7 @@ import { AppHeader } from '@/components/layout/app-header'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { navItemsFor } from '@/components/layout/nav-items'
 import { RealtimeProvider } from '@/components/realtime/realtime-provider'
+import { DuplicateBanner } from '@/components/tracker/duplicate-banner'
 import { OfflineSync } from '@/components/offline/offline-sync'
 import { RunningTimerBar } from '@/components/tracker/running-timer-bar'
 import { runningTimers } from '@/lib/events/service'
@@ -28,6 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <div className="flex min-h-dvh flex-col" data-child-id={ctx.activeChild?.id ?? ''}>
               <AppHeader ctx={ctx} />
               <main className="mx-auto w-full max-w-2xl flex-1 px-3 pb-44 pt-4">{children}</main>
+              <DuplicateBanner />
               <RunningTimerBar
                 timers={timers.map((timer) => ({
                   id: timer.id,

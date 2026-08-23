@@ -5,6 +5,7 @@ import { loadSleepHeatmap, loadStats } from '@/lib/stats/queries'
 import { PERIOD_DAYS, type Period } from '@/lib/stats/periods'
 import { buildWeeklyReview } from '@/lib/stats/weekly-review'
 import { localDateKey, addDays } from '@/lib/time'
+import { offeneDuplikate } from '@/lib/events/duplicate-service'
 import { EmptyState } from '@/components/ui/empty-state'
 import { StatsView } from './stats-view'
 
@@ -42,6 +43,13 @@ export default async function StatsPage({
     loadSleepHeatmap(child.id, ctx.timezone, 30),
   ])
 
+  // Erst ab vier offenen Faellen ist es ein Thema – einer davon ist meistens
+  // nur ein Timer, den beide gestartet haben.
+  const offeneDuplikateImZeitraum = await offeneDuplikate(child.id, {
+    von: stats.from,
+    bis: stats.to,
+  })
+
   // Tagesschluessel der Heatmap, neueste zuletzt.
   const dayKeys: string[] = []
   for (let i = 29; i >= 0; i--) {
@@ -64,6 +72,7 @@ export default async function StatsPage({
       heatmapDays={dayKeys}
       childId={child.id}
       review={buildWeeklyReview(stats, previous, child.name)}
+      offeneDuplikate={offeneDuplikateImZeitraum}
     />
   )
 }

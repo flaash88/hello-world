@@ -12,7 +12,11 @@ mit Sprüngen und Meilensteinen, Tagebuch mit Fotos und Tonspuren,
 Einschlafgeräusche, Eltern-Tab, Wissensbereich (Ernährung, Lebensmittel-Check,
 Geburtsvorbereitung, Behördenwege Österreich, Stillen, Wochenbett, Rezepte),
 Vorsorge (Impfungen und Eltern-Kind-Pass), Zahnschema, Fieberverlauf mit
-Arztzettel und Milchvorrat mit Etiketten.
+Arztzettel und Milchvorrat mit Etiketten. Für die ersten Wochen: Gewichtsverlauf
+ab dem Geburtsgewicht, Stillprotokoll für die Hebamme und eine Notfallkarte, die
+auch ohne Netz steht. Dazu Doppelerfassungs-Erkennung für den Zwei-Personen-
+Betrieb, PWA-Verknüpfungen samt Share Target und eine REST-Schnittstelle für
+Home Assistant (siehe `docs/homeassistant.md`).
 
 > **Vorsorgedaten prüfen.** Impfplan und Eltern-Kind-Pass-Untersuchungen liegen
 > als versionierte JSON-Dateien unter `content/vorsorge/`. Sie tragen derzeit
@@ -109,6 +113,13 @@ Danach:
   darauf. Fehlt es, sagt `/tagebuch/toene` das offen, statt still zu scheitern.
 - **QR-Codes auf den Milch-Etiketten** brauchen `APP_URL`; ohne die öffentliche
   Adresse druckt die App keinen Code statt einen, der ins Leere führt.
+- **Automationen:** Unter **Mehr → Automationen & API** entstehen Tokens für
+  Home Assistant und NFC-Tags. Sie gelten für einen Haushalt und eine Person,
+  sind einzeln widerrufbar und stehen nur einmal im Klartext da. Die Anleitung
+  mit fertigen Snippets liegt in `docs/homeassistant.md`.
+- **Drucken:** Stillprotokoll und Arzt-Zettel sind auf A4 hochkant ausgelegt,
+  schwarzweiß und ohne Navigation. Über das Browser-Menü drucken oder als PDF
+  herunterladen.
 
 ## Entwicklung
 

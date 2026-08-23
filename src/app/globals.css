@@ -143,12 +143,37 @@
 
 /* Der Jahresrückblick soll sich ordentlich ausdrucken lassen. */
 @media print {
-  body {
-    background: white;
-    color: black;
+  /* A4 hochkant, schwarzweiss. Der Ausdruck geht an Hebamme oder Ordination –
+     dort hilft weder der Nachtmodus noch eine Akzentfarbe. */
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
   }
-  header,
-  nav,
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    /* Nachtmodus abschalten: die Variablen werden hier hart ueberschrieben,
+       damit auch Komponenten mit Token-Farben schwarz auf weiss drucken. */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 100%;
+    --muted-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
+  }
+  /* Toasts und Hinweisbanner gehoeren nicht aufs Papier. Die App-Huelle
+     (Kopf, Tab-Leiste, Timer-Leiste) traegt dafuer `print:hidden` – ein
+     pauschales `header, nav { display: none }` haette auch die Kopfzeile der
+     Druckansichten erwischt. */
   [role='status'] {
     display: none !important;
   }
@@ -158,5 +183,10 @@
   }
   .print\:hidden {
     display: none !important;
+  }
+  /* Tabellenzeilen nicht ueber den Seitenrand hinweg zerreissen. */
+  tr,
+  li {
+    break-inside: avoid;
   }
 }

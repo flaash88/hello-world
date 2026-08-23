@@ -14,6 +14,13 @@ export const metadata: Metadata = {
     apple: [{ url: '/icons/icon-192.png', sizes: '192x192' }],
   },
   robots: { index: false, follow: false },
+  other: {
+    // Titel, Statusleiste und `mobile-web-app-capable` setzt Next aus
+    // `appleWebApp` selbst; die alte iOS-Schreibweise nicht. Aktuelles iOS
+    // liest den Anzeigemodus ohnehin aus dem Manifest – fuer aeltere Geraete
+    // kostet diese Zeile nichts.
+    'apple-mobile-web-app-capable': 'yes',
+  },
 }
 
 export const viewport: Viewport = {

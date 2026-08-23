@@ -173,3 +173,15 @@ export function formatMass(grams: number, prefs: UnitPrefs = DEFAULT_UNITS): str
   if (grams >= 1000) return formatWeight(grams / 1000, prefs)
   return `${grams.toLocaleString(localeTag(), { maximumFractionDigits: 0 })} g`
 }
+
+/**
+ * Masse auf das Gramm genau – ohne den Wechsel auf Kilogramm, den `formatMass`
+ * ab einem Kilo macht. In den ersten Lebenswochen ist der Unterschied zwischen
+ * 3.400 und 3.450 Gramm genau der Punkt.
+ */
+export function formatGrams(grams: number, prefs: UnitPrefs = DEFAULT_UNITS): string {
+  if (prefs.weight === 'lb') {
+    return `${(grams / G_PER_OZ).toLocaleString(localeTag(), { maximumFractionDigits: 1 })} oz`
+  }
+  return `${Math.round(grams).toLocaleString(localeTag())} g`
+}

@@ -1,4 +1,5 @@
 import type { Messort } from '@/lib/fever/episode'
+import type { Kopf } from '@/lib/print/kopf'
 
 export type MessungView = {
   id: string
@@ -30,10 +31,8 @@ export type IntervallView = {
 
 export type FieberDaten = {
   childName: string
-  geburtsdatum: string | null
-  alterMonate: number | null
-  gewichtKg: number | null
-  gewichtVom: string | null
+  /** Kopfzeile des Arztzettels – dieselbe wie im Stillprotokoll. */
+  kopf: Kopf
   beginn: string
   hoechste: { temperatureC: number; at: string; ort: Messort | null } | null
   messungen: MessungView[]

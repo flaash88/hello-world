@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MedicalDisclaimer } from '@/components/medical-disclaimer'
+import { PrintHeader } from '@/components/print/print-header'
 import type { FieberDaten, GabeView, MessungView } from './types'
 
 const HINWEIS_KEY = 'sp_fieber_hinweis'
@@ -98,7 +99,9 @@ export function FieberAnsicht({ daten }: { daten: FieberDaten }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-2">
+      {/* Auf dem Papier steht der Titel in der Kopfzeile des Zettels – hier
+          waere er doppelt. */}
+      <div className="flex items-start justify-between gap-2 print:hidden">
         <div>
           <h1 className="font-display text-2xl font-bold">Fieberverlauf</h1>
           <p className="text-muted-foreground">
@@ -317,32 +320,14 @@ function Arztzettel({ daten }: { daten: FieberDaten }) {
 
   return (
     <section className="rounded-xl border border-border p-4 print:border-0 print:p-0">
-      <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold">
-        <Thermometer className="size-4 print:hidden" aria-hidden />
+      <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold print:hidden">
+        <Thermometer className="size-4" aria-hidden />
         Zettel für die Ordination
       </h2>
 
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <div>
-          <dt className="text-muted-foreground">Kind</dt>
-          <dd className="font-semibold">{daten.childName}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Geboren</dt>
-          <dd className="font-semibold">
-            {daten.geburtsdatum ?? '—'}
-            {daten.alterMonate !== null ? ` (${daten.alterMonate} Monate)` : ''}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Gewicht</dt>
-          <dd className="font-semibold">
-            {daten.gewichtKg !== null
-              ? `${daten.gewichtKg.toLocaleString(localeTag(), { maximumFractionDigits: 2 })} kg`
-              : 'nicht eingetragen'}
-            {daten.gewichtVom ? ` (${daten.gewichtVom})` : ''}
-          </dd>
-        </div>
+      <PrintHeader kopf={daten.kopf} />
+
+      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
         <div>
           <dt className="text-muted-foreground">Fieber seit</dt>
           <dd className="font-semibold">{formatDateLong(beginn)}, {formatTime(beginn)}</dd>

@@ -56,7 +56,14 @@ describe('flushQueue', () => {
     const fetchMock = mockFetch(() => ({ results: [] }))
     vi.stubGlobal('fetch', fetchMock)
     const summary = await flushQueue()
-    expect(summary).toEqual({ applied: 0, duplicate: 0, failed: 0, audioApplied: 0, remaining: 0 })
+    expect(summary).toEqual({
+      applied: 0,
+      duplicate: 0,
+      failed: 0,
+      audioApplied: 0,
+      sharedApplied: 0,
+      remaining: 0,
+    })
     expect(fetchMock).not.toHaveBeenCalled()
   })
 

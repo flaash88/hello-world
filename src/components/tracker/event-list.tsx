@@ -16,6 +16,8 @@ export type ListedEvent = EditableEvent & {
   durationSec: number | null
   running: boolean
   createdBy: { id: string; displayName: string; initials: string; color: string } | null
+  /** "automation" = ueber die API eingetragen, z. B. vom NFC-Tag. */
+  source?: string | null
 }
 
 /**
@@ -91,6 +93,11 @@ export function EventList({
                           {event.running && (
                             <span className="text-xs font-semibold text-primary">läuft</span>
                           )}
+                          {event.source === 'automation' && (
+                            <span className="rounded border border-border px-1 text-[0.625rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                              Automation
+                            </span>
+                          )}
                         </span>
                         {detail && (
                           <span className="block truncate text-sm text-muted-foreground">{detail}</span>
@@ -111,7 +118,11 @@ export function EventList({
                           size="sm"
                           initials={event.createdBy.initials}
                           color={event.createdBy.color}
-                          title={`Eingetragen von ${event.createdBy.displayName}`}
+                          title={
+                            event.source === 'automation'
+                              ? `Automation (${event.createdBy.displayName})`
+                              : `Eingetragen von ${event.createdBy.displayName}`
+                          }
                         />
                       )}
                     </button>

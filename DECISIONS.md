@@ -569,3 +569,97 @@ kein Decodieren im Browser, kein Ruckeln auf dem Telefon.
 **Aufnahmen liegen als ArrayBuffer in der Queue.** Blobs in IndexedDB sind je nach
 Browser heikel, Rohdaten sind es nirgends. Der Blob entsteht erst beim Hochladen
 wieder.
+
+## Phase 10
+
+**Geburtsgewicht in Gramm, ganzzahlig.** `GrowthMeasurement` rechnet in Kilogramm
+mit Nachkommastellen, `Child.birthWeightG` in ganzen Gramm. In den ersten Wochen
+ist der Unterschied zwischen 3.400 und 3.450 Gramm genau der Punkt, und die
+Klinikwaage zeigt Gramm an. Dazu kam `formatGrams()` in der Einheitenschicht –
+`formatMass()` wechselt ab einem Kilo auf Kilogramm und verlöre die Auflösung.
+
+**Die Neugeborenen-Ansicht rechnet, sie bewertet nicht.** Ein Verlust bis etwa
+7 % ist normal, bis 10 % kommt vor – deshalb stehen beide Marken grau und
+gestrichelt im Diagramm, ohne Farbe und ohne Wort. Der einzige Satz, den die App
+sagt, ist die Anregung, es bei der Hebamme anzusprechen; er kommt einmal und
+verschwindet, sobald das Geburtsgewicht wieder erreicht ist. Ein Test verbietet
+„verpasst“ und „versäumt“ in diesen Texten.
+
+**Ein Druckmodul für beide Zettel.** Der Zettel für die Ordination (9.3) und das
+Stillprotokoll fragen nach denselben Kopfangaben. Statt das Layout zweimal zu
+bauen, liegt es in `src/lib/print/`: `kopf.ts` baut die Felder, `document.ts` die
+pdf-lib-Bausteine, `print-header.tsx` die Fassung für den Browser. Der
+Wochenbericht zeichnet über dieselben Funktionen.
+
+**`header` und `nav` werden im Druck nicht mehr pauschal ausgeblendet.** Die alte
+Regel `header, nav { display: none }` hat auch die Kopfzeile der Druckansichten
+erwischt – aufgefallen ist das erst, als der Test den Ausdruck wirklich als PDF
+gelesen hat. Jetzt trägt die App-Hülle `print:hidden`, und beide Ausdrucke sind
+gegen A4 geprüft: je genau eine Seite, mit Kopf, ohne Bedienelemente.
+
+**Die Notfallkarte legt keine zweiten Felder an.** Doppelt gepflegte Notfalldaten
+sind schlimmer als keine: irgendwann stimmt eine der beiden Fassungen nicht mehr,
+und man merkt es im falschen Moment. Damit die Gesundheitskategorie diese Quelle
+wirklich sein kann, hat sie jetzt eine Art „Allergie“ und beim Medikament einen
+Schalter „Dauermedikament“ – ohne die beiden hätte die Karte doch eigene Felder
+gebraucht. Neu sind nur Blutgruppe, Vorerkrankungen, Adresse und Kontakte.
+
+**Kein Nachtmodus auf der Notfallkarte.** Wer sie öffnet, braucht sie jetzt und
+nicht schonend: maximaler Kontrast, sehr große Schrift, jede Nummer über die
+volle Breite antippbar. Rettung und Vergiftungszentrale stehen invertiert, die
+Beratungsnummer normal – die Reihenfolge auf dem Schirm ist die Reihenfolge der
+Dringlichkeit.
+
+**Offline heißt hier wirklich offline.** Die Karte wird bei jedem Besuch in
+IndexedDB gespiegelt, das Dokument hält der Service Worker vor. Ohne beides
+zusammen wäre die Seite ohne Netz entweder leer oder veraltet.
+
+**Doppelerfassung blockiert nicht.** Der Eintrag wird gespeichert, danach fragt
+die App. Nachts um drei ist ein Dialog, der das Speichern verhindert, das Letzte,
+was jemand braucht. Wer den Hinweis ignoriert, verliert nichts – der Verdacht
+bleibt offen und taucht in der Auswertung wieder auf.
+
+**Ausgeschlossen wird der neuere Eintrag.** Zwei Einträge für denselben Schlaf
+ergäben ein Wachfenster von null Minuten und würden den Median verziehen. Der
+ältere bleibt in der Statistik, damit das Ereignis nicht ganz verschwindet.
+
+**Den Eintrag der anderen Person kann niemand löschen.** „Meinen löschen“ gibt es
+nur für den eigenen. Etwas wegzuräumen, das jemand anderes eingetragen hat, ohne
+dass er es merkt, wäre übergriffig – „Beide behalten“ ist dafür da.
+
+**30 Minuten Fenster bei Medikamenten.** Bleibt eine doppelte Gabe stehen, glauben
+beide, die Dosis sei zweimal gegeben worden. Deshalb das größte Fenster und der
+deutlichste Hinweis – im selben Rahmen wie Phase 9.3: die App rechnet weiterhin
+nichts aus, sie zählt nur.
+
+**Die alten PWA-Verknüpfungen zeigten ins Leere.** `/schnell/schlaf`,
+`/schnell/stillen` und `/schnell/windel` standen seit Phase 0 im Manifest, die
+Routen gab es nie. Jetzt führen sie auf `/heute?action=…`; der Parameter
+verschwindet sofort per `history.replaceState`, sonst startet ein Neuladen den
+Timer ein zweites Mal.
+
+**Relativer Location-Header beim Share Target.** `Response.redirect()` verlangt
+eine absolute URL, und die wäre hinter dem Tunnel die interne Containeradresse
+gewesen – der Browser wäre im Nichts gelandet. Aufgefallen im Test, weil der
+Cookie auf einem anderen Host nicht mitkam.
+
+**Die API akzeptiert keine Cookies.** Ein Token, der am NFC-Tag oder in der
+Home-Assistant-Konfiguration steht, soll nicht dieselben Rechte haben wie eine
+angemeldete Person am Handy. Weil `/api/v1` Cookies gar nicht erst liest, ist CSRF
+über diese Endpunkte ausgeschlossen; CORS ist aus, das Limit liegt bei 60
+Anfragen pro Minute je Token, und jeder Zugriff steht im Audit-Log.
+
+**Der Typ-Enum der API wird abgeleitet, nicht getippt.** `API_TYPES` entsteht aus
+`EVENT_TYPES` und `HEALTH_KINDS`. Ein Test hält fest, dass jeder Ereignistyp darin
+auftaucht und nichts darin steht, was nicht aus einer Registry kommt – kommt
+später ein Typ dazu, kann die API ihn sofort.
+
+**Tokens sind nicht im Backup.** Sie liegen nur gehasht in der DB und wären in
+einer Sicherung wertlos. Webhooks schon – die sind Konfiguration, kein Geheimnis.
+
+**iOS liest weder Verknüpfungen noch Share Target.** Beides ist Android-Sache.
+Was auf dem iPhone zählt, ist das Manifest mit `display: standalone`, das
+Apple-Touch-Icon und der Titel; die alte Schreibweise
+`apple-mobile-web-app-capable` steht zusätzlich im Kopf, weil sie ältere Geräte
+noch brauchen und nichts kostet. Beides ist im E2E-Lauf gegen die ausgelieferte
+Seite geprüft, nicht nur behauptet.
