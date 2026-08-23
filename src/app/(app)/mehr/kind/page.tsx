@@ -25,6 +25,8 @@ export default async function ChildSettingsPage() {
       birthDate: child.birthDate ? localDateKey(child.birthDate, ctx.timezone) : '',
       dueDate: child.dueDate ? localDateKey(child.dueDate, ctx.timezone) : '',
       sex: child.sex === 'male' ? 'male' : child.sex === 'female' ? 'female' : 'unknown',
+      birthWeightG: child.birthWeightG !== null ? String(child.birthWeightG) : '',
+      dischargeWeightG: child.dischargeWeightG !== null ? String(child.dischargeWeightG) : '',
       ageLabel: child.birthDate ? formatAge(child.birthDate, now, ctx.timezone) : null,
       correctedWeeks:
         corrected !== null && rawAge !== null && corrected !== rawAge

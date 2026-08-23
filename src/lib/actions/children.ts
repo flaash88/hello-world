@@ -25,6 +25,9 @@ const childSchema = z.object({
   birthDate: z.string().optional(),
   dueDate: z.string().optional(),
   sex: z.enum(['male', 'female', 'unknown']).default('unknown'),
+  // Gramm, ganzzahlig. Leeres Feld heisst "nicht eingetragen", nicht "null Gramm".
+  birthWeightG: z.number().int().min(200).max(8000).nullable().optional(),
+  dischargeWeightG: z.number().int().min(200).max(8000).nullable().optional(),
 })
 
 function parseDate(value: string | undefined): Date | null {
@@ -47,6 +50,8 @@ export async function createChildAction(
       birthDate: parseDate(parsed.data.birthDate),
       dueDate: parseDate(parsed.data.dueDate),
       sex: parsed.data.sex,
+      birthWeightG: parsed.data.birthWeightG ?? null,
+      dischargeWeightG: parsed.data.dischargeWeightG ?? null,
     },
   })
   await setActiveChildAction(child.id)
@@ -70,6 +75,8 @@ export async function updateChildAction(
       birthDate: parseDate(parsed.data.birthDate),
       dueDate: parseDate(parsed.data.dueDate),
       sex: parsed.data.sex,
+      birthWeightG: parsed.data.birthWeightG ?? null,
+      dischargeWeightG: parsed.data.dischargeWeightG ?? null,
     },
   })
   revalidatePath('/', 'layout')

@@ -143,17 +143,22 @@ model LoginAttempt {
 // ------------------------------------------------------------------- Kinder --
 
 model Child {
-  id          String    @id @default(cuid())
-  householdId String
-  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  name        String
-  birthDate   DateTime?
-  dueDate     DateTime? // fuer korrigiertes Alter bei Fruehgeburt
-  sex         String    @default("unknown") // male | female | unknown
-  avatarPath  String?
-  archived    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  householdId      String
+  household        Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  name             String
+  birthDate        DateTime?
+  dueDate          DateTime? // fuer korrigiertes Alter bei Fruehgeburt
+  sex              String    @default("unknown") // male | female | unknown
+  // Geburts- und Entlassungsgewicht in Gramm. Bewusst ganzzahlig und nicht in
+  // Kilogramm wie GrowthMeasurement: in den ersten Wochen zaehlen zehn Gramm,
+  // und die Waage in der Klinik zeigt Gramm an.
+  birthWeightG     Int?
+  dischargeWeightG Int?
+  avatarPath       String?
+  archived         Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   events       Event[]
   measurements GrowthMeasurement[]
