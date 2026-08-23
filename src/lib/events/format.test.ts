@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { eventDetail, eventDurationSec, eventTitle, formatVolume, formatTemperature } from './format'
+import { eventDetail, eventDurationSec, eventTitle } from './format'
 
 const at = (iso: string) => new Date(iso)
 
@@ -117,7 +117,38 @@ describe('eventDurationSec', () => {
 
 describe('Einheitenformatierung', () => {
   it('formatiert Milliliter und Temperatur deutsch', () => {
-    expect(formatVolume(120)).toBe('120 ml')
-    expect(formatTemperature(37.05)).toBe('37,1 °C')
+    expect(
+      eventDetail({
+        type: 'bottle',
+        startedAt: at('2026-01-01T10:00:00Z'),
+        endedAt: null,
+        durationSec: null,
+        payload: { content: 'formula', amountMl: 120 },
+      }),
+    ).toContain('120 ml')
+    expect(
+      eventDetail({
+        type: 'health',
+        startedAt: at('2026-01-01T10:00:00Z'),
+        endedAt: null,
+        durationSec: null,
+        payload: { kind: 'temperature', temperatureC: 37.05 },
+      }),
+    ).toContain('37,1 °C')
+  })
+
+  it('folgt der eingestellten Einheit', () => {
+    expect(
+      eventDetail(
+        {
+          type: 'bottle',
+          startedAt: at('2026-01-01T10:00:00Z'),
+          endedAt: null,
+          durationSec: null,
+          payload: { content: 'formula', amountMl: 120 },
+        },
+        { weight: 'lb', length: 'in', temp: 'f', volume: 'oz' },
+      ),
+    ).toContain('4,1 oz')
   })
 })

@@ -15,6 +15,8 @@ import { ChevronLeft, ChevronRight, Droplets, Milk, Moon, Timer, TriangleAlert, 
 import type { DiaperStats, FeedingStats, HeatmapCell, SleepStats } from '@/lib/stats/aggregate'
 import { PERIOD_LABEL, type Period } from '@/lib/stats/periods'
 import { formatDateShort, formatDuration } from '@/lib/time'
+import { formatVolume } from '@/lib/units'
+import { useUnits } from '@/components/units-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatTile } from '@/components/stats/stat-tile'
 import { SleepHeatmap } from '@/components/stats/sleep-heatmap'
@@ -69,6 +71,7 @@ export function StatsView({
   heatmapCells: HeatmapCell[]
   heatmapDays: string[]
 }) {
+  const units = useUnits()
   const { sleep, feeding, diapers, daily } = stats
   const from = new Date(stats.from)
   const to = new Date(new Date(stats.to).getTime() - 1)
@@ -214,8 +217,8 @@ export function StatsView({
                 hint="Median"
               />
               <StatTile label="Stillen" value={String(feeding.nursingCount)} hint={formatDuration(feeding.nursingMin * 60, { short: true })} />
-              <StatTile icon={Milk} color="bottle" label="Flasche" value={`${feeding.bottleMl} ml`} hint={`${feeding.bottleCount} Flaschen`} />
-              <StatTile label="Abgepumpt" value={`${feeding.pumpingMl} ml`} hint={`${feeding.pumpingCount} Einheiten`} />
+              <StatTile icon={Milk} color="bottle" label="Flasche" value={formatVolume(feeding.bottleMl, units)} hint={`${feeding.bottleCount} Flaschen`} />
+              <StatTile label="Abgepumpt" value={formatVolume(feeding.pumpingMl, units)} hint={`${feeding.pumpingCount} Einheiten`} />
               <StatTile label="Beikost" value={String(feeding.solidsCount)} />
             </div>
           </section>

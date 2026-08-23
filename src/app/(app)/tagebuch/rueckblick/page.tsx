@@ -4,6 +4,7 @@ import { Baby, Printer } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { addDays, formatAge, formatDateLong, startOfLocalDay } from '@/lib/time'
+import { formatLength, formatWeight, unitPrefsFrom } from '@/lib/units'
 import { EmptyState } from '@/components/ui/empty-state'
 import { BackLink } from '@/components/layout/back-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +18,7 @@ export default async function YearReviewPage({
   searchParams: Promise<{ jahr?: string }>
 }) {
   const ctx = await getAppContext()
+  const units = unitPrefsFrom(ctx.household.settings)
   const child = ctx.activeChild
 
   if (!child) {
@@ -95,17 +97,13 @@ export default async function YearReviewPage({
               {first && last && first.weightKg !== null && last.weightKg !== null && (
                 <Stat
                   label="Gewicht"
-                  value={`+${(last.weightKg - first.weightKg).toLocaleString('de-AT', {
-                    maximumFractionDigits: 2,
-                  })} kg`}
+                  value={`+${formatWeight(last.weightKg - first.weightKg, units)}`}
                 />
               )}
               {first && last && first.lengthCm !== null && last.lengthCm !== null && (
                 <Stat
                   label="Gewachsen"
-                  value={`+${(last.lengthCm - first.lengthCm).toLocaleString('de-AT', {
-                    maximumFractionDigits: 1,
-                  })} cm`}
+                  value={`+${formatLength(last.lengthCm - first.lengthCm, units)}`}
                 />
               )}
             </CardContent>

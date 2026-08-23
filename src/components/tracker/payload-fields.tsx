@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import { OptionGrid, type Option } from './option-grid'
 import { NumberStepper } from './number-stepper'
+import { UnitStepper } from './unit-stepper'
 import {
   BOTTLE_CONTENT_LABEL,
   BOTTLE_CONTENTS,
@@ -197,20 +198,18 @@ function BottleFields(props: FieldProps) {
         value={str(payload, 'content') ?? 'formula'}
         onChange={(value) => set(props, 'content', value)}
       />
-      <NumberStepper
+      <UnitStepper
+        kind="volume"
         id="amountMl"
         label="Menge"
-        unit="ml"
-        step={10}
         max={500}
         value={num(payload, 'amountMl')}
         onChange={(value) => set(props, 'amountMl', value)}
       />
-      <NumberStepper
+      <UnitStepper
+        kind="volume"
         id="leftoverMl"
         label="Rest in der Flasche"
-        unit="ml"
-        step={10}
         max={500}
         value={num(payload, 'leftoverMl')}
         onChange={(value) => set(props, 'leftoverMl', value)}
@@ -233,30 +232,27 @@ function PumpingFields(props: FieldProps) {
         value={str(payload, 'side') ?? 'both'}
         onChange={(value) => set(props, 'side', value)}
       />
-      <NumberStepper
+      <UnitStepper
+        kind="volume"
         id="pumpAmount"
         label="Menge gesamt"
-        unit="ml"
-        step={10}
         max={1000}
         value={num(payload, 'amountMl')}
         onChange={(value) => set(props, 'amountMl', value)}
       />
       <div className="grid grid-cols-2 gap-3">
-        <NumberStepper
+        <UnitStepper
+          kind="volume"
           id="pumpLeft"
           label="Links"
-          unit="ml"
-          step={10}
           max={500}
           value={num(payload, 'leftMl')}
           onChange={(value) => set(props, 'leftMl', value)}
         />
-        <NumberStepper
+        <UnitStepper
+          kind="volume"
           id="pumpRight"
           label="Rechts"
-          unit="ml"
-          step={10}
           max={500}
           value={num(payload, 'rightMl')}
           onChange={(value) => set(props, 'rightMl', value)}
@@ -527,11 +523,10 @@ function HealthFields(props: FieldProps) {
 
       {kind === 'temperature' && (
         <>
-          <NumberStepper
+          <UnitStepper
+            kind="temp"
             id="temperatureC"
             label="Temperatur"
-            unit="°C"
-            step={0.1}
             min={30}
             max={45}
             placeholder="37,0"
@@ -560,6 +555,7 @@ function HealthFields(props: FieldProps) {
               placeholder="z. B. Nurofen Saft"
             />
           </div>
+          {/* Dosen bleiben in ml und mg – so steht es auf der Packung. */}
           <div className="grid grid-cols-2 gap-3">
             <NumberStepper
               id="doseMl"

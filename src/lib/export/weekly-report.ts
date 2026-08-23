@@ -2,6 +2,7 @@ import 'server-only'
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
 import { formatDateShort, formatDuration } from '@/lib/time'
 import type { StatsBundle } from '@/lib/stats/queries'
+import { DEFAULT_UNITS, formatVolume, type UnitPrefs } from '@/lib/units'
 
 /**
  * Wochenbericht als PDF.
@@ -44,6 +45,8 @@ export type WeeklyReportInput = {
   growth?: { label: string; value: string }[]
   /** Kurzer, automatisch erzeugter Wochenrueckblick. */
   summary: string[]
+  /** Einheiten des Haushalts; der Bericht folgt der Einstellung. */
+  units?: UnitPrefs
 }
 
 export async function buildWeeklyReportPdf(input: WeeklyReportInput): Promise<Uint8Array> {
@@ -60,6 +63,7 @@ export async function buildWeeklyReportPdf(input: WeeklyReportInput): Promise<Ui
   const width = 595.28 - 2 * MARGIN
 
   const { stats } = input
+  const units = input.units ?? DEFAULT_UNITS
   const from = stats.from
   const to = new Date(stats.to.getTime() - 1)
 
@@ -108,8 +112,8 @@ export async function buildWeeklyReportPdf(input: WeeklyReportInput): Promise<Ui
   drawRows(cursor, regular, bold, width, [
     ['Mahlzeiten gesamt', String(stats.feeding.mealCount)],
     ['Stillmahlzeiten', `${stats.feeding.nursingCount} (${formatDuration(stats.feeding.nursingMin * 60, { short: true })})`],
-    ['Flasche', `${stats.feeding.bottleCount} (${stats.feeding.bottleMl} ml)`],
-    ['Abgepumpt', `${stats.feeding.pumpingCount} (${stats.feeding.pumpingMl} ml)`],
+    ['Flasche', `${stats.feeding.bottleCount} (${formatVolume(stats.feeding.bottleMl, units)})`],
+    ['Abgepumpt', `${stats.feeding.pumpingCount} (${formatVolume(stats.feeding.pumpingMl, units)})`],
     ['Beikost', String(stats.feeding.solidsCount)],
     [
       'Abstand (Median)',

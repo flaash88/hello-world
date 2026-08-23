@@ -15,7 +15,6 @@ import { Plus, Ruler, Trash2 } from 'lucide-react'
 import {
   CURVE_PERCENTILES,
   INDICATOR_LABEL,
-  INDICATOR_UNIT,
   LENGTH_HEIGHT_TRANSITION_DAY,
   describePercentile,
   shortPercentile,
@@ -33,7 +32,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { NumberStepper } from '@/components/tracker/number-stepper'
+import { UnitStepper } from '@/components/tracker/unit-stepper'
+import { useUnits } from '@/components/units-provider'
+import { formatUnit, toDisplay, unitLabel, type UnitKind, type UnitPrefs } from '@/lib/units'
 import { useToast } from '@/components/ui/toast'
 import { MedicalDisclaimer } from '@/components/medical-disclaimer'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -61,6 +62,40 @@ const CURVE_STYLE: Record<number, { color: string; dash?: string }> = {
   97: { color: 'hsl(var(--muted-foreground))', dash: '3 3' },
 }
 
+/**
+ * BMI bleibt kg/m²: Eine Umrechnung auf lb/in² kennt niemand, und die WHO
+ * gibt den Wert nur metrisch an. Alles andere folgt der Einstellung.
+ */
+function indicatorKind(indicator: Indicator): UnitKind | null {
+  if (indicator === 'bmi') return null
+  return indicator === 'weight' ? 'weight' : 'length'
+}
+
+function formatIndicator(indicator: Indicator, value: number, units: UnitPrefs): string {
+  const kind = indicatorKind(indicator)
+  if (!kind) return `${value.toLocaleString('de-AT', { maximumFractionDigits: 1 })} kg/m²`
+  return formatUnit(kind, value, units)
+}
+
+function indicatorUnitLabel(indicator: Indicator, units: UnitPrefs): string {
+  const kind = indicatorKind(indicator)
+  return kind ? unitLabel(kind, units) : 'kg/m²'
+}
+
+/** Kurvenwerte fuer die Anzeige umrechnen – gerechnet wird weiter metrisch. */
+function displayCurve(indicator: Indicator, curve: CurvePoint[], units: UnitPrefs): CurvePoint[] {
+  const kind = indicatorKind(indicator)
+  if (!kind) return curve
+  return curve.map((point) => {
+    const next: CurvePoint = { ageDays: point.ageDays }
+    for (const [key, value] of Object.entries(point)) {
+      if (key === 'ageDays') continue
+      next[key] = toDisplay(kind, value, units)
+    }
+    return next
+  })
+}
+
 export function GrowthView({
   childId,
   childName,
@@ -81,6 +116,7 @@ export function GrowthView({
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Point | null>(null)
   const [pending, startTransition] = useTransition()
+  const units = useUnits()
   const { toast } = useToast()
   const router = useRouter()
 
@@ -141,8 +177,7 @@ export function GrowthView({
                     {INDICATOR_LABEL[indicator]}
                   </p>
                   <p className="tabular font-display text-xl font-bold">
-                    {raw.toLocaleString('de-AT', { maximumFractionDigits: indicator === 'weight' ? 3 : 1 })}{' '}
-                    <span className="text-sm font-normal">{INDICATOR_UNIT[indicator]}</span>
+                    {formatIndicator(indicator, raw, units)}
                   </p>
                   <Badge variant="secondary" className="mt-1">
                     {shortPercentile(result.percentile)}
@@ -178,7 +213,11 @@ export function GrowthView({
               .filter((point) => point.results[indicator] !== null)
               .map((point) => ({
                 ageDays: point.ageDays,
-                value: point.results[indicator]!.value,
+                value: (() => {
+                  const kind = indicatorKind(indicator)
+                  const value = point.results[indicator]!.value
+                  return kind ? toDisplay(kind, value, units) : value
+                })(),
               }))
 
             return (
@@ -195,7 +234,7 @@ export function GrowthView({
                   <CardContent className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart
-                        data={curves[indicator]}
+                        data={displayCurve(indicator, curves[indicator], units)}
                         margin={{ top: 4, right: 8, bottom: 4, left: -22 }}
                       >
                         <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
@@ -223,7 +262,7 @@ export function GrowthView({
                           }}
                           labelFormatter={(value) => `${Math.round(Number(value) / 30.4)} Monate`}
                           formatter={(value, name) => [
-                            `${Number(value).toLocaleString('de-AT', { maximumFractionDigits: 2 })} ${INDICATOR_UNIT[indicator]}`,
+                            `${Number(value).toLocaleString('de-AT', { maximumFractionDigits: 2 })} ${indicatorUnitLabel(indicator, units)}`,
                             String(name),
                           ]}
                         />
@@ -286,9 +325,9 @@ export function GrowthView({
                     </p>
                     <p className="tabular font-semibold">
                       {[
-                        point.weightKg !== null && `${point.weightKg.toLocaleString('de-AT')} kg`,
-                        point.lengthCm !== null && `${point.lengthCm.toLocaleString('de-AT')} cm`,
-                        point.headCm !== null && `KU ${point.headCm.toLocaleString('de-AT')} cm`,
+                        point.weightKg !== null && formatUnit('weight', point.weightKg, units),
+                        point.lengthCm !== null && formatUnit('length', point.lengthCm, units),
+                        point.headCm !== null && `KU ${formatUnit('length', point.headCm, units)}`,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -407,33 +446,30 @@ function MeasurementDialog({
               defaultValue={toLocalInput(point?.measuredAt ?? new Date().toISOString())}
             />
           </div>
-          <NumberStepper
+          <UnitStepper
+            kind="weight"
             id="weightKg"
             label="Gewicht"
-            unit="kg"
-            step={0.05}
             min={0.3}
             max={60}
             placeholder="5,20"
             value={weight}
             onChange={setWeight}
           />
-          <NumberStepper
+          <UnitStepper
+            kind="length"
             id="lengthCm"
             label="Länge"
-            unit="cm"
-            step={0.5}
             min={20}
             max={160}
             placeholder="58,0"
             value={length}
             onChange={setLength}
           />
-          <NumberStepper
+          <UnitStepper
+            kind="length"
             id="headCm"
             label="Kopfumfang"
-            unit="cm"
-            step={0.5}
             min={20}
             max={70}
             placeholder="39,0"
