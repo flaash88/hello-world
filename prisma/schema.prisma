@@ -253,7 +253,10 @@ model ChecklistItem {
   pregnancyId String?
   pregnancy   Pregnancy? @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)
   householdId String
-  listKey     String     @default("hospitalbag") // hospitalbag | custom
+  listKey     String     @default("hospitalbag") // hospitalbag | behoerdenwege | custom
+  // Schluessel aus der Vorlage – macht das Nachziehen neuer Eintraege
+  // idempotent, so wie bei den Mutter-Kind-Pass-Terminen.
+  templateKey String?
   section     String
   label       String
   note        String?
@@ -267,6 +270,7 @@ model ChecklistItem {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  @@unique([householdId, listKey, templateKey])
   @@index([householdId, listKey])
 }
 

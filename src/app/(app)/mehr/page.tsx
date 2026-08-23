@@ -5,6 +5,7 @@ import {
   Baby,
   BellRing,
   BookHeart,
+  BookOpen,
   ChevronRight,
   Download,
   HardDriveDownload,
@@ -31,6 +32,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
   {
     title: 'Für euch',
     links: [
+      { href: '/wissen', label: 'Wissen & Nachschlagen', icon: BookOpen },
       { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
       { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
