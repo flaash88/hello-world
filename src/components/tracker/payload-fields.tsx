@@ -586,6 +586,17 @@ function HealthFields(props: FieldProps) {
             value={num(payload, 'repeatHours')}
             onChange={(value) => set(props, 'repeatHours', value)}
           />
+          <div className="flex min-h-12 items-center justify-between gap-4">
+            <Label htmlFor="dauerhaft">Dauermedikament</Label>
+            <Switch
+              id="dauerhaft"
+              checked={payload.dauerhaft === true}
+              onCheckedChange={(checked) => set(props, 'dauerhaft', checked || null)}
+            />
+          </div>
+          <p className="-mt-2 text-xs text-muted-foreground">
+            Regelmäßig gegeben? Dann steht es auf der Notfallkarte.
+          </p>
         </>
       )}
 
@@ -599,6 +610,22 @@ function HealthFields(props: FieldProps) {
             onChange={(event) => set(props, 'symptom', event.target.value)}
             placeholder="z. B. Husten seit gestern"
           />
+        </div>
+      )}
+
+      {kind === 'allergy' && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="allergy">Allergie oder Unverträglichkeit</Label>
+          <Input
+            id="allergy"
+            maxLength={120}
+            value={str(payload, 'allergy') ?? ''}
+            onChange={(event) => set(props, 'allergy', event.target.value)}
+            placeholder="z. B. Kuhmilcheiweiß"
+          />
+          <p className="text-xs text-muted-foreground">
+            Steht danach auf der Notfallkarte.
+          </p>
         </div>
       )}
 

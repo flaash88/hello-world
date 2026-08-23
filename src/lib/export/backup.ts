@@ -61,13 +61,14 @@ export async function buildBackup(
       prisma.customSound.findMany({ where: { householdId } }),
     ])
 
-  const [vorsorge, teeth, milkPortions, audioNotes] = await Promise.all([
+  const [vorsorge, teeth, milkPortions, audioNotes, emergencyContacts] = await Promise.all([
     prisma.vorsorgeEntry.findMany({ where: { child: { householdId } }, orderBy: { doneAt: 'asc' } }),
     prisma.tooth.findMany({ where: { child: { householdId } } }),
     prisma.milkPortion.findMany({ where: { householdId }, orderBy: { abgepumptAm: 'asc' } }),
     // Wie bei den Klaengen: die Tondateien liegen im Upload-Volume, hier steht
     // nur, welche es gab – sonst waere das Backup schnell dreistellig gross.
     prisma.audioNote.findMany({ where: { child: { householdId } }, orderBy: { recordedAt: 'asc' } }),
+    prisma.emergencyContact.findMany({ where: { householdId }, orderBy: { sortOrder: 'asc' } }),
   ])
 
   const privateJournal = options.includeOwnPrivate
@@ -98,6 +99,7 @@ export async function buildBackup(
     teeth,
     milkPortions,
     audioNotes,
+    emergencyContacts,
     privateJournal,
   }
 }

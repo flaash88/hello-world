@@ -16,6 +16,8 @@ import {
   Moon,
   Music,
   Ruler,
+  ShieldAlert,
+  Siren,
   Sparkles,
   Smile,
   SlidersHorizontal,
@@ -37,6 +39,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
   {
     title: 'Für euch',
     links: [
+      { href: '/notfall', label: 'Notfallkarte', icon: Siren },
       { href: '/wissen', label: 'Wissen & Nachschlagen', icon: BookOpen },
       { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
       { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
@@ -54,6 +57,7 @@ const GROUPS: { title: string; links: { href: string; label: string; icon: Lucid
     title: 'Einstellungen',
     links: [
       { href: '/mehr/kind', label: 'Kindprofil', icon: Baby },
+      { href: '/mehr/notfall', label: 'Notfalldaten', icon: ShieldAlert },
       { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
       { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
       { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },

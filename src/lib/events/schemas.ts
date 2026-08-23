@@ -84,7 +84,14 @@ export const healthPayload = z.object({
   doseMl: z.number().min(0).max(200).optional(),
   /** Wiederholungsintervall in Stunden – daraus entsteht eine Erinnerung. */
   repeatHours: z.number().min(0.5).max(48).optional(),
+  /**
+   * Dauermedikament statt Einzelgabe. Nur dafuer da, dass die Notfallkarte
+   * weiss, was regelmaessig gegeben wird – die App leitet daraus nichts ab.
+   */
+  dauerhaft: z.boolean().optional(),
   symptom: z.string().max(120).optional(),
+  /** Bekannte Allergie oder Unvertraeglichkeit, z. B. "Kuhmilcheiweiss". */
+  allergy: z.string().max(120).optional(),
   vaccine: z.string().max(120).optional(),
 })
 

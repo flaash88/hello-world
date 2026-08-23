@@ -68,15 +68,24 @@ export type QueuedAudio = {
 
 export type AudioEntry = QueuedAudio & { attempts: number; lastError?: string }
 
+/**
+ * Gespiegelte Notfallkarte. Liegt bewusst in derselben Datenbank wie die
+ * Queue: eine Datenbank, ein Upgrade-Pfad, und beim Abmelden ist alles an
+ * einem Ort.
+ */
+export type NotfallSpiegel = { key: 'aktuell'; karte: unknown; gespiegeltAm: string }
+
 interface QueueDb extends DBSchema {
   operations: { key: string; value: QueueEntry; indexes: { queuedAt: string } }
   audio: { key: string; value: AudioEntry; indexes: { queuedAt: string } }
+  notfall: { key: string; value: NotfallSpiegel }
 }
 
 const DB_NAME = 'sproessling'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE = 'operations'
 const AUDIO_STORE = 'audio'
+const NOTFALL_STORE = 'notfall'
 /** Nach so vielen Fehlversuchen gilt ein Eintrag als dauerhaft kaputt. */
 export const MAX_ATTEMPTS = 8
 
@@ -92,6 +101,9 @@ function db(): Promise<IDBPDatabase<QueueDb>> {
       if (alteVersion < 2) {
         const store = database.createObjectStore(AUDIO_STORE, { keyPath: 'clientId' })
         store.createIndex('queuedAt', 'queuedAt')
+      }
+      if (alteVersion < 3) {
+        database.createObjectStore(NOTFALL_STORE, { keyPath: 'key' })
       }
     },
   })
@@ -190,4 +202,20 @@ export async function failedAudio(): Promise<AudioEntry[]> {
 
 export async function countPendingAudio(): Promise<number> {
   return (await pendingAudio()).length
+}
+
+// --------------------------------------------------------- Notfallkarte --
+
+export async function spiegleNotfallKarte(karte: unknown): Promise<void> {
+  const database = await db()
+  await database.put(NOTFALL_STORE, {
+    key: 'aktuell',
+    karte,
+    gespiegeltAm: new Date().toISOString(),
+  })
+}
+
+export async function gespiegelteNotfallKarte(): Promise<NotfallSpiegel | null> {
+  const database = await db()
+  return (await database.get(NOTFALL_STORE, 'aktuell')) ?? null
 }

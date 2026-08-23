@@ -20,13 +20,33 @@ model Household {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users        User[]
-  children     Child[]
-  invites      Invite[]
-  pregnancies  Pregnancy[]
-  settings     HouseholdSettings?
-  customSounds CustomSound[]
-  milkPortions MilkPortion[]
+  users             User[]
+  children          Child[]
+  invites           Invite[]
+  pregnancies       Pregnancy[]
+  settings          HouseholdSettings?
+  customSounds      CustomSound[]
+  milkPortions      MilkPortion[]
+  emergencyContacts EmergencyContact[]
+}
+
+/**
+ * Kontakte der Notfallkarte. Die festen Nummern (144, Vergiftungsinformations-
+ * zentrale, 1450) stehen im Code und nicht hier – sie sollen sich nicht
+ * loeschen lassen.
+ */
+model EmergencyContact {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  role        String // kinderarzt | hebamme | klinik | frei
+  name        String
+  phone       String
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([householdId, sortOrder])
 }
 
 model HouseholdSettings {
@@ -57,6 +77,9 @@ model HouseholdSettings {
   milkDeepFreezeHours Int     @default(8640)
   milkThawedHours     Int     @default(24)
   milkExpiryPush      Boolean @default(true)
+
+  // Wohnadresse fuer die Notfallkarte – im Notruf wird zuerst danach gefragt.
+  emergencyAddress String?
 
   updatedAt DateTime @updatedAt
 }
@@ -155,6 +178,11 @@ model Child {
   // und die Waage in der Klinik zeigt Gramm an.
   birthWeightG     Int?
   dischargeWeightG Int?
+  // Fuer die Notfallkarte. Alles andere dort kommt aus vorhandenen Quellen –
+  // Allergien und Dauermedikamente aus der Gesundheitskategorie, das Gewicht
+  // aus GrowthMeasurement, die Impfungen aus VorsorgeEntry.
+  bloodGroup       String?
+  conditions       String?
   avatarPath       String?
   archived         Boolean   @default(false)
   createdAt        DateTime  @default(now())

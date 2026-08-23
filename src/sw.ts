@@ -27,6 +27,26 @@ const serwist = new Serwist({
         plugins: [new ExpirationPlugin({ maxEntries: 400, maxAgeSeconds: 60 * 86400 })],
       }),
     },
+    // Die Notfallkarte muss ohne Netz stehen. Das Dokument wird bei jedem
+    // Besuch frisch geholt und dabei gecacht; faellt das Netz aus, kommt die
+    // zuletzt gesehene Fassung aus dem Cache und die Daten aus IndexedDB.
+    {
+      matcher: ({ request, url }) =>
+        request.destination === 'document' && url.pathname === '/notfall',
+      handler: new NetworkFirst({
+        cacheName: 'sp-notfall',
+        networkTimeoutSeconds: 3,
+        plugins: [new ExpirationPlugin({ maxEntries: 2, maxAgeSeconds: 180 * 86400 })],
+      }),
+    },
+    {
+      matcher: ({ url }) => url.pathname === '/api/notfall',
+      handler: new NetworkFirst({
+        cacheName: 'sp-notfall',
+        networkTimeoutSeconds: 3,
+        plugins: [new ExpirationPlugin({ maxEntries: 4, maxAgeSeconds: 180 * 86400 })],
+      }),
+    },
     {
       matcher: ({ url }) => url.pathname.startsWith('/api/'),
       handler: new NetworkFirst({
