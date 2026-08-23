@@ -10,7 +10,8 @@ import {
   lastNursingSide,
   recentEvents,
 } from '@/lib/events/queries'
-import { EVENT_TYPES, type EventType } from '@/lib/events/types'
+import { unitPrefsFrom } from '@/lib/units'
+import { parseQuickActions } from '@/lib/settings/display'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,18 +26,9 @@ import { LastEventsStrip } from '@/components/tracker/last-events-strip'
 import { EventList } from '@/components/tracker/event-list'
 import { AllActionsSheet } from '@/components/tracker/all-actions-sheet'
 
-const DEFAULT_QUICK_ACTIONS: EventType[] = ['sleep', 'nursing', 'bottle', 'diaper']
-
-function parseQuickActions(value: unknown): EventType[] {
-  if (!Array.isArray(value)) return DEFAULT_QUICK_ACTIONS
-  const filtered = value.filter(
-    (entry): entry is EventType => typeof entry === 'string' && (EVENT_TYPES as readonly string[]).includes(entry),
-  )
-  return filtered.length > 0 ? filtered : DEFAULT_QUICK_ACTIONS
-}
-
 export default async function HomePage() {
   const ctx = await getAppContext()
+  const units = unitPrefsFrom(ctx.household.settings)
   const partnerMissing = ctx.members.length < 2
   const child = ctx.activeChild
 
@@ -50,7 +42,7 @@ export default async function HomePage() {
         knownFoods(child.id),
         lastNursingSide(child.id),
         analyseSleep(child, ctx.timezone),
-        buildDayClockData(child.id, ctx.timezone, 0),
+        buildDayClockData(child.id, ctx.timezone, 0, new Date(), units),
       ])
     : ([[], new Map(), [], null, null, null] as const)
 
@@ -127,6 +119,7 @@ export default async function HomePage() {
               Zuletzt
             </h2>
             <LastEventsStrip
+              units={units}
               lastByType={lastByType}
               types={['sleep', 'nursing', 'bottle', 'pumping', 'solids', 'diaper']}
             />

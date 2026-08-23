@@ -34,7 +34,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
       <ul className="mx-auto flex max-w-2xl items-stretch">
         {items.map(({ href, label, icon }) => {
           const Icon = ICONS[icon]
-          const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
+          const active = pathname === href || pathname.startsWith(`${href}/`)
           return (
             <li key={href} className="flex-1">
               <Link
