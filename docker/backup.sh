@@ -6,6 +6,9 @@ set -e
 RETENTION="${BACKUP_RETENTION_DAYS:-14}"
 HOUR="${BACKUP_HOUR:-3}"
 DIR=/backups
+# Wird von der App im Upload-Volume abgelegt (nur lesend eingebunden).
+REQUEST="${BACKUP_REQUEST_FILE:-/data/uploads/.backup-request}"
+STAMP_FILE="$DIR/.last-run"
 
 mkdir -p "$DIR"
 
@@ -23,17 +26,26 @@ run_backup() {
   fi
   find "$DIR" -name 'sproessling-*.sql.gz' -type f -mtime "+$RETENTION" -delete
   echo "[backup] Aeltere Sicherungen als $RETENTION Tage entfernt."
+  date +%Y-%m-%dT%H:%M:%S > "$STAMP_FILE"
 }
 
-# Beim Start einmal sichern, danach taeglich zur eingestellten Stunde.
+# Beim Start einmal sichern, danach minuetlich pruefen: Liegt eine Anforderung
+# aus der App vor (Markierung neuer als der letzte Lauf), oder ist die
+# taegliche Backup-Stunde erreicht?
 run_backup || true
+last_day=$(date +%Y-%m-%d)
 
 while true; do
-  now_h=$(date +%H)
-  now_m=$(date +%M)
-  # Sekunden bis zur naechsten vollen Backup-Stunde.
-  target=$(( (24 + HOUR - now_h) % 24 ))
-  if [ "$target" = "0" ]; then target=24; fi
-  sleep $(( target * 3600 - now_m * 60 ))
-  run_backup || true
+  sleep 60
+  if [ -f "$REQUEST" ] && [ -n "$(find "$REQUEST" -newer "$STAMP_FILE" 2>/dev/null)" ]; then
+    echo "[backup] Anforderung aus der App erkannt."
+    run_backup || true
+    last_day=$(date +%Y-%m-%d)
+    continue
+  fi
+  today=$(date +%Y-%m-%d)
+  if [ "$(date +%H)" = "$(printf '%02d' "$HOUR")" ] && [ "$today" != "$last_day" ]; then
+    run_backup || true
+    last_day="$today"
+  fi
 done

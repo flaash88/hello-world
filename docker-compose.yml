@@ -19,9 +19,13 @@ services:
       VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@example.org}
       CRON_SECRET: ${CRON_SECRET:-}
       UPLOAD_DIR: /data/uploads
+      BACKUP_DIR: /backups
       TZ: ${TZ:-Europe/Vienna}
     volumes:
       - uploads:/data/uploads
+      # Nur lesend: Die App zeigt die Sicherungen an, erstellt werden sie vom
+      # Sidecar unten.
+      - backups:/backups:ro
     ports:
       # Nur lokal binden – nach aussen geht es ueber den Cloudflare Tunnel.
       - '127.0.0.1:3000:3000'
@@ -76,9 +80,12 @@ services:
       PGHOST: postgres
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_HOUR: ${BACKUP_HOUR:-3}
+      BACKUP_REQUEST_FILE: /data/uploads/.backup-request
       TZ: ${TZ:-Europe/Vienna}
     volumes:
       - backups:/backups
+      # Nur lesend: Hier legt die App die Anforderung "jetzt sichern" ab.
+      - uploads:/data/uploads:ro
       - ./docker/backup.sh:/usr/local/bin/backup.sh:ro
     entrypoint: ['/bin/sh', '/usr/local/bin/backup.sh']
 
