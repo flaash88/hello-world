@@ -186,3 +186,67 @@ test.describe('Einstellungen', () => {
     await expect(page.getByTestId('form-error')).toBeVisible()
   })
 })
+
+test.describe('Eigene Einschlafgeräusche', () => {
+  /** Kleinste gültige WAV-Datei: RIFF-Header plus ein paar Samples. */
+  function wavFile(): Buffer {
+    const samples = 800
+    const data = Buffer.alloc(samples * 2)
+    for (let i = 0; i < samples; i += 1) data.writeInt16LE(Math.round(Math.sin(i / 8) * 3000), i * 2)
+    const header = Buffer.alloc(44)
+    header.write('RIFF', 0)
+    header.writeUInt32LE(36 + data.length, 4)
+    header.write('WAVE', 8)
+    header.write('fmt ', 12)
+    header.writeUInt32LE(16, 16)
+    header.writeUInt16LE(1, 20)
+    header.writeUInt16LE(1, 22)
+    header.writeUInt32LE(8000, 24)
+    header.writeUInt32LE(16000, 28)
+    header.writeUInt16LE(2, 32)
+    header.writeUInt16LE(16, 34)
+    header.write('data', 36)
+    header.writeUInt32LE(data.length, 40)
+    return Buffer.concat([header, data])
+  }
+
+  test('lädt eine eigene Datei hoch, spielt sie und löscht sie wieder', async ({ page }) => {
+    const email = uniqueEmail('sound')
+    await register(page, { name: 'Mama', email, code: await createHouseholdInvite() })
+    await setUpChild(page, 'Mila', 45)
+
+    await page.goto('/sounds')
+    await page.getByLabel('Name (optional)').fill('Regen am Fenster')
+    await page.getByLabel('Audiodatei').setInputFiles({
+      name: 'regen.wav',
+      mimeType: 'audio/wav',
+      buffer: wavFile(),
+    })
+    await page.getByRole('button', { name: 'Hinzufügen' }).click()
+
+    await expect(page.getByText('Regen am Fenster')).toBeVisible()
+    await expect(page.getByText(/^Eigene Datei · /)).toBeVisible()
+
+    await page.getByRole('button', { name: 'Regen am Fenster abspielen' }).click()
+    await expect(page.getByRole('button', { name: 'Wiedergabe beenden' })).toBeVisible()
+    await page.getByRole('button', { name: 'Wiedergabe beenden' }).click()
+
+    await page.getByRole('button', { name: 'Regen am Fenster löschen' }).click()
+    await expect(page.getByText('Regen am Fenster')).toHaveCount(0)
+  })
+
+  test('weist Dateien ab, die keine Audiodateien sind', async ({ page }) => {
+    const email = uniqueEmail('sound-fake')
+    await register(page, { name: 'Mama', email, code: await createHouseholdInvite() })
+    await setUpChild(page, 'Nils', 45)
+
+    await page.goto('/sounds')
+    await page.getByLabel('Audiodatei').setInputFiles({
+      name: 'schummel.mp3',
+      mimeType: 'audio/mpeg',
+      buffer: Buffer.from('Das ist in Wahrheit ein Text und kein Klang.'),
+    })
+    await page.getByRole('button', { name: 'Hinzufügen' }).click()
+    await expect(page.getByTestId('form-error')).toContainText('Audiodatei')
+  })
+})
