@@ -13,6 +13,8 @@ import {
 } from 'recharts'
 import { deleteMaternalLogAction, saveMaternalLogAction } from '@/lib/actions/pregnancy-tracking'
 import { formatDateShort, formatDateTime } from '@/lib/time'
+import { formatWeight, fromDisplay, roundedDisplay, unitLabel } from '@/lib/units'
+import { useUnits } from '@/components/units-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -56,6 +58,7 @@ const COMMON_SYMPTOMS = [
 
 export function MaternalLogView({ logs }: { logs: Log[] }) {
   const [open, setOpen] = useState(false)
+  const units = useUnits()
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
@@ -64,9 +67,9 @@ export function MaternalLogView({ logs }: { logs: Log[] }) {
     () =>
       logs
         .filter((l) => l.weightKg !== null)
-        .map((l) => ({ t: new Date(l.recordedAt).getTime(), kg: l.weightKg! }))
+        .map((l) => ({ t: new Date(l.recordedAt).getTime(), kg: roundedDisplay('weight', l.weightKg!, units) }))
         .sort((a, b) => a.t - b.t),
-    [logs],
+    [logs, units],
   )
 
   const bpSeries = useMemo(
@@ -122,7 +125,7 @@ export function MaternalLogView({ logs }: { logs: Log[] }) {
                 />
                 <Tooltip
                   labelFormatter={(v) => formatDateShort(new Date(Number(v)))}
-                  formatter={(value) => [`${value} kg`, 'Gewicht']}
+                  formatter={(value) => [`${value} ${unitLabel('weight', units)}`, 'Gewicht']}
                   contentStyle={{
                     background: 'hsl(var(--popover))',
                     border: '1px solid hsl(var(--border))',
@@ -194,7 +197,7 @@ export function MaternalLogView({ logs }: { logs: Log[] }) {
                     </p>
                     <p className="tabular font-semibold">
                       {[
-                        log.weightKg !== null && `${log.weightKg.toLocaleString('de-AT')} kg`,
+                        log.weightKg !== null && formatWeight(log.weightKg, units),
                         log.systolic !== null && log.diastolic !== null && `${log.systolic}/${log.diastolic} mmHg`,
                         log.pulse !== null && `${log.pulse} bpm`,
                       ]
@@ -255,6 +258,7 @@ function MaternalLogDialog({
 }) {
   const [symptoms, setSymptoms] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const units = useUnits()
   const [pending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
@@ -281,7 +285,11 @@ function MaternalLogDialog({
     startTransition(async () => {
       const result = await saveMaternalLogAction({
         recordedAt: String(formData.get('recordedAt') ?? '') || undefined,
-        weightKg: num('weightKg'),
+        // Eingegeben wird in der eingestellten Einheit, gespeichert in kg.
+        weightKg: (() => {
+          const value = num('weightKg')
+          return value === null ? null : fromDisplay('weight', value, units)
+        })(),
         systolic: num('systolic'),
         diastolic: num('diastolic'),
         pulse: num('pulse'),
@@ -312,7 +320,7 @@ function MaternalLogDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="weightKg">Gewicht (kg)</Label>
+              <Label htmlFor="weightKg">Gewicht ({unitLabel('weight', units)})</Label>
               <Input id="weightKg" name="weightKg" inputMode="decimal" placeholder="68,4" />
             </div>
             <div className="flex flex-col gap-1.5">

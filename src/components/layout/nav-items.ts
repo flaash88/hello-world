@@ -1,3 +1,5 @@
+import { DASHBOARD_PATH } from '@/lib/settings/display'
+
 /**
  * Nur serialisierbare Werte: Die Tab-Leiste ist eine Client-Komponente und
  * bekommt ihre Ziele vom Server. Symbole werden dort anhand des Schlüssels
@@ -25,7 +27,7 @@ export function navItemsFor({
   hasChild: boolean
   hasPregnancy: boolean
 }): NavItem[] {
-  const home: NavItem = { href: '/', label: 'Heute', icon: 'home' }
+  const home: NavItem = { href: DASHBOARD_PATH, label: 'Heute', icon: 'home' }
   const more: NavItem = { href: '/mehr', label: 'Mehr', icon: 'more' }
   const pregnancy: NavItem = { href: '/schwangerschaft', label: 'SSW', icon: 'pregnancy' }
 

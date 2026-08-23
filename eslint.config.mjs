@@ -8,6 +8,8 @@ const config = [
       'node_modules/**',
       '.next/**',
       'coverage/**',
+      'test-results/**',
+      'playwright-report/**',
       'next-env.d.ts',
       'public/sw.js',
       'public/swe-worker-*.js',

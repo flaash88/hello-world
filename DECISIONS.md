@@ -307,3 +307,62 @@ Leben lässt.
 **Der Jahresrückblick ist eine druckbare Seite, kein PDF-Export.** Der Browser
 macht daraus mit zwei Taps ein PDF, und die Seite bleibt dabei durchsuchbar
 und kopierbar. Eigene Druckregeln blenden Navigation und Statusleisten aus.
+
+## Phase 7 – Eltern, Einstellungen, Betrieb
+
+**Der Eltern-Tab misst nichts, er fragt.** Drei Regler und ein Knopf, in zehn
+Sekunden erledigt. Kein Score, keine Diagnose, keine Ampel. Aus den Werten
+entsteht nur eine einzige Aussage – und die auch nur, wenn sie über Tage
+dieselbe bleibt.
+
+**Der Hinweis auf Unterstützung braucht fünf Tage Daten und eine deutliche
+Häufung** (siehe `src/lib/parents/support.ts`): mindestens fünf Tage mit
+niedriger Stimmung, fünf Nächte unter fünf Stunden oder sechs Tage hoher
+Belastung in vierzehn Tagen. Danach ist sieben Tage Ruhe, egal wie die Werte
+aussehen. Ein Hinweis, der jeden Tag kommt, wird weggeklickt statt gelesen.
+Der Text nennt keine Krankheit und stellt keine Diagnose – ein Test prüft
+genau das, damit es beim Umformulieren nicht verrutscht.
+
+**Die Kontakte sind österreichisch und konkret**: Hebamme, Frühe Hilfen,
+Rat auf Draht 147, Telefonseelsorge 142, Rettung 144 – als `tel:`-Links, weil
+man nachts keine Nummer abtippt.
+
+**Das private Elterntagebuch ist der einzige nicht geteilte Bereich.** Es ist
+an den Nutzer gebunden, nicht an den Haushalt, wird beim JSON-Export nur auf
+ausdrücklichen Wunsch mitgegeben und steht mit genau diesem Satz in der App.
+Ein E2E-Test meldet sich als zweite Person an und prüft, dass der Eintrag dort
+nicht auftaucht.
+
+**Einheiten sind Anzeige, nicht Speicherung.** In der Datenbank steht
+ausnahmslos kg, cm, °C und ml; `src/lib/units.ts` rechnet erst an der
+Oberfläche um – auch bei der Eingabe, wo `UnitStepper` den eingetippten Wert
+zurückrechnet. Dadurch bleiben WHO-Perzentile, Statistik und CSV-Export
+unabhängig von der Einstellung, und ein Wechsel der Einheit ändert keine Daten.
+Medikamentendosen bleiben in ml und mg, weil das auf der Packung steht. Der BMI
+bleibt kg/m², weil es lb/in² nicht gibt.
+
+**Die Wurzel `/` leitet nur weiter, das Dashboard liegt auf `/heute`.**
+So bleibt `start_url` im Manifest stabil, während der Startbildschirm frei
+wählbar ist. Zeigt die gewählte Seite gerade nichts an (Verlauf ohne Kind,
+SSW ohne Schwangerschaft), landet man auf dem Dashboard statt auf einer leeren
+Seite.
+
+**Die App fordert Backups an, sie erstellt sie nicht.** Das App-Image hat kein
+`pg_dump` und keine Schreibrechte im Backup-Volume; „Jetzt sichern“ legt eine
+Markierungsdatei im Upload-Volume ab, das der Sidecar nur lesend eingebunden
+hat. Ist die Markierung neuer als der letzte Lauf, sichert er. Kein Container
+schreibt ins Volume des anderen, und trotzdem funktioniert der Knopf. Fehlt
+das Backup-Volume (lokale Entwicklung), sagt die Seite das offen, statt eine
+Sicherung zu behaupten.
+
+**„Konto löschen“ löscht den Haushalt, nicht eine Person.** Bei zwei Personen
+in einem gemeinsamen Verlauf hängt an jedem Eintrag, wer ihn gemacht hat. Ein
+halber Haushalt wäre entweder ein kaputter Verlauf (fehlende Urheber) oder ein
+gefälschter (umgeschriebene Urheber). Deshalb löscht der Knopf alles – nach
+Passwort und getipptem Bestätigungswort, mit dem Export-Link direkt daneben.
+Die Bilddateien gehen erst nach dem Datenbank-Commit; bricht der ab, sind sie
+noch da.
+
+**Der Wechsel „Kind anlegen“ liegt im Kindprofil, nicht in einem eigenen
+Menü.** Das Datenmodell kann Geschwister; die Oberfläche zeigt eines und
+schaltet erst um, wenn es wirklich mehr als eines gibt.

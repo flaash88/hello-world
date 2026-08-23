@@ -3,7 +3,8 @@ import { prisma } from '@/lib/db'
 import { loadStats } from '@/lib/stats/queries'
 import { buildWeeklyReview } from '@/lib/stats/weekly-review'
 import { buildWeeklyReportPdf } from '@/lib/export/weekly-report'
-import { evaluateGrowth, INDICATOR_UNIT, shortPercentile, type Sex } from '@/lib/growth'
+import { evaluateGrowth, shortPercentile, type Sex } from '@/lib/growth'
+import { formatUnit, unitPrefsFrom } from '@/lib/units'
 import { correctedAgeDays } from '@/lib/sleep/windows'
 import { ageInDays, formatAge, localDateKey } from '@/lib/time'
 
@@ -21,12 +22,14 @@ export async function GET(request: Request): Promise<Response> {
 
   const household = await prisma.household.findUniqueOrThrow({
     where: { id: user.householdId },
-    select: { name: true, timezone: true },
+    select: { name: true, timezone: true, settings: true },
   })
   const child = childId
     ? await prisma.child.findFirst({ where: { id: childId, householdId: user.householdId } })
     : await prisma.child.findFirst({ where: { householdId: user.householdId, archived: false } })
   if (!child) return new Response('Kein Kind gefunden', { status: 404 })
+
+  const units = unitPrefsFrom(household.settings)
 
   const [stats, previous] = await Promise.all([
     loadStats(child.id, 'week', household.timezone, offset),
@@ -53,7 +56,7 @@ export async function GET(request: Request): Promise<Response> {
       const result = evaluateGrowth(indicator, sex, value, age)
       growth.push({
         label,
-        value: `${value.toLocaleString('de-AT')} ${INDICATOR_UNIT[indicator]} (${shortPercentile(result.percentile)})`,
+        value: `${formatUnit(indicator === 'weight' ? 'weight' : 'length', value, units)} (${shortPercentile(result.percentile)})`,
       })
     }
     add('Gewicht', latest.weightKg, 'weight')
@@ -69,6 +72,7 @@ export async function GET(request: Request): Promise<Response> {
     householdName: household.name,
     stats,
     timezone: household.timezone,
+    units,
     growth,
     summary: buildWeeklyReview(stats, previous, child.name),
   })

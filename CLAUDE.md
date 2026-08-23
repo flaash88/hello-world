@@ -42,6 +42,8 @@ src/
   app/
     (auth)/            Anmeldung und Registrierung
     (app)/             Alles hinter der Anmeldung (Layout mit Header + Tab-Leiste)
+                       `/` leitet auf den eingestellten Startbildschirm,
+                       das Dashboard selbst liegt auf `/heute`
     api/               Route Handler (SSE, Health, Uploads, Push, Export …)
   components/
     ui/                shadcn-Bausteine (Button, Card, Dialog …)
@@ -55,6 +57,10 @@ src/
     growth/            WHO-LMS-Daten und Perzentil-Rechnung
     stats/             Aggregationen für die Auswertungen
     content/           Wochen-Content, Sprünge, Übungen, Meilensteine
+    parents/           Eltern-Signal und Unterstützungskontakte
+    settings/          Startbildschirm, Schnellaktionen, Bestätigungswort
+    backup/            Lesezugriff auf das Backup-Volume
+    units.ts           Einheiten-Umrechnung für die Anzeige (Speicher: metrisch)
     actions/           Server Actions
 content/weeks/de/      Woche-für-Woche-Inhalte (Markdown + Frontmatter)
 prisma/                Schema, Migrationen, Seed

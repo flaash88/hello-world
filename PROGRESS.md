@@ -87,3 +87,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Neun Einschlafgeräusche, vollständig per Web Audio API erzeugt, mit Timer, Fade-Out,
   Lautstärke, Favoriten und MediaSession für den Sperrbildschirm.
 - Grün: lint, typecheck, 296 Unit-Tests, 49 E2E-Tests, build.
+
+## Phase 7 – Eltern, Einstellungen, Betrieb (abgeschlossen)
+
+- Eltern-Tab: Check-in mit drei Reglern, eigener Schlaf, Verlauf gegen die Nächte des Kindes.
+- Nachtschicht mit Übergabe-Notiz für beide sichtbar; privates Tagebuch nur für die eigene Person.
+- Hinweis auf Hilfe erst bei Häufung über Tage, danach sieben Tage Ruhe; AT-Kontakte als tel:-Links.
+- Einheiten (kg/lb, cm/in, °C/°F, ml/oz) als reine Anzeigeschicht – gespeichert bleibt metrisch.
+- Kindprofil mit Geburtsdatum, ET für das korrigierte Alter, Geschlecht und Geschwisterwechsel.
+- Startbildschirm und Schnellaktionen wählbar; `/` leitet weiter, Dashboard liegt auf `/heute`.
+- Backup-Seite: vorhandene Dumps, „jetzt sichern“ über Markierungsdatei, Restore-Anleitung.
+- Haushalt samt beider Konten löschbar – mit Passwort, Bestätigungswort und Export daneben.
+- Grün: lint, typecheck, 335 Unit-Tests (96,9 % Coverage auf der Logik), 57 E2E-Tests, build.

@@ -5,6 +5,8 @@ import type { PregnancyWeekContent } from '@/lib/pregnancy/content'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { formatLength, formatMass } from '@/lib/units'
+import { useUnits } from '@/components/units-provider'
 import { clamp } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +22,7 @@ export function WeekBrowser({
   const first = weeks[0]!.week
   const last = weeks[weeks.length - 1]!.week
   const [week, setWeek] = useState(() => clamp(initialWeek, first, last))
+  const units = useUnits()
   const stripRef = useRef<HTMLDivElement>(null)
   const content = weeks.find((w) => w.week === week)!
 
@@ -68,15 +71,10 @@ export function WeekBrowser({
           <CardDescription>
             Etwa so groß wie {content.comparison.toLowerCase()}
             {content.lengthCm !== null &&
-              ` · ${content.lengthCm.toLocaleString('de-AT', { maximumFractionDigits: 1 })} cm ${
+              ` · ${formatLength(content.lengthCm, units)} ${
                 content.lengthKind === 'ssl' ? '(Scheitel–Steiß)' : '(Scheitel–Ferse)'
               }`}
-            {content.weightG !== null &&
-              ` · ${
-                content.weightG >= 1000
-                  ? `${(content.weightG / 1000).toLocaleString('de-AT', { maximumFractionDigits: 2 })} kg`
-                  : `${content.weightG} g`
-              }`}
+            {content.weightG !== null && ` · ${formatMass(content.weightG, units)}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

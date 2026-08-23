@@ -4,6 +4,12 @@
  */
 import { formatDuration } from '@/lib/time'
 import {
+  DEFAULT_UNITS,
+  formatTemperature,
+  formatVolume,
+  type UnitPrefs,
+} from '@/lib/units'
+import {
   BOTTLE_CONTENT_LABEL,
   DIAPER_KIND_LABEL,
   EVENT_CATEGORIES,
@@ -38,14 +44,6 @@ function num(value: unknown): number | null {
 
 function str(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null
-}
-
-export function formatVolume(ml: number): string {
-  return `${ml.toLocaleString('de-AT', { maximumFractionDigits: 0 })} ml`
-}
-
-export function formatTemperature(celsius: number): string {
-  return `${celsius.toLocaleString('de-AT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} °C`
 }
 
 /** Titel des Eintrags, z. B. "Nickerchen" oder "Flasche · Pre-Nahrung". */
@@ -87,7 +85,7 @@ export function eventTitle(event: EventLike): string {
 }
 
 /** Zweite Zeile mit den Details, oder null wenn es nichts zu sagen gibt. */
-export function eventDetail(event: EventLike): string | null {
+export function eventDetail(event: EventLike, units: UnitPrefs = DEFAULT_UNITS): string | null {
   const p = asRecord(event.payload)
   const parts: string[] = []
 
@@ -114,18 +112,18 @@ export function eventDetail(event: EventLike): string | null {
     }
     case 'bottle': {
       const amount = num(p.amountMl)
-      if (amount !== null) parts.push(formatVolume(amount))
+      if (amount !== null) parts.push(formatVolume(amount, units))
       const leftover = num(p.leftoverMl)
-      if (leftover !== null && leftover > 0) parts.push(`${formatVolume(leftover)} übrig`)
+      if (leftover !== null && leftover > 0) parts.push(`${formatVolume(leftover, units)} übrig`)
       break
     }
     case 'pumping': {
       const total = num(p.amountMl)
       const left = num(p.leftMl)
       const right = num(p.rightMl)
-      if (total !== null) parts.push(formatVolume(total))
+      if (total !== null) parts.push(formatVolume(total, units))
       else if (left !== null || right !== null) {
-        parts.push(formatVolume((left ?? 0) + (right ?? 0)))
+        parts.push(formatVolume((left ?? 0) + (right ?? 0), units))
       }
       const side = str(p.side)
       if (side) parts.push(NURSING_SIDE_LABEL[side as 'left'] ?? side)
@@ -172,11 +170,12 @@ export function eventDetail(event: EventLike): string | null {
     }
     case 'health': {
       const temp = num(p.temperatureC)
-      if (temp !== null) parts.push(formatTemperature(temp))
+      if (temp !== null) parts.push(formatTemperature(temp, units))
       const medication = str(p.medication)
       if (medication) {
         const doseMg = num(p.doseMg)
         const doseMl = num(p.doseMl)
+        // Medikamentendosen bleiben in ml und mg: Das steht so auf der Packung.
         const dose = doseMl !== null ? `${doseMl} ml` : doseMg !== null ? `${doseMg} mg` : null
         parts.push(dose ? `${medication}, ${dose}` : medication)
       }

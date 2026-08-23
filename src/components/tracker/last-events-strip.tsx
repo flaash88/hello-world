@@ -3,6 +3,7 @@ import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
 import { eventDetail, eventDurationSec } from '@/lib/events/format'
 import { formatDuration, formatRelative } from '@/lib/time'
 import type { EventRow } from '@/lib/events/queries'
+import { DEFAULT_UNITS, type UnitPrefs } from '@/lib/units'
 import { QUICK_ACTION_ICONS } from './quick-actions-icons'
 
 /**
@@ -12,9 +13,12 @@ import { QUICK_ACTION_ICONS } from './quick-actions-icons'
 export function LastEventsStrip({
   lastByType,
   types,
+  units = DEFAULT_UNITS,
 }: {
   lastByType: Map<string, EventRow>
   types: EventType[]
+  /** Serverkomponente: Die Einheiten kommen als Prop, nicht aus dem Kontext. */
+  units?: UnitPrefs
 }) {
   const rows = types
     .map((type) => ({ type, event: lastByType.get(type) }))
@@ -28,7 +32,7 @@ export function LastEventsStrip({
         const category = EVENT_CATEGORIES[type]
         const Icon = QUICK_ACTION_ICONS[type]
         const duration = eventDurationSec(event)
-        const detail = eventDetail(event)
+        const detail = eventDetail(event, units)
         return (
           <li key={type} className="border-b border-border last:border-b-0">
             <Link href={`/verlauf?typ=${type}`} className="flex items-center gap-3 p-3">

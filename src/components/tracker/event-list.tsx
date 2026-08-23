@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
+import { useUnits } from '@/components/units-provider'
 import { eventDetail, eventDurationSec, eventTitle } from '@/lib/events/format'
 import { formatDuration, formatTime, localDateKey } from '@/lib/time'
 import { UserAvatar } from '@/components/ui/avatar'
@@ -34,6 +35,7 @@ export function EventList({
   showDayHeadings?: boolean
 }) {
   const [editing, setEditing] = useState<ListedEvent | null>(null)
+  const units = useUnits()
 
   if (events.length === 0) {
     return (
@@ -62,7 +64,7 @@ export function EventList({
                 const category = EVENT_CATEGORIES[event.type as EventType]
                 const Icon = QUICK_ACTION_ICONS[event.type as EventType]
                 const duration = eventDurationSec(event)
-                const detail = eventDetail(event)
+                const detail = eventDetail(event, units)
                 return (
                   <li key={event.id} className="border-b border-border last:border-b-0">
                     <button

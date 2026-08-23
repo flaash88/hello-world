@@ -69,7 +69,8 @@ export async function login(page: Page, email: string): Promise<void> {
   await page.getByLabel('E-Mail').fill(email)
   await page.getByLabel('Passwort').fill(PASSWORD)
   await page.getByRole('button', { name: 'Anmelden' }).click()
-  await page.waitForURL('/')
+  // Die Wurzel leitet auf den eingestellten Startbildschirm weiter.
+  await page.waitForURL(/\/(heute|onboarding)$/)
 }
 
 /** Legt Schwangerschaft mit `days` Tagen bis zum ET an (ab /onboarding). */
@@ -78,7 +79,7 @@ export async function setUpPregnancy(page: Page, days: number): Promise<void> {
   await page.getByRole('button', { name: 'Schwangerschaft anlegen' }).click()
   await page.getByLabel('Errechneter Termin').fill(dateInput(days))
   await page.getByRole('button', { name: 'Anlegen' }).click()
-  await page.waitForURL('/')
+  await page.waitForURL(/\/heute$/)
 }
 
 /** Legt ein Kind mit Geburtsdatum vor `daysAgo` Tagen an (ab /onboarding). */
@@ -88,7 +89,7 @@ export async function setUpChild(page: Page, name: string, daysAgo: number): Pro
   await page.getByLabel('Name').fill(name)
   await page.getByLabel('Geburtsdatum').fill(dateInput(-daysAgo))
   await page.getByRole('button', { name: 'Anlegen' }).click()
-  await page.waitForURL('/')
+  await page.waitForURL(/\/heute$/)
 }
 
 /** Datum im Format fuer <input type="date">, `days` Tage ab heute. */

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { addDays, formatDateShort, minutesSinceLocalMidnight, startOfLocalDay } from '@/lib/time'
 import { eventsBetween } from '@/lib/events/queries'
 import { eventDetail, eventTitle } from '@/lib/events/format'
+import { unitPrefsFrom, DEFAULT_UNITS, type UnitPrefs } from '@/lib/units'
 import { toDaySegments, type DaySegment } from '@/lib/dashboard/day-segments'
 import { analyseSleep } from '@/lib/sleep/analysis'
 import type { PlannedWindow } from '@/components/dashboard/day-clock'
@@ -28,9 +29,9 @@ export async function loadDaySegmentsAction(
   const child = await assertChildInHousehold(childId, user.householdId)
   const household = await prisma.household.findUniqueOrThrow({
     where: { id: user.householdId },
-    select: { timezone: true },
+    select: { timezone: true, settings: true },
   })
-  return buildDayClockData(child.id, household.timezone, dayOffset)
+  return buildDayClockData(child.id, household.timezone, dayOffset, new Date(), unitPrefsFrom(household.settings))
 }
 
 export async function buildDayClockData(
@@ -38,6 +39,7 @@ export async function buildDayClockData(
   timezone: string,
   dayOffset: number,
   now: Date = new Date(),
+  units: UnitPrefs = DEFAULT_UNITS,
 ): Promise<DayClockData> {
   const dayStart = addDays(startOfLocalDay(now, timezone), Math.min(0, dayOffset), timezone)
   const dayEnd = addDays(dayStart, 1, timezone)
@@ -45,7 +47,7 @@ export async function buildDayClockData(
   const events = await eventsBetween(childId, dayStart, dayEnd)
   const segments = toDaySegments(events, dayStart, dayEnd, timezone, now, (event) => {
     const source = events.find((e) => e.id === event.id)!
-    const detail = eventDetail(source)
+    const detail = eventDetail(source, units)
     const title = eventTitle(source)
     return detail ? `${title} · ${detail}` : title
   })

@@ -25,16 +25,21 @@ Der zweite Elternteil bekommt seinen Code danach in der App unter
 
 - **Healthcheck:** `GET /api/health` prüft App und Datenbank.
 - **Backups:** Der `backup`-Container legt jede Nacht ein `pg_dump` im Volume
-  `backups` ab (Aufbewahrung `BACKUP_RETENTION_DAYS`, Standard 14 Tage).
+  `backups` ab (Aufbewahrung `BACKUP_RETENTION_DAYS`, Standard 14 Tage). Unter
+  **Mehr → Backup & Daten** siehst du die vorhandenen Sicherungen und kannst
+  eine sofort anfordern: Die App legt dafür eine Markierung im Upload-Volume
+  ab, die der Sidecar innerhalb einer Minute aufgreift. Die App selbst hat
+  keinen Schreibzugriff auf das Backup-Volume und kein `pg_dump`.
 - **Restore:**
   ```bash
-  docker compose stop app
+  docker compose stop app cron
   docker compose exec -T postgres psql -U sproessling -d postgres \
-    -c 'DROP DATABASE sproessling;' -c 'CREATE DATABASE sproessling;'
-  gunzip -c backups/sproessling-<stamp>.sql.gz | \
-    docker compose exec -T postgres psql -U sproessling -d sproessling
-  docker compose start app
+    -c 'DROP DATABASE sproessling WITH (FORCE);' -c 'CREATE DATABASE sproessling;'
+  docker compose run --rm -T backup sh -c \
+    'gunzip -c /backups/sproessling-<stamp>.sql.gz | psql'
+  docker compose start app cron
   ```
+  Dieselbe Anleitung steht in der App unter **Mehr → Backup & Daten**.
 - **Update:** `git pull && docker compose up -d --build` – Migrationen laufen
   beim Start automatisch (`prisma migrate deploy`).
 - **Uploads** liegen im Volume `uploads` und sind Teil des Backups nur, wenn du

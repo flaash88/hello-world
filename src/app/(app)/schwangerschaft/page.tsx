@@ -15,6 +15,7 @@ import { getAppContext } from '@/lib/household'
 import { gestationalAge, TRIMESTERS } from '@/lib/pregnancy/weeks'
 import { pregnancyWeekContent } from '@/lib/pregnancy/content'
 import { formatDateLong } from '@/lib/time'
+import { formatLength, formatMass, unitPrefsFrom } from '@/lib/units'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CountdownRing } from '@/components/pregnancy/countdown-ring'
@@ -33,6 +34,7 @@ const TOOLS = [
 
 export default async function PregnancyPage() {
   const ctx = await getAppContext()
+  const units = unitPrefsFrom(ctx.household.settings)
   if (!ctx.pregnancy) redirect('/onboarding')
 
   const age = gestationalAge(ctx.pregnancy.dueDate, new Date(), ctx.timezone)
@@ -65,8 +67,8 @@ export default async function PregnancyPage() {
             <p className="text-center text-sm text-muted-foreground">
               Euer Baby ist etwa so groß wie {articleFor(content.comparison)}{' '}
               <strong className="text-foreground">{content.comparison}</strong>
-              {content.lengthCm !== null && ` – rund ${formatCm(content.lengthCm)} cm`}
-              {content.weightG !== null && ` und ${formatWeight(content.weightG)}`}.
+              {content.lengthCm !== null && ` – rund ${formatLength(content.lengthCm, units)}`}
+              {content.weightG !== null && ` und ${formatMass(content.weightG, units)} schwer`}.
             </p>
           )}
         </CardContent>
@@ -155,12 +157,3 @@ function articleFor(word: string): string {
   return 'ein'
 }
 
-function formatCm(cm: number): string {
-  return cm.toLocaleString('de-AT', { maximumFractionDigits: 1 })
-}
-
-function formatWeight(grams: number): string {
-  return grams >= 1000
-    ? `${(grams / 1000).toLocaleString('de-AT', { maximumFractionDigits: 2 })} kg schwer`
-    : `${grams} g schwer`
-}

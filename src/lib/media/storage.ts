@@ -1,5 +1,5 @@
 import 'server-only'
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rm, unlink, writeFile } from 'node:fs/promises'
 import { createHash, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import sharp from 'sharp'
@@ -152,6 +152,21 @@ export async function deleteStoredFile(relativePath: string): Promise<void> {
     await unlink(target)
   } catch {
     // Bereits gelöscht – kein Grund für einen Fehler.
+  }
+}
+
+/**
+ * Entfernt alle Bilder eines Kindes. Wird nur beim vollstaendigen Loeschen
+ * gebraucht – Einzelbilder gehen ueber deleteStoredFile.
+ */
+export async function deleteChildUploads(childId: string): Promise<void> {
+  const root = path.resolve(UPLOAD_DIR)
+  const target = path.resolve(root, childId)
+  if (!target.startsWith(root + path.sep)) return
+  try {
+    await rm(target, { recursive: true, force: true })
+  } catch {
+    // Verzeichnis gab es nie oder ist schon weg.
   }
 }
 

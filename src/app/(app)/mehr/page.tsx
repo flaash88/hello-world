@@ -1,6 +1,23 @@
 import type { Metadata } from 'next'
+import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
-import { BellRing, ChevronRight, Download, LineChart, LogOut, Moon, Music, Ruler, Sparkles, UserPlus, Users } from 'lucide-react'
+import {
+  Baby,
+  BellRing,
+  ChevronRight,
+  Download,
+  HardDriveDownload,
+  HeartHandshake,
+  LineChart,
+  LogOut,
+  Moon,
+  Music,
+  Ruler,
+  Sparkles,
+  SlidersHorizontal,
+  UserPlus,
+  Users,
+} from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { logoutAction } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -10,15 +27,34 @@ import { InstallHint } from '@/components/install-hint'
 
 export const metadata: Metadata = { title: 'Mehr' }
 
-const LINKS = [
-  { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
-  { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
-  { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
-  { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
-  { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
-  { href: '/auswertung', label: 'Auswertung', icon: LineChart },
-  { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
-  { href: '/mehr/export', label: 'Export & Backup', icon: Download },
+const GROUPS: { title: string; links: { href: string; label: string; icon: LucideIcon }[] }[] = [
+  {
+    title: 'Für euch',
+    links: [
+      { href: '/eltern', label: 'Eltern – Stimmung & Nachtschicht', icon: HeartHandshake },
+      { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
+      { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
+      { href: '/auswertung', label: 'Auswertung', icon: LineChart },
+      { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
+    ],
+  },
+  {
+    title: 'Einstellungen',
+    links: [
+      { href: '/mehr/kind', label: 'Kindprofil', icon: Baby },
+      { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
+      { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
+      { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
+      { href: '/mehr/darstellung', label: 'Einheiten & Startbildschirm', icon: SlidersHorizontal },
+    ],
+  },
+  {
+    title: 'Daten',
+    links: [
+      { href: '/mehr/export', label: 'Export', icon: Download },
+      { href: '/mehr/daten', label: 'Backup & Daten', icon: HardDriveDownload },
+    ],
+  },
 ]
 
 export default async function MorePage() {
@@ -48,22 +84,27 @@ export default async function MorePage() {
         </CardContent>
       </Card>
 
-      <nav aria-label="Einstellungen">
-        <ul className="flex flex-col gap-2">
-          {LINKS.map(({ href, label, icon: Icon }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className="flex min-h-14 items-center gap-3 rounded-xl border border-border bg-card px-4 font-semibold"
-              >
-                <Icon className="size-5 text-muted-foreground" aria-hidden />
-                <span className="flex-1">{label}</span>
-                <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {GROUPS.map((group) => (
+        <nav key={group.title} aria-label={group.title}>
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            {group.title}
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {group.links.map(({ href, label, icon: Icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="flex min-h-14 items-center gap-3 rounded-xl border border-border bg-card px-4 font-semibold"
+                >
+                  <Icon className="size-5 text-muted-foreground" aria-hidden />
+                  <span className="flex-1">{label}</span>
+                  <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))}
 
       <InstallHint />
 
