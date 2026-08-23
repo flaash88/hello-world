@@ -26,23 +26,161 @@ Home Assistant (siehe `docs/homeassistant.md`).
 > Eltern-Kind-Pass ab. Herkunft, Prüfstand und Prüfintervall stehen in
 > `DECISIONS.md`.
 
-## Setup in 10 Zeilen
+## Setup auf einer frischen VM
+
+Geschrieben für Debian 12 und Ubuntu 24.04. Andere Distributionen gehen auch,
+dann weicht nur Schritt 2 ab.
+
+**Was die VM braucht:** 2 vCPU, 4 GB RAM, 20 GB Platte. Der Next-Build ist der
+hungrigste Moment – mit 2 GB RAM klappt er nur mit Swap. Danach reicht deutlich
+weniger.
+
+**Was du sonst brauchst:** eine Domain bei Cloudflare (für den Tunnel) und ein
+paar Minuten.
+
+### 1. System vorbereiten
+
+```bash
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install -y ca-certificates curl git
+
+# Zeitzone setzen – die App rechnet in Europe/Vienna, der Host sollte mitziehen.
+sudo timedatectl set-timezone Europe/Vienna
+
+# Sicherheitsupdates automatisch einspielen (die VM hängt am Internet).
+sudo apt-get install -y unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
+```
+
+Node.js brauchst du **nicht** auf dem Host – alles läuft in Containern.
+
+### 2. Docker installieren
+
+Nicht `apt install docker.io` nehmen: das ist meist zu alt und bringt
+`docker compose` nicht mit. Das offizielle Repository von Docker:
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+. /etc/os-release   # setzt ID (debian|ubuntu) und VERSION_CODENAME
+
+sudo curl -fsSL "https://download.docker.com/linux/$ID/gpg" \
+  -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+https://download.docker.com/linux/$ID $VERSION_CODENAME stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl enable --now docker
+```
+
+Damit du nicht bei jedem Befehl `sudo` brauchst:
+
+```bash
+sudo usermod -aG docker "$USER"
+newgrp docker            # oder einmal ab- und wieder anmelden
+docker compose version   # muss v2.x zeigen
+```
+
+### 3. Sprössling holen und konfigurieren
+
+```bash
+git clone <repo> sproessling && cd sproessling
+git checkout claude/sprossling-baby-tracker-sv49bu
+cp .env.example .env
+```
+
+Ein kleiner Helfer, damit die Werte sauber in die `.env` kommen:
+
+```bash
+setenv() {
+  if grep -q "^$1=" .env; then
+    sed -i "s|^$1=.*|$1=\"$2\"|" .env
+  else
+    printf '%s="%s"\n' "$1" "$2" >> .env
+  fi
+}
+```
+
+Geheimnisse erzeugen:
+
+```bash
+setenv SESSION_SECRET "$(openssl rand -base64 48)"
+setenv CRON_SECRET    "$(openssl rand -hex 32)"
+# Hex, nicht base64: das Passwort landet in einer URL, und "/" oder "+" darin
+# zerlegen die Verbindungszeichenkette.
+setenv POSTGRES_PASSWORD "$(openssl rand -hex 24)"
+setenv BOOTSTRAP_INVITE_CODE "START-CODE"
+setenv APP_URL "https://sproessling.example.org"   # deine spätere Adresse
+```
+
+VAPID-Schlüssel für Web Push – dafür reicht ein Wegwerf-Container:
+
+```bash
+docker run --rm node:22-alpine npx --yes web-push generate-vapid-keys
+```
+
+Die beiden Ausgaben eintragen:
+
+```bash
+setenv NEXT_PUBLIC_VAPID_PUBLIC_KEY "<Public Key>"
+setenv VAPID_PRIVATE_KEY            "<Private Key>"
+setenv VAPID_SUBJECT                "mailto:du@example.org"
+```
+
+Kurz gegenlesen, ob nichts Wichtiges mehr auf `CHANGE_ME` steht:
+
+```bash
+grep CHANGE_ME .env | grep -v '^DATABASE_URL='   # darf nichts ausgeben
+```
+
+`DATABASE_URL` bleibt absichtlich auf dem Platzhalter stehen: im
+Compose-Betrieb setzt `docker-compose.yml` sie selbst aus Benutzer, Passwort und
+Containername zusammen. Gebraucht wird die Zeile nur, wenn du die App ohne
+Docker gegen eine eigene Postgres laufen lässt.
+
+### 4. Starten und prüfen
+
+```bash
+docker compose up -d --build      # dauert beim ersten Mal ein paar Minuten
+docker compose ps                 # app muss "healthy" sein
+curl -f http://127.0.0.1:3000/api/health   # {"status":"ok"}
+```
+
+Wenn `app` in einer Restart-Schleife hängt, sagt `docker compose logs app`, an
+welchem der drei Startschritte (Datenbank abwarten → migrieren → seeden) es
+klemmt.
+
+### 5. Von außen erreichbar machen
+
+Die App bindet bewusst nur auf `127.0.0.1:3000`. Nach außen geht es über den
+Cloudflare Tunnel – siehe den nächsten Abschnitt. **Öffne keinen Port 3000 in
+der Firewall.**
+
+Danach `https://<deine-domain>/register` mit `START-CODE` öffnen und das erste
+Konto anlegen. Den Code für den zweiten Elternteil erzeugt die App unter
+**Mehr → Zweite Person einladen**.
+
+Zum Schluss den Bootstrap-Code entwerten, damit er nicht offen herumliegt:
+
+```bash
+setenv BOOTSTRAP_INVITE_CODE ""
+docker compose up -d
+```
+
+### Wenn Docker schon läuft
 
 ```bash
 git clone <repo> sproessling && cd sproessling
 cp .env.example .env
-openssl rand -base64 48                      # -> SESSION_SECRET in .env
-npx web-push generate-vapid-keys             # -> VAPID-Schlüssel in .env
-echo "POSTGRES_PASSWORD=$(openssl rand -base64 24)" >> .env
-sed -i 's/^BOOTSTRAP_INVITE_CODE=.*/BOOTSTRAP_INVITE_CODE="START-CODE"/' .env
-docker compose up -d --build                 # App, Postgres, Backup-Sidecar
-curl -f http://127.0.0.1:3000/api/health     # {"status":"ok"}
-# Cloudflare Tunnel einrichten (siehe unten – Ziel ist app:3000, nicht 127.0.0.1)
-# https://<deine-domain>/register mit START-CODE öffnen und Konto anlegen
+# Schritt 3 von oben (setenv-Block), dann:
+docker compose up -d --build
+curl -f http://127.0.0.1:3000/api/health
 ```
-
-Der zweite Elternteil bekommt seinen Code danach in der App unter
-**Mehr → Zweite Person einladen**.
 
 ## Zugriff von außen (Cloudflare Tunnel)
 
