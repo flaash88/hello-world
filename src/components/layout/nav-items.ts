@@ -11,6 +11,7 @@ export type NavIconKey =
   | 'development'
   | 'stats'
   | 'journal'
+  | 'parents'
   | 'pregnancy'
   | 'more'
 export type NavItem = { href: string; label: string; icon: NavIconKey }
@@ -18,7 +19,8 @@ export type NavItem = { href: string; label: string; icon: NavIconKey }
 /**
  * Die Tab-Leiste hat höchstens fünf Ziele. Welche das sind, hängt davon ab,
  * wo ihr gerade steht: Solange nur eine Schwangerschaft läuft, ist die
- * SSW-Ansicht wichtiger als Auswertungen ohne Daten.
+ * SSW-Ansicht wichtiger als Auswertungen ohne Daten. Der Eltern-Tab ist immer
+ * dabei – er kostet zehn Sekunden am Tag und nur dann, wenn er nah liegt.
  */
 export function navItemsFor({
   hasChild,
@@ -29,21 +31,22 @@ export function navItemsFor({
 }): NavItem[] {
   const home: NavItem = { href: DASHBOARD_PATH, label: 'Heute', icon: 'home' }
   const more: NavItem = { href: '/mehr', label: 'Mehr', icon: 'more' }
+  const parents: NavItem = { href: '/eltern', label: 'Wir', icon: 'parents' }
   const pregnancy: NavItem = { href: '/schwangerschaft', label: 'SSW', icon: 'pregnancy' }
 
   if (!hasChild) {
-    return hasPregnancy ? [home, pregnancy, more] : [home, more]
+    return hasPregnancy ? [home, pregnancy, parents, more] : [home, parents, more]
   }
 
   const items: NavItem[] = [
     home,
     { href: '/verlauf', label: 'Verlauf', icon: 'history' },
+    parents,
     { href: '/entwicklung', label: 'Entwicklung', icon: 'development' },
-    { href: '/tagebuch', label: 'Tagebuch', icon: 'journal' },
     more,
   ]
-  // Läuft parallel noch eine Schwangerschaft (Geschwisterkind), verdrängt sie
-  // das Tagebuch – das ist einen Tap weiter unter "Mehr" erreichbar.
+  // Laeuft parallel noch eine Schwangerschaft (Geschwisterkind), verdraengt sie
+  // die Entwicklungsseite – die ist einen Tap weiter unter "Mehr".
   if (hasPregnancy) items.splice(3, 1, pregnancy)
   return items
 }

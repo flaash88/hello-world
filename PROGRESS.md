@@ -90,7 +90,7 @@ Ein Block pro Phase, maximal zehn Zeilen.
 
 ## Phase 7 – Eltern, Einstellungen, Betrieb (abgeschlossen)
 
-- Eltern-Tab: Check-in mit drei Reglern, eigener Schlaf, Verlauf gegen die Nächte des Kindes.
+- Eltern-Tab in der Tab-Leiste: Check-in mit drei Reglern, eigener Schlaf, Verlauf gegen die Nächte.
 - Nachtschicht mit Übergabe-Notiz für beide sichtbar; privates Tagebuch nur für die eigene Person.
 - Hinweis auf Hilfe erst bei Häufung über Tage, danach sieben Tage Ruhe; AT-Kontakte als tel:-Links.
 - Einheiten (kg/lb, cm/in, °C/°F, ml/oz) als reine Anzeigeschicht – gespeichert bleibt metrisch.
@@ -98,4 +98,4 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Startbildschirm und Schnellaktionen wählbar; `/` leitet weiter, Dashboard liegt auf `/heute`.
 - Backup-Seite: vorhandene Dumps, „jetzt sichern“ über Markierungsdatei, Restore-Anleitung.
 - Haushalt samt beider Konten löschbar – mit Passwort, Bestätigungswort und Export daneben.
-- Grün: lint, typecheck, 335 Unit-Tests (96,9 % Coverage auf der Logik), 57 E2E-Tests, build.
+- Grün: lint, typecheck, 341 Unit-Tests (96,9 % Coverage auf der Logik), 57 E2E-Tests, build.

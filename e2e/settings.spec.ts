@@ -15,7 +15,9 @@ test.describe('Eltern-Tab', () => {
     await register(page, { name: 'Mama', email, code: await createHouseholdInvite() })
     await setUpChild(page, 'Lena', 90)
 
-    await page.goto('/eltern')
+    // Der Eltern-Tab liegt in der Tab-Leiste, nicht zwei Ebenen tief.
+    await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Wir' }).click()
+    await expect(page).toHaveURL(/\/eltern$/)
     await expect(page.getByRole('heading', { name: 'Wir' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Eigenen Schlaf dazu eintragen' }).click()
