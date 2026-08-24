@@ -225,3 +225,20 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Verfällt die Nutzergeste über dem Laden, bittet der Knopf um einen zweiten Tap,
   statt einen Fehler zu melden.
 - Grün: lint, typecheck, 783 Unit-Tests, 175 E2E-Tests, build.
+
+## Phase 13c – Filterreihe im Verlauf (abgeschlossen)
+
+- Die Reihe bleibt unter der Kopfzeile stehen, statt halb dahinter zu verschwinden.
+- Knöpfe 48 px hoch mit größerer Schrift; der gewählte Filter ist gefüllt, nicht getönt.
+- Beim Öffnen scrollt die Reihe zur gewählten Art.
+- Vier E2E-Tests messen die Lage nach dem Scrollen, statt sie nur zu vermuten.
+
+## Phase 13d – Kreisuhr lesbar und treffbar (abgeschlossen)
+
+- Alle vier Stundenbeschriftungen lagen ausserhalb der Zeichenfläche und wurden
+  abgeschnitten; die Fläche ist jetzt groß genug, die seitlichen hängen am äußeren Ende.
+- Einträge ohne Dauer sind Marken von 15 px statt Bögen von 2 px.
+- Getippt wird in den Ring, nicht auf den Bogen – `segmentBeiMinute` sucht den gemeinten
+  Eintrag im Umkreis von 25 Minuten.
+- Kein Ring dünner als 22 Einheiten, Scheibe nutzt die volle Breite.
+- Vier E2E-Tests messen Beschriftungen, Markengröße und den Tap daneben.
