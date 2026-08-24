@@ -995,3 +995,28 @@ dabei stehen (`block: nearest`), sonst springt die ganze Seite.
 **Gewählt heißt gefüllt.** Vorher war der aktive Filter nur zart getönt
 (`bg-primary/10`). Nachts, bei heruntergedrehter Helligkeit, ist das kein
 Unterschied. Jetzt ist er ausgefüllt.
+
+**Die Kreisuhr hatte ihre Stundenbeschriftungen ausserhalb der Zeichenfläche.**
+Bei 300 Einheiten Kantenlänge und einem Beschriftungsradius von 158 lag
+„00:00" bei y = −8, „12:00" bei y = 308, „06:00" bei x = 308 und „18:00" bei
+x = −8. Alle vier wurden abgeschnitten. Die Fläche ist jetzt 340 Einheiten
+groß; links und rechts hängen die Beschriftungen an ihrem äußeren Ende statt
+mittig über dem Strich, weil „18:00" bei 13 Pixeln rund 36 Einheiten breit ist
+und mittig gesetzt wieder die Hälfte davon herausragen würde.
+
+**Einträge ohne Dauer sind Marken, keine Bögen.** Eine Windel bekam sechs
+Minuten Mindestbreite – im Windelring sind das 1,9 Einheiten, also knapp zwei
+Pixel. Das sieht niemand und trifft erst recht niemand. Jetzt ist es ein Punkt
+von 15 Pixeln Durchmesser an der richtigen Uhrzeit, was der Sache auch näher
+kommt: Der Eintrag *ist* ein Zeitpunkt, keine Dauer.
+
+**Ausgewählt wird über den Ring, nicht über den Bogen.** Der Tap sagt nur, in
+welchem Ring und zu welcher Uhrzeit er lag; welcher Eintrag gemeint war,
+rechnet `segmentBeiMinute` aus – innerhalb von 25 Minuten gewinnt der nächste,
+darüber hinaus wird nichts ausgewählt. Damit muss niemand mehr den Bogen selbst
+treffen. Die Umkehrrechnung (`minuteAusPunkt`, `ringFuerRadius`) steht in
+`day-segments.ts` und ist geprüft; in der Komponente wäre sie es nicht.
+
+**Kein Ring ist dünner als 22 Einheiten.** Der innerste hatte 12. Vier Ringe auf
+einer Scheibe sind ohnehin eng; wenn einer davon so schmal ist, dass ein
+Eintrag darin zum Haarstrich wird, ist er als Ring nichts wert.

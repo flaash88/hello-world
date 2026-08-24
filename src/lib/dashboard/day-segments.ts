@@ -126,3 +126,70 @@ export function minuteLabel(minute: number): string {
   const m = total % 60
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
+
+/**
+ * Umkehrung von `polarPoint`: Welche Minute des Tages liegt in dieser Richtung?
+ *
+ * Wird gebraucht, damit man nicht den haarfeinen Bogen selbst treffen muss,
+ * sondern irgendwo in den Ring tippen kann. Ein Windel-Eintrag ist als Bogen
+ * keine zwei Pixel breit – das trifft nachts niemand.
+ */
+export function minuteAusPunkt(x: number, y: number, center: number): number {
+  const winkel = Math.atan2(y - center, x - center) + Math.PI / 2
+  const normiert = ((winkel % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
+  return (normiert / (2 * Math.PI)) * MINUTES_PER_DAY
+}
+
+/** Abstand vom Mittelpunkt. */
+export function radiusAusPunkt(x: number, y: number, center: number): number {
+  return Math.hypot(x - center, y - center)
+}
+
+export type RingMasse = { inner: number; outer: number }
+
+/**
+ * In welchem Ring liegt dieser Radius? Die Toleranz greift an den Rändern,
+ * damit ein Tap zwischen zwei Ringen nicht ins Leere geht.
+ */
+export function ringFuerRadius(
+  radius: number,
+  ringe: readonly RingMasse[],
+  toleranz = 6,
+): number | null {
+  for (let i = 0; i < ringe.length; i++) {
+    const ring = ringe[i]!
+    if (radius >= ring.inner - toleranz && radius <= ring.outer + toleranz) return i
+  }
+  return null
+}
+
+/** Wie weit liegt eine Minute von einem Segment entfernt? Innerhalb: null. */
+export function abstandZuSegment(segment: DaySegment, minute: number): number {
+  const von = segment.fromMin
+  const bis = Math.max(segment.toMin, segment.fromMin)
+  if (minute >= von && minute <= bis) return 0
+  // Über Mitternacht hinaus wird nicht gesucht – der Tag hat einen Anfang.
+  return Math.min(Math.abs(minute - von), Math.abs(minute - bis))
+}
+
+/**
+ * Das gemeinte Segment zu einem Tap. Deckt keines die Minute ab, gewinnt das
+ * nächstgelegene innerhalb der Toleranz – sonst nichts, denn ein Tap auf eine
+ * leere Stelle soll nichts auswählen.
+ */
+export function segmentBeiMinute(
+  segmente: readonly DaySegment[],
+  minute: number,
+  toleranzMinuten = 25,
+): DaySegment | null {
+  let bestes: DaySegment | null = null
+  let besterAbstand = Number.POSITIVE_INFINITY
+  for (const segment of segmente) {
+    const abstand = abstandZuSegment(segment, minute)
+    if (abstand < besterAbstand) {
+      besterAbstand = abstand
+      bestes = segment
+    }
+  }
+  return besterAbstand <= toleranzMinuten ? bestes : null
+}
