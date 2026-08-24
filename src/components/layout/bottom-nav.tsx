@@ -41,10 +41,6 @@ export function BottomNav({ items }: { items: NavItem[] }) {
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                // Die fuenf Ziele der Leiste sind die haeufigsten Wege der App.
-                // Sie im Hintergrund vorzuladen kostet ueber den Tunnel wenig
-                // und macht den Wechsel sofort – ohne das wartet jeder Tap auf
-                // eine volle Runde zum Server.
                 prefetch
                 aria-current={active ? 'page' : undefined}
                 className={cn(

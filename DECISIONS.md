@@ -855,6 +855,31 @@ Tunnel, Server – die bei jedem Tab-Wechsel neu anfiel. Dagegen helfen drei
 Dinge, die alle nichts am Server ändern: `staleTimes` hält eine besuchte Seite
 30 Sekunden im Router-Cache (der SSE-Strom verwirft ihn, sobald die andere
 Person etwas einträgt), die fünf Ziele der Tab-Leiste werden vorgeladen, und
-ein `loading.tsx` zeigt beim Wechsel sofort die Umrisse statt die alte Seite
-stehen zu lassen. Dazu werden die beiden Schriften vorgeladen, damit der Text
-nicht erst in der Systemschrift erscheint und dann umspringt.
+die beiden Schriften werden vorgeladen, damit der Text nicht erst in der
+Systemschrift erscheint und dann umspringt.
+
+**Kein `loading.tsx` auf Gruppenebene.** Der erste Versuch hatte eines: ein
+graues Gerüst, das beim Wechsel sofort erscheint. Gemessen an
+`e2e/api.spec.ts` (12 Tests) war das ein Desaster – 36 Sekunden und 12 grün
+vorher, 5 Minuten 41 und 7 grün danach; ohne die Datei wieder 38 Sekunden und
+12 grün. Eine Datei auf Ebene der `(app)`-Gruppe legt jede Seite in eine
+Suspense-Grenze, und das kostet weit mehr, als es einbringt. Es wäre auch die
+schlechtere Bedienung gewesen: bei jedem Tab-Wechsel erst graue Rechtecke, auf
+einer schnellen Verbindung ein Flackern statt eines Gewinns. Der Prefetch, der
+zwischenzeitlich verdächtigt wurde, kostet dagegen nichts messbares (34
+Sekunden mit, 38 ohne) und bleibt.
+
+**Ein Befehl für die E2E-Tests.** `npm run test:e2e` zieht die Datenbank hoch,
+migriert, baut, startet den Server, testet und räumt auf. Die Datenbank wird in
+dieser Reihenfolge gesucht: `E2E_DATABASE_URL`, dann ein Wegwerf-Container über
+Docker, dann ein laufender Postgres aus `DATABASE_URL`. Findet sich keine,
+bricht das Skript ab und nennt alle drei Wege – statt in einen Timeout zu
+laufen, in dem man raten muss, was fehlt. `globalTimeout` steht auf 15 Minuten:
+der ganze Satz braucht acht, und ein Abbruch mit Bericht ist mehr wert als eine
+Warteschleife.
+
+**`reuseExistingServer` steht auf `false`.** Ein Server aus einem früheren Lauf
+liefert Chunks einer alten Build-ID aus. Im Browser sieht das aus wie
+„Application error: a client-side exception", und die Fehlersuche landet an
+Stellen, die in Ordnung sind – einmal einen halben Nachmittag lang. Die paar
+Sekunden Startzeit sind das billigere Ende.

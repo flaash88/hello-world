@@ -192,4 +192,9 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - „Mehr" neu geordnet: Bereiche als Kacheln in zwei Spalten in Gebrauchsreihenfolge, alle
   Einstellungen hinter einer Zeile auf `/mehr/einstellungen`. Von 21 offenen Zeilen auf 7 Reihen.
 - Ladezeiten: der Server braucht 40–170 ms; die Zähigkeit kam von der Netzrunde bei jedem
-  Wechsel. `staleTimes`, vorgeladene Tab-Ziele, ein Ladegerüst und vorgeladene Schriften.
+  Wechsel. `staleTimes`, vorgeladene Tab-Ziele und vorgeladene Schriften. Das zuerst gebaute
+  `loading.tsx` ist wieder raus: es hat den E2E-Satz von 36 Sekunden auf 5:41 gebracht und
+  wäre auch als Bedienung schlechter gewesen (graue Rechtecke bei jedem Wechsel).
+- `npm run test:e2e` läuft eigenständig: Datenbank (Docker oder vorhandener Postgres),
+  Migration, Build, Server, Tests, Aufräumen. globalTimeout 15 Minuten, Reporter `line`,
+  kein Wiederverwenden alter Server.

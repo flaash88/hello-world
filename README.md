@@ -25,7 +25,7 @@ Home Assistant (siehe `docs/homeassistant.md`).
 > Benachrichtigungen außer den Eltern-Kind-Pass-Fristen. Das ist Absicht: eine
 > Tracking-App, die im Wochenbett Vorgaben macht, richtet mehr Schaden an als
 > ihr Nutzen wert ist. Einschalten lässt sich alles einzeln unter
-> **Mehr → Was die App anzeigt**, und genauso einfach wieder ab. Abgeschaltete
+> **Mehr → Einstellungen → Was die App anzeigt**, und genauso einfach wieder ab. Abgeschaltete
 > Bereiche verschwinden vollständig – es gibt keine graue Kachel, die daran
 > erinnert. Eure Daten bleiben in jedem Fall erhalten.
 
@@ -174,7 +174,7 @@ der Firewall.**
 
 Danach `https://<deine-domain>/register` mit `START-CODE` öffnen und das erste
 Konto anlegen. Den Code für den zweiten Elternteil erzeugt die App unter
-**Mehr → Zweite Person einladen**.
+**Mehr → Einstellungen → Zweite Person einladen**.
 
 Zum Schluss den Bootstrap-Code entwerten, damit er nicht offen herumliegt:
 
@@ -233,7 +233,7 @@ Danach:
 - **Healthcheck:** `GET /api/health` prüft App und Datenbank.
 - **Backups:** Der `backup`-Container legt jede Nacht ein `pg_dump` im Volume
   `backups` ab (Aufbewahrung `BACKUP_RETENTION_DAYS`, Standard 14 Tage). Unter
-  **Mehr → Backup & Daten** siehst du die vorhandenen Sicherungen und kannst
+  **Mehr → Einstellungen → Backup & Daten** siehst du die vorhandenen Sicherungen und kannst
   eine sofort anfordern: Die App legt dafür eine Markierung im Upload-Volume
   ab, die der Sidecar innerhalb einer Minute aufgreift. Die App selbst hat
   keinen Schreibzugriff auf das Backup-Volume und kein `pg_dump`.
@@ -246,7 +246,7 @@ Danach:
     'gunzip -c /backups/sproessling-<stamp>.sql.gz | psql'
   docker compose start app cron
   ```
-  Dieselbe Anleitung steht in der App unter **Mehr → Backup & Daten**.
+  Dieselbe Anleitung steht in der App unter **Mehr → Einstellungen → Backup & Daten**.
 - **Migrationen** laufen beim Start des App-Containers (`prisma migrate deploy`).
   Die CLI dafür liegt im Image unter `/opt/prisma-cli`; hängt der Container in
   einer Restart-Schleife, zeigt `docker compose logs app`, an welcher der drei
@@ -262,14 +262,21 @@ Danach:
   darauf. Fehlt es, sagt `/tagebuch/toene` das offen, statt still zu scheitern.
 - **QR-Codes auf den Milch-Etiketten** brauchen `APP_URL`; ohne die öffentliche
   Adresse druckt die App keinen Code statt einen, der ins Leere führt.
-- **Automationen:** Unter **Mehr → Automationen & API** entstehen Tokens für
+- **Automationen:** Unter **Mehr → Einstellungen → Automationen & API** entstehen Tokens für
   Home Assistant und NFC-Tags. Sie gelten für einen Haushalt und eine Person,
   sind einzeln widerrufbar und stehen nur einmal im Klartext da. Die Anleitung
   mit fertigen Snippets liegt in `docs/homeassistant.md`.
 - **Drucken:** Stillprotokoll und Arzt-Zettel sind auf A4 hochkant ausgelegt,
-  schwarzweiß und ohne Navigation. Über das Browser-Menü drucken oder als PDF
-  herunterladen.
-- **Umfang der App:** Unter **Mehr → Was die App anzeigt** liegen drei Stufen
+  schwarzweiß und ohne Navigation. Auf jeder dieser Seiten steht ein
+  Druck-Knopf; in der installierten App auf iOS öffnet er die AirPrint-Auswahl,
+  und „In Dateien speichern" macht daraus ein PDF. Beim Stillprotokoll und beim
+  Wochenbericht gibt es zusätzlich ein serverseitig gebautes PDF – das Ergebnis
+  ist verlässlicher als was der Browser aus der Seite macht.
+- **Wo was liegt:** Unter **Mehr** stehen die Bereiche als Kacheln, sortiert
+  nach Gebrauch im Wochenbett – Notfallkarte, Stillprotokoll, Tagebuch,
+  Milchvorrat zuerst. Alles, was man einmal einstellt, liegt hinter der Zeile
+  **Einstellungen** in drei Gruppen: Kind und Haushalt, Was die App tut, Daten.
+- **Umfang der App:** Unter **Mehr → Einstellungen → Was die App anzeigt** liegen drei Stufen
   („Nur Protokoll", „Erweitert", „Alles") und darunter ein Schalter je Bereich –
   wer nur die Tagesuhr will, schaltet nur die ein. Dieselbe Seite hat „App auf
   Protokollmodus zurücksetzen" (schaltet alles Zusätzliche ab, ohne Daten zu
@@ -278,7 +285,7 @@ Danach:
   Der Zustand gilt für den ganzen Haushalt, nicht je Gerät.
 - **Benachrichtigungen** sind ab Werk aus, bis auf die Fristen im
   Eltern-Kind-Pass. Was es überhaupt geben kann, steht unter
-  **Mehr → Benachrichtigungen**: Schlaffenster, Medikamenten-Intervall,
+  **Mehr → Einstellungen → Benachrichtigungen**: Schlaffenster, Medikamenten-Intervall,
   Milchvorrat und Nachtschicht-Übergabe. Aufforderungen, etwas einzutragen, und
   Wochenrückblicke gibt es nicht – die stehen nicht in der Erlaubnisliste in
   `src/lib/push/kategorien.ts` und lassen sich auch nicht einschalten. Die
@@ -294,10 +301,31 @@ npm run db:seed
 npm run dev
 ```
 
-`npm run check` führt Lint, Typecheck und Unit-Tests aus. Für `npm run test:e2e`
-braucht es vorher `npm run build`; in Umgebungen mit vorinstalliertem Chromium
-zeigt `PLAYWRIGHT_CHROMIUM_PATH` auf den Browser. Für die Tests des
-Tonspur-Tagebuchs muss `ffmpeg` lokal installiert sein.
+`npm run check` führt Lint, Typecheck und Unit-Tests aus.
+
+`npm run test:e2e` läuft eigenständig: es zieht die Datenbank hoch, migriert,
+baut die App, startet sie, testet und räumt hinterher auf.
+
+```bash
+npm run test:e2e                          # alles
+npm run test:e2e -- --keep-build          # ohne Neubau, beim Iterieren
+npm run test:e2e -- e2e/notfall.spec.ts   # nur eine Datei
+```
+
+Die Datenbank wird in dieser Reihenfolge gesucht:
+
+1. `E2E_DATABASE_URL`, falls gesetzt.
+2. Ein Wegwerf-Container `postgres:16-alpine` über Docker. Er bekommt kein
+   dauerhaftes Volume und wird am Ende entfernt – auch bei Strg-C und nach
+   einem Fehlschlag.
+3. Ein laufender Postgres unter `DATABASE_URL`.
+
+Findet sich keine davon, bricht das Skript ab und nennt alle drei Wege, statt
+in einen Timeout zu laufen. Ein vorinstalliertes Chromium sucht es selbst
+(`PLAYWRIGHT_BROWSERS_PATH`, `/opt/pw-browsers/chromium`, `/usr/bin/chromium`);
+mit `PLAYWRIGHT_CHROMIUM_PATH` lässt sich der Pfad vorgeben. Der ganze Satz
+braucht etwa acht Minuten, die harte Grenze liegt bei fünfzehn. Für die Tests
+des Tonspur-Tagebuchs muss `ffmpeg` lokal installiert sein.
 
 ## Hinweis
 
