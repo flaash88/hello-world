@@ -162,6 +162,14 @@
   .safe-top {
     padding-top: max(env(safe-area-inset-top), 0rem);
   }
+  /*
+   * Hoehe der Kopfzeile: Sicherheitsabstand oben, 3.5rem Inhalt, 1px Linie.
+   * Wer etwas direkt unter der Kopfzeile festhaelt, braucht diesen Wert –
+   * geraten stimmt er auf dem iPhone mit Insel nicht.
+   */
+  .unter-kopf {
+    top: calc(max(env(safe-area-inset-top), 0rem) + 3.5rem + 1px);
+  }
   .tabular {
     font-variant-numeric: tabular-nums;
   }

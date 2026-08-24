@@ -977,3 +977,21 @@ bleibt deshalb liegen, und der Knopf bittet um einen zweiten Tap, statt einen
 Fehler zu melden – beim zweiten Mal liegt sie bereit und es geht sofort.
 Weitergegeben wird nur die Datei, ohne Titel: Mit beidem gibt iOS teils den Text
 weiter statt der Datei.
+
+**Die Filterreihe im Verlauf bleibt stehen.** Sie scrollte mit der Liste nach
+oben weg und lag dabei hinter der durchscheinenden Kopfzeile: halb zu sehen und
+in der oberen Hälfte nicht mehr antippbar – ein 48-Pixel-Ziel, von dem nur
+zwanzig übrig blieben. Jetzt klebt sie direkt unter der Kopfzeile, auf
+deckendem Grund. Die Höhe der Kopfzeile steht als Klasse `.unter-kopf` in
+`globals.css`; geraten stimmt sie auf einem iPhone mit Insel nicht, weil der
+Sicherheitsabstand oben dazukommt.
+
+**Der gewählte Filter wird in den Blick geholt.** Zehn Arten passen nicht
+nebeneinander, und wer nach „Abpumpen" gefiltert hat, sah beim Zurückkommen
+eine Reihe, die vorne bei „Alles" anfängt – ohne Hinweis darauf, was gerade
+gilt. Beim Öffnen scrollt die Reihe zur gewählten Art. Senkrecht bleibt sie
+dabei stehen (`block: nearest`), sonst springt die ganze Seite.
+
+**Gewählt heißt gefüllt.** Vorher war der aktive Filter nur zart getönt
+(`bg-primary/10`). Nachts, bei heruntergedrehter Helligkeit, ist das kein
+Unterschied. Jetzt ist er ausgefüllt.

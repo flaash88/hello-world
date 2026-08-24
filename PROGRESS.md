@@ -225,3 +225,10 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Verfällt die Nutzergeste über dem Laden, bittet der Knopf um einen zweiten Tap,
   statt einen Fehler zu melden.
 - Grün: lint, typecheck, 783 Unit-Tests, 175 E2E-Tests, build.
+
+## Phase 13c – Filterreihe im Verlauf (abgeschlossen)
+
+- Die Reihe bleibt unter der Kopfzeile stehen, statt halb dahinter zu verschwinden.
+- Knöpfe 48 px hoch mit größerer Schrift; der gewählte Filter ist gefüllt, nicht getönt.
+- Beim Öffnen scrollt die Reihe zur gewählten Art.
+- Vier E2E-Tests messen die Lage nach dem Scrollen, statt sie nur zu vermuten.
