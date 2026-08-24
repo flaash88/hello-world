@@ -778,3 +778,108 @@ schon der Sog, den die Phase vermeiden soll.
 Quelltext ist von Hand gesetzt – ein Lauf über eine bestehende Datei formatiert
 sie gegen den Hausstil um. Formatiert wird beim Schreiben, geprüft wird mit
 ESLint.
+
+## Phase 12 – Nachbesserungen aus dem echten Betrieb
+
+**Die Vergiftungsinformationszentrale ist keine Verschlucken-Hotline.** Auf der
+Notfallkarte stand „Etwas verschluckt? Rund um die Uhr erreichbar." Das war
+falsch und im Ernstfall gefährlich: die VIZ berät bei *Verdacht auf Vergiftung*
+– Medikamente, Putz- und Haushaltsmittel, Pflanzen, Pilze. Ein Kind, das sich
+an einem Fremdkörper verschluckt und keine Luft bekommt, braucht 144. Der Text
+sagt das jetzt und verweist ausdrücklich weiter. Belegt über die Gesundheit
+Österreich GmbH (Betreiberin der VIZ) und das Gesundheitsportal des
+Sozialministeriums; die Quelle steht mit Stand sichtbar auf der Karte, und ein
+Test hält fest, dass „verschluckt" dort nicht mehr auftaucht.
+
+**Schwarze Flächen sind kein Kontrast, sondern eine Todesanzeige.** Die beiden
+dringenden Nummern waren vollflächig schwarz hinterlegt. Weiß auf Schwarz ist
+nicht besser lesbar als Schwarz auf Weiß, sieht aber aus wie eine Traueranzeige.
+Jetzt haben alle Karten weißen Grund und schwarze Schrift – den höchsten
+Kontrast, den es gibt – und die dringenden heben sich über eine breite
+terrakottafarbene Kante ab.
+
+**Fotos werden im Browser verkleinert, bevor sie hochgeladen werden.** Ein
+Handyfoto hat vier bis acht Megabyte; der Server rechnete es ohnehin auf 2048
+Pixel herunter. Über WLAN fiel der Umweg nicht auf, über Mobilfunk und einen
+Tunnel brach die Verbindung ab, bevor das Bild ankam. Verkleinert wird auf
+dieselbe Kantenlänge, die am Ende gespeichert wird – kein Qualitätsverlust,
+etwa ein Zehntel der Datenmenge. Wo der Browser das Format nicht dekodieren
+kann (HEIC auf älteren Geräten), geht das Original raus: lieber langsam als
+gar nicht.
+
+**Das Aufnahmedatum wird vor dem Verkleinern gelesen.** Canvas entfernt die
+EXIF-Daten. Damit der Datumsvorschlag aus Phase 10.5 nicht verschwindet, sucht
+der Browser das Feld selbst und schickt es getrennt mit; der Server prüft es
+wie jede Eingabe von außen und nimmt es nur, wenn im Bild selbst keines steht.
+Das Datumsmuster liegt in `lib/media/aufnahmezeit.ts` und wird von beiden Seiten
+benutzt.
+
+**Ein Bild pro Anfrage.** Gebündelt war ein abgebrochener Upload der Verlust
+der ganzen Auswahl. Jetzt scheitert höchstens ein Bild, und man sieht welches.
+
+**Die Fehlermeldung sagt, was passiert ist.** Jeder Fehlschlag – abgelehntes
+Format, zu großes Bild, abgebrochene Verbindung, HTML-Antwort eines Proxys –
+wurde als „Keine Verbindung zum Server." angezeigt. Das war der Grund, warum
+sich das Problem nicht einordnen ließ. Der Statuscode wird jetzt genannt, und
+`response.json()` läuft nicht mehr vor der Prüfung auf `response.ok`.
+
+**„Über das Browser-Menü drucken" gab es in der installierten App nie.** Auf
+iOS läuft die PWA im Standalone-Modus ohne Adressleiste und ohne Teilen-Knopf –
+der Hinweis war genau dort falsch, wo die App am häufigsten benutzt wird.
+Stattdessen ein Knopf, der `window.print()` aufruft; iOS öffnet die
+AirPrint-Auswahl, und daraus entsteht über „In Dateien speichern" ein PDF. Wo es
+ein serverseitig gebautes PDF gibt, steht der Weg daneben.
+
+**Datums- und Zeitfelder auf iOS.** Safari gibt diesen Feldern ein eigenes
+Aussehen: der Wert steht mittig, das Feld ignoriert `width: 100%`. Auf dem
+iPhone sah der Wert dadurch aus, als wäre er aus dem Rahmen gerutscht. Über
+`-webkit-appearance: none` und `::-webkit-date-and-time-value` steht er links
+wie in jedem anderen Eingabefeld.
+
+**Einundzwanzig Links in einer Spalte sind keine Liste, sondern eine Wand.**
+Unter „Mehr" standen alle Bereiche und alle Einstellungen offen untereinander.
+Jetzt stehen die Bereiche als Kacheln in zwei Spalten – halbe Höhe, und man
+erkennt ein Ziel am Symbol statt am Zeilenanfang –, und alles, was man einmal
+einstellt, liegt hinter einer einzigen Zeile auf `/mehr/einstellungen`. Die
+Reihenfolge der Kacheln folgt dem Gebrauch im Wochenbett, nicht dem Alphabet.
+Ein Test hält fest, dass beim Umbau kein Einstellungspfad unerreichbar wurde.
+
+**Die Einstellungen sind nicht nach Feature-Schaltern gefiltert.** Eine
+Einstellung, die man nicht findet, weil der zugehörige Bereich gerade aus ist,
+wäre eine Falle – „Was die App anzeigt" muss immer erreichbar sein.
+
+**Der Server war nie langsam.** Gemessen auf dem fertigen Build mit 400
+Ereignissen: 40 bis 170 Millisekunden bis zum ersten Byte, je Seite. Die
+gefühlte Zähigkeit kommt aus der Runde durchs Netz – Handy, Cloudflare-Kante,
+Tunnel, Server – die bei jedem Tab-Wechsel neu anfiel. Dagegen helfen drei
+Dinge, die alle nichts am Server ändern: `staleTimes` hält eine besuchte Seite
+30 Sekunden im Router-Cache (der SSE-Strom verwirft ihn, sobald die andere
+Person etwas einträgt), die fünf Ziele der Tab-Leiste werden vorgeladen, und
+die beiden Schriften werden vorgeladen, damit der Text nicht erst in der
+Systemschrift erscheint und dann umspringt.
+
+**Kein `loading.tsx` auf Gruppenebene.** Der erste Versuch hatte eines: ein
+graues Gerüst, das beim Wechsel sofort erscheint. Gemessen an
+`e2e/api.spec.ts` (12 Tests) war das ein Desaster – 36 Sekunden und 12 grün
+vorher, 5 Minuten 41 und 7 grün danach; ohne die Datei wieder 38 Sekunden und
+12 grün. Eine Datei auf Ebene der `(app)`-Gruppe legt jede Seite in eine
+Suspense-Grenze, und das kostet weit mehr, als es einbringt. Es wäre auch die
+schlechtere Bedienung gewesen: bei jedem Tab-Wechsel erst graue Rechtecke, auf
+einer schnellen Verbindung ein Flackern statt eines Gewinns. Der Prefetch, der
+zwischenzeitlich verdächtigt wurde, kostet dagegen nichts messbares (34
+Sekunden mit, 38 ohne) und bleibt.
+
+**Ein Befehl für die E2E-Tests.** `npm run test:e2e` zieht die Datenbank hoch,
+migriert, baut, startet den Server, testet und räumt auf. Die Datenbank wird in
+dieser Reihenfolge gesucht: `E2E_DATABASE_URL`, dann ein Wegwerf-Container über
+Docker, dann ein laufender Postgres aus `DATABASE_URL`. Findet sich keine,
+bricht das Skript ab und nennt alle drei Wege – statt in einen Timeout zu
+laufen, in dem man raten muss, was fehlt. `globalTimeout` steht auf 15 Minuten:
+der ganze Satz braucht acht, und ein Abbruch mit Bericht ist mehr wert als eine
+Warteschleife.
+
+**`reuseExistingServer` steht auf `false`.** Ein Server aus einem früheren Lauf
+liefert Chunks einer alten Build-ID aus. Im Browser sieht das aus wie
+„Application error: a client-side exception", und die Fehlersuche landet an
+Stellen, die in Ordnung sind – einmal einen halben Nachmittag lang. Die paar
+Sekunden Startzeit sind das billigere Ende.

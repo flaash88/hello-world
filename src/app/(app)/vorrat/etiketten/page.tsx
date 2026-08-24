@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Printer } from 'lucide-react'
+import { PrintButton } from '@/components/print/print-button'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { formatDateShort } from '@/lib/time'
@@ -78,10 +78,7 @@ export default async function EtikettenPage() {
             {ETIKETT_BREITE_MM} × {ETIKETT_HOEHE_MM} mm
           </p>
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Printer className="size-4" aria-hidden />
-          Über das Browser-Menü drucken
-        </p>
+        <PrintButton label="Etiketten drucken" />
       </div>
 
       {ohneQr && (

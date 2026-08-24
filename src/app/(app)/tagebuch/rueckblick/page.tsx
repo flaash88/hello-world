@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Baby, Printer } from 'lucide-react'
+import { PrintButton } from '@/components/print/print-button'
+import { Baby } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { addDays, formatAge, formatDateLong, startOfLocalDay } from '@/lib/time'
@@ -221,11 +222,11 @@ function Stat({ label, value }: { label: string; value: string }) {
   )
 }
 
+/**
+ * Der Rueckblick ist eine reine Leseseite; gedruckt wird sie ueber die Seite
+ * selbst. In der installierten App gibt es kein Browser-Menue, deshalb ein
+ * echter Knopf.
+ */
 function PrintHint() {
-  return (
-    <p className="flex items-center gap-1.5 text-xs text-muted-foreground print:hidden">
-      <Printer className="size-4" aria-hidden />
-      Über das Browser-Menü als PDF drucken
-    </p>
-  )
+  return <PrintButton label="Rückblick drucken" />
 }

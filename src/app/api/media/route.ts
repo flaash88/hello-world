@@ -8,6 +8,19 @@ import { publish } from '@/lib/realtime'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+/**
+ * Ein vom Browser gemeldetes Aufnahmedatum. Wird geprueft wie jede Eingabe
+ * von aussen: kein Datum vor 1990, keines aus der Zukunft.
+ */
+function aufnahmezeitAusFeld(value: FormDataEntryValue | null): Date | null {
+  if (typeof value !== 'string' || !value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  if (date.getFullYear() < 1990) return null
+  if (date.getTime() > Date.now() + 86_400_000) return null
+  return date
+}
+
 /** Bild-Upload. Mehrere Dateien pro Anfrage sind erlaubt. */
 export async function POST(request: Request): Promise<Response> {
   const user = await getCurrentUser()
@@ -23,6 +36,10 @@ export async function POST(request: Request): Promise<Response> {
   const form = await request.formData()
   const childId = String(form.get('childId') ?? '')
   const journalEntryId = form.get('journalEntryId')
+  // Der Browser verkleinert Bilder vor dem Upload und verliert dabei die
+  // EXIF-Daten. Damit das Aufnahmedatum nicht verschwindet, liest er es vorher
+  // selbst aus und schickt es mit. Was hier im Bild steht, hat Vorrang.
+  const gemeldetesDatum = aufnahmezeitAusFeld(form.get('takenAt'))
 
   const child = await prisma.child.findFirst({
     where: { id: childId, householdId: user.householdId },
@@ -54,7 +71,7 @@ export async function POST(request: Request): Promise<Response> {
         height: result.image.height,
         bytes: result.image.bytes,
         mimeType: result.image.mimeType,
-        takenAt: result.image.takenAt,
+        takenAt: result.image.takenAt ?? gemeldetesDatum,
         createdById: user.id,
       },
     })

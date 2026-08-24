@@ -34,6 +34,28 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang={DEFAULT_LOCALE} suppressHydrationWarning>
+      <head>
+        {/*
+         * Die beiden Schriften liegen selbst gehostet unter /public/fonts. Ohne
+         * Vorladen findet der Browser sie erst, wenn er das CSS geparst hat –
+         * ueber eine langsame Verbindung ist das eine zusaetzliche Runde, und
+         * bis dahin steht der Text in der Systemschrift und springt danach um.
+         */}
+        <link
+          rel="preload"
+          href="/fonts/nunito-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/fraunces-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>{children}</body>
     </html>
   )

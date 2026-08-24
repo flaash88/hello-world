@@ -39,7 +39,22 @@ const nextConfig = {
   // Standalone nur fuer das Docker-Image – lokal und im E2E-Lauf stoert es
   // `next start`.
   output: process.env.BUILD_STANDALONE === '1' ? ('standalone' as const) : undefined,
-  experimental: { optimizePackageImports: ['lucide-react', 'recharts'] },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts'],
+    /*
+     * Wie lange eine schon besuchte Seite im Router-Cache des Browsers gilt.
+     *
+     * Ohne das holt jeder Tab-Wechsel die Seite neu vom Server – ueber den
+     * Tunnel sind das jedes Mal ein paar hundert Millisekunden, und zwischen
+     * "Heute" und "Verlauf" hin und her zu tippen fuehlt sich zaeh an. Mit 30
+     * Sekunden ist der Weg zurueck sofort da.
+     *
+     * Veraltete Daten sind dabei kein Thema: traegt die andere Person etwas
+     * ein, kommt das ueber SSE herein und loest `router.refresh()` aus – und
+     * das verwirft den Cache.
+     */
+    staleTimes: { dynamic: 30, static: 180 },
+  },
   serverExternalPackages: ['@node-rs/argon2', 'pg', 'sharp'],
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]

@@ -1,12 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Download, FileText, Printer } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { tagesEreignisseAction, type TagesEreignisRow } from '@/lib/actions/protokoll'
 import { PROTOKOLL_TAGE } from '@/lib/protokoll/days'
-import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { UserAvatar } from '@/components/ui/avatar'
+import { PrintButton } from '@/components/print/print-button'
 import { PrintHeader } from '@/components/print/print-header'
 import { cn } from '@/lib/utils'
 import type { ProtokollDaten, ZeileView } from './types'
@@ -38,10 +38,6 @@ export function ProtokollAnsicht({ daten }: { daten: ProtokollDaten }) {
           <h1 className="font-display text-2xl font-bold">Stillprotokoll</h1>
           <p className="text-muted-foreground">Für den Besuch der Hebamme.</p>
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Printer className="size-4" aria-hidden />
-          Über das Browser-Menü drucken
-        </p>
       </div>
 
       <nav className="flex gap-2 print:hidden" aria-label="Zeitraum">
@@ -131,12 +127,10 @@ export function ProtokollAnsicht({ daten }: { daten: ProtokollDaten }) {
         Leere Zellen heißen: nichts eingetragen.
       </p>
 
-      <Button asChild variant="outline" size="lg" className="print:hidden">
-        <a href={`/api/protokoll/pdf?tage=${daten.tage}&kind=${daten.childId}`}>
-          <Download aria-hidden />
-          Als PDF herunterladen
-        </a>
-      </Button>
+      <PrintButton
+        pdfHref={`/api/protokoll/pdf?tage=${daten.tage}&kind=${daten.childId}`}
+        pdfLabel="Als PDF herunterladen"
+      />
 
       <TagDialog childId={daten.childId} zeile={offen} onClose={() => setOffen(null)} />
     </div>
