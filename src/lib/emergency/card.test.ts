@@ -3,6 +3,7 @@ import {
   KONTAKT_ROLLEN,
   KONTAKT_VORLAGE,
   NOTRUFE,
+  NOTRUF_QUELLE,
   allergienAus,
   dauermedikamenteAus,
   istBefuellt,
@@ -128,5 +129,41 @@ describe('istBefuellt', () => {
 
   it('zählt Impfungen allein nicht als befüllt – die helfen im Notfall nicht', () => {
     expect(istBefuellt({ ...leer, impfungen: [{ titel: '6-fach', datum: '1. März' }] })).toBe(false)
+  })
+})
+
+describe('NOTRUFE', () => {
+  const viz = NOTRUFE.find((n) => n.key === 'vergiftung')!
+  const rettung = NOTRUFE.find((n) => n.key === 'rettung')!
+
+  it('führt die drei österreichischen Nummern mit den richtigen Ziffern', () => {
+    expect(NOTRUFE.map((n) => n.nummer)).toEqual(['144', '01 406 43 43', '1450'])
+  })
+
+  it('beschreibt die Vergiftungszentrale als Vergiftungsberatung, nicht als Verschlucken-Hotline', () => {
+    // Ein verschluckter Fremdkörper ist kein Fall für die VIZ – das war der
+    // ursprüngliche Fehler. Zuständig ist sie für den Verdacht auf Vergiftung.
+    expect(viz.hinweis).toMatch(/Verdacht auf Vergiftung/)
+    expect(viz.hinweis).not.toMatch(/verschluckt/i)
+    // Und sie verweist bei Lebensgefahr weiter auf 144.
+    expect(viz.hinweis).toMatch(/144/)
+  })
+
+  it('nennt beim Rettungsdienst die Lage, nicht die Diagnose', () => {
+    expect(rettung.hinweis).toMatch(/Atemnot/)
+    expect(rettung.hinweis).toMatch(/Ersticken/)
+  })
+
+  it('trägt eine nachprüfbare Quelle mit Stand', () => {
+    expect(NOTRUF_QUELLE.text.length).toBeGreaterThan(30)
+    expect(NOTRUF_QUELLE.stand).toMatch(/^\d{4}-\d{2}$/)
+  })
+
+  it('verspricht bei keiner Nummer etwas, was sie nicht leistet', () => {
+    for (const notruf of NOTRUFE) {
+      expect(notruf.hinweis).not.toMatch(/!/)
+      // Keine Nummer darf als Ersatz für den Rettungsdienst dastehen.
+      if (notruf.key !== 'rettung') expect(notruf.hinweis).not.toMatch(/Lebensgefahr/)
+    }
   })
 })

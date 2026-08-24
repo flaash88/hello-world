@@ -5,6 +5,7 @@ import { Copy, Phone, Settings2, ShieldAlert } from 'lucide-react'
 import {
   KONTAKT_ROLLE_LABEL,
   NOTRUFE,
+  NOTRUF_QUELLE,
   istBefuellt,
   telHref,
   type NotfallKarte,
@@ -62,19 +63,22 @@ export function NotfallAnsicht({
             key={notruf.key}
             href={telHref(notruf.nummer)}
             className={cn(
-              'flex min-h-20 w-full items-center gap-4 rounded-xl border-2 px-4 py-3',
-              notruf.dringend
-                ? 'border-black bg-black text-white'
-                : 'border-black bg-white text-black',
+              // Weisser Grund und schwarze Schrift geben den hoechsten Kontrast,
+              // den es gibt. Die dringenden Nummern heben sich ueber eine
+              // breite Kante ab, nicht ueber eine schwarze Flaeche: die las
+              // sich wie eine Todesanzeige und war schlechter zu lesen.
+              'flex min-h-20 w-full items-center gap-4 rounded-xl border-2 border-black bg-white py-3 pr-4 text-black',
+              notruf.dringend ? 'border-l-[10px] border-l-[#c2582c] pl-3' : 'pl-4',
             )}
           >
-            <Phone className="size-7 shrink-0" aria-hidden />
+            <Phone
+              className={cn('size-7 shrink-0', notruf.dringend && 'text-[#c2582c]')}
+              aria-hidden
+            />
             <span className="min-w-0 flex-1">
               <span className="block font-display text-2xl font-bold tabular">{notruf.nummer}</span>
               <span className="block text-base font-semibold">{notruf.name}</span>
-              <span className={cn('block text-sm', notruf.dringend ? 'text-white/80' : 'text-black/70')}>
-                {notruf.hinweis}
-              </span>
+              <span className="block text-sm leading-snug text-black/70">{notruf.hinweis}</span>
             </span>
           </a>
         ))}
@@ -185,6 +189,10 @@ export function NotfallAnsicht({
         <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
         Diese Karte zeigt, was ihr eingetragen habt. Sie rechnet nichts aus und leitet aus dem
         Gewicht keine Dosierung ab.
+      </p>
+
+      <p className="pb-4 text-xs leading-snug text-black/60">
+        {NOTRUF_QUELLE.text} Stand {NOTRUF_QUELLE.stand}.
       </p>
     </div>
   )

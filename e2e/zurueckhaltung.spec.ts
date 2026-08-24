@@ -46,8 +46,10 @@ test.describe('Auslieferungszustand', () => {
     // … und nicht im Menü.
     await page.goto('/mehr')
     await expect(page.getByRole('link', { name: 'Auswertung', exact: true })).toHaveCount(0)
-    await expect(page.getByRole('link', { name: 'Entwicklung & Übungen' })).toHaveCount(0)
-    await expect(page.getByRole('link', { name: 'Stillprotokoll für die Hebamme' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Entwicklung', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Stillprotokoll' })).toBeVisible()
+    // Die Einstellungen liegen hinter einer Zeile und bleiben immer erreichbar.
+    await expect(page.getByRole('link', { name: 'Einstellungen' })).toBeVisible()
 
     // Auch direkt über die URL gibt es sie nicht.
     await page.goto('/auswertung')
@@ -218,5 +220,42 @@ test.describe('Nachtragen', () => {
 
     await dialog.getByRole('button', { name: 'Speichern' }).click()
     await expect(page.getByText('Eingetragen', { exact: true })).toBeVisible()
+  })
+})
+
+test.describe('Mehr', () => {
+  test('zeigt die Bereiche als Kacheln und die Einstellungen hinter einer Zeile', async ({
+    page,
+  }) => {
+    const email = uniqueEmail('menu')
+    await register(page, { name: 'Mama', email, code: await createHouseholdInvite() })
+    await setUpChild(page, 'Noa', 20)
+
+    await page.goto('/mehr')
+    const bereiche = page.getByRole('navigation', { name: 'Bereiche' })
+    await expect(bereiche.getByRole('link', { name: 'Notfallkarte' })).toBeVisible()
+    await expect(bereiche.getByRole('link', { name: 'Stillprotokoll' })).toBeVisible()
+
+    // Die Einstellungen liegen nicht mehr offen unter „Mehr“ …
+    await expect(page.getByRole('link', { name: 'Kindprofil' })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Backup & Daten' })).toHaveCount(0)
+
+    // … sondern eine Ebene tiefer, und dort vollständig.
+    await page.getByRole('link', { name: 'Einstellungen' }).click()
+    await expect(page).toHaveURL(/\/mehr\/einstellungen$/)
+    for (const name of [
+      'Kindprofil',
+      'Notfalldaten',
+      'Zweite Person einladen',
+      'Was die App anzeigt',
+      'Benachrichtigungen',
+      'Nachtmodus',
+      'Einheiten & Startbildschirm',
+      'Export',
+      'Backup & Daten',
+      'Automationen & API',
+    ]) {
+      await expect(page.getByRole('link', { name: new RegExp(name) })).toBeVisible()
+    }
   })
 })

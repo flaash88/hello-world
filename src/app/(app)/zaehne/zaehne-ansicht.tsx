@@ -1,8 +1,9 @@
 'use client'
+import { PrintButton } from '@/components/print/print-button'
 import { useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Printer, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { deleteToothAction, saveToothAction } from '@/lib/actions/teeth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -73,10 +74,7 @@ export function ZaehneAnsicht({
             </p>
           )}
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground print:hidden">
-          <Printer className="size-4" aria-hidden />
-          Über das Browser-Menü drucken
-        </p>
+        <PrintButton />
       </div>
 
       <div className="flex justify-center">

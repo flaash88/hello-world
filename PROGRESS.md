@@ -174,3 +174,22 @@ Ein Block pro Phase, maximal zehn Zeilen.
   „halb drei"), Ein-Tap-Vorschläge ab drei gleichen Werten. Nachgetragenes ist nicht markiert.
 - `/willkommen` erklärt beim ersten Start den Protokollmodus – ohne Feature-Rundgang. In den
   Einstellungen: „Auf Protokollmodus zurücksetzen" und „Pause" für 1, 3, 7 oder 30 Tage.
+
+## Phase 12 – Nachbesserungen aus dem echten Betrieb (abgeschlossen)
+
+- Notfallkarte: Die Vergiftungsinformationszentrale beriet laut Text bei „etwas verschluckt" –
+  falsch und im Ernstfall gefährlich. Sie ist für den Verdacht auf Vergiftung zuständig und
+  verweist jetzt bei Atemnot ausdrücklich auf 144. Quelle mit Stand steht auf der Karte.
+- Die schwarz hinterlegten Notrufkarten sind weiß mit terrakottafarbener Kante: gleicher
+  Kontrast, ohne wie eine Traueranzeige auszusehen.
+- Fotos werden vor dem Upload im Browser auf 2048 px verkleinert (etwa ein Zehntel der
+  Datenmenge), einzeln statt gebündelt geschickt, und das Aufnahmedatum wird vorher aus den
+  EXIF-Daten gelesen und getrennt mitgeschickt. Damit geht der Upload auch über Mobilfunk durch.
+- Die Fehlermeldung nennt den echten Grund statt immer „Keine Verbindung zum Server".
+- Druck-Knöpfe statt des Hinweises „über das Browser-Menü drucken" – den es in der installierten
+  App auf iOS nicht gibt. Wo ein serverseitiges PDF existiert, steht es daneben.
+- Datums- und Zeitfelder: Safari zentrierte den Wert und ignorierte die Feldbreite.
+- „Mehr" neu geordnet: Bereiche als Kacheln in zwei Spalten in Gebrauchsreihenfolge, alle
+  Einstellungen hinter einer Zeile auf `/mehr/einstellungen`. Von 21 offenen Zeilen auf 7 Reihen.
+- Ladezeiten: der Server braucht 40–170 ms; die Zähigkeit kam von der Netzrunde bei jedem
+  Wechsel. `staleTimes`, vorgeladene Tab-Ziele, ein Ladegerüst und vorgeladene Schriften.

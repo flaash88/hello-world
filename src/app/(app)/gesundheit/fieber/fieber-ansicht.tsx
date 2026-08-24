@@ -1,4 +1,5 @@
 'use client'
+import { PrintButton } from '@/components/print/print-button'
 import { useEffect, useMemo, useState } from 'react'
 import {
   CartesianGrid,
@@ -11,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Info, Printer, Thermometer } from 'lucide-react'
+import { Info, Thermometer } from 'lucide-react'
 import {
   FIEBER_AB_C,
   HOHES_FIEBER_AB_C,
@@ -109,10 +110,7 @@ export function FieberAnsicht({ daten }: { daten: FieberDaten }) {
             {daten.hoechste ? ` · höchste ${grad(daten.hoechste.temperatureC)}` : ''}
           </p>
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground print:hidden">
-          <Printer className="size-4" aria-hidden />
-          Über das Browser-Menü drucken
-        </p>
+        <PrintButton />
       </div>
 
       {hinweisOffen && (

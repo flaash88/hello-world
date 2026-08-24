@@ -7,7 +7,7 @@ test.describe('Wissen', () => {
     await setUpPregnancy(page, 60)
 
     await page.goto('/mehr')
-    await page.getByRole('link', { name: 'Wissen & Nachschlagen' }).click()
+    await page.getByRole('link', { name: 'Wissen', exact: true }).click()
     await expect(page).toHaveURL(/\/wissen$/)
 
     for (const label of ['Ernährung', 'Darf ich das essen?', 'Geburtsvorbereitung', 'Stillen', 'Wochenbett']) {
