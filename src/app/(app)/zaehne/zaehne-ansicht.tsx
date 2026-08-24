@@ -74,7 +74,7 @@ export function ZaehneAnsicht({
             </p>
           )}
         </div>
-        <PrintButton />
+        <PrintButton pdfHref={`/api/zaehne/pdf?kind=${childId}`} />
       </div>
 
       <div className="flex justify-center">

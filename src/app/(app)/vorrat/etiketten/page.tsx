@@ -77,8 +77,13 @@ export default async function EtikettenPage() {
             {etiketten.length} von {ETIKETTEN_PRO_BOGEN} auf einem A4-Bogen ·{' '}
             {ETIKETT_BREITE_MM} × {ETIKETT_HOEHE_MM} mm
           </p>
+          {/* Der Browser skaliert den Ausdruck nach eigenem Gutduenken; die
+              Masse stimmen nur im PDF. */}
+          <p className="text-sm text-muted-foreground">
+            Die Masse stimmen im PDF. Was hier steht, ist die Vorschau.
+          </p>
         </div>
-        <PrintButton label="Etiketten drucken" />
+        <PrintButton label="Etiketten drucken" pdfHref="/api/etiketten/pdf" />
       </div>
 
       {ohneQr && (

@@ -47,7 +47,7 @@ test.describe('Druckansichten', () => {
     expect(text).toContain('Lina')
     expect(text).toContain('Zeitraum')
     expect(text).toMatch(/pro Tag/i)
-    expect(text).not.toContain('Als PDF herunterladen')
+    expect(text).not.toContain('Als PDF öffnen')
     expect(text).not.toContain('Über das Browser-Menü')
     expect(text).not.toContain('Entwicklung')
 

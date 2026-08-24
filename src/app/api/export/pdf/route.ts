@@ -8,6 +8,7 @@ import { formatUnit, unitPrefsFrom } from '@/lib/units'
 import { correctedAgeDays } from '@/lib/sleep/windows'
 import { ageInDays, formatAge, localDateKey } from '@/lib/time'
 import { featureState } from '@/lib/settings/features'
+import { pdfAntwort } from '@/lib/print/antwort'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -94,11 +95,5 @@ export async function GET(request: Request): Promise<Response> {
   })
 
   const filename = `sproessling-woche-${localDateKey(stats.from, household.timezone)}.pdf`
-  return new Response(Buffer.from(bytes), {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store',
-    },
-  })
+  return pdfAntwort(bytes, filename)
 }

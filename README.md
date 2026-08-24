@@ -266,12 +266,18 @@ Danach:
   Home Assistant und NFC-Tags. Sie gelten für einen Haushalt und eine Person,
   sind einzeln widerrufbar und stehen nur einmal im Klartext da. Die Anleitung
   mit fertigen Snippets liegt in `docs/homeassistant.md`.
-- **Drucken:** Stillprotokoll und Arzt-Zettel sind auf A4 hochkant ausgelegt,
-  schwarzweiß und ohne Navigation. Auf jeder dieser Seiten steht ein
-  Druck-Knopf; in der installierten App auf iOS öffnet er die AirPrint-Auswahl,
-  und „In Dateien speichern" macht daraus ein PDF. Beim Stillprotokoll und beim
-  Wochenbericht gibt es zusätzlich ein serverseitig gebautes PDF – das Ergebnis
-  ist verlässlicher als was der Browser aus der Seite macht.
+- **Drucken und Weitergeben:** Jede Ansicht, die aus der Hand gegeben wird, hat
+  einen Knopf **Als PDF öffnen**: Stillprotokoll, Arzt-Zettel aus dem
+  Fieberverlauf, Jahresrückblick, Etikettenbogen, Zahnschema und Wochenbericht.
+  Das PDF entsteht auf dem Server und öffnet in einem neuen Tab; von dort führen
+  der Teilen-Knopf zu Drucken, „In Dateien sichern" und AirDrop. Das ist der
+  Weg, der auf allen Geräten gleich funktioniert – in der vom Startbildschirm
+  gestarteten App auf dem iPhone bewirkt `window.print()` nichts und ein
+  Download landet nirgends. Deshalb steht der zusätzliche Knopf **Drucken** nur
+  dort, wo er auch etwas tut: am Rechner, auf Android und im Safari.
+  Stillprotokoll und Arzt-Zettel sind dabei A4 hochkant, schwarzweiß und ohne
+  Navigation; der Etikettenbogen trifft die 70 × 37 mm der Universaletiketten,
+  was über den Browser-Druck nicht verlässlich geht.
 - **Wo was liegt:** Unter **Mehr** stehen die Bereiche als Kacheln, sortiert
   nach Gebrauch im Wochenbett – Notfallkarte, Stillprotokoll, Tagebuch,
   Milchvorrat zuerst. Alles, was man einmal einstellt, liegt hinter der Zeile

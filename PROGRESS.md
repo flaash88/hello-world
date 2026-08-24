@@ -198,3 +198,18 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - `npm run test:e2e` läuft eigenständig: Datenbank (Docker oder vorhandener Postgres),
   Migration, Build, Server, Tests, Aufräumen. globalTimeout 15 Minuten, Reporter `line`,
   kein Wiederverwenden alter Server.
+
+## Phase 13 – Drucken, Teilen, Fieber eintragen (abgeschlossen)
+
+- „Temperatur eintragen" öffnet den Gesundheits-Dialog, statt auf `/heute` zu verlinken;
+  der Knopf steht auch während einer laufenden Episode auf der Fieberseite.
+- Vier neue PDF-Ausgaben: Arztzettel (`/api/fieber/pdf`), Jahresrückblick mit Fotos
+  (`/api/rueckblick/pdf`), Etikettenbogen in echten 70 × 37 mm (`/api/etiketten/pdf`),
+  Zahnschema als Liste (`/api/zaehne/pdf`).
+- Alle PDFs gehen `inline` heraus und öffnen in einem neuen Tab: erst dort gibt es auf
+  dem iPhone Drucken, „In Dateien sichern" und AirDrop.
+- Drucken-Knopf nur, wo `window.print()` etwas bewirkt – in der installierten App auf
+  iOS tut es nichts, dort führt allein das PDF weiter.
+- PDF-Bausteine brechen jetzt Seiten um; Tabellen wiederholen ihre Kopfzeile.
+- Fieberdaten und Rückblick werden von Seite und PDF aus derselben Quelle geladen.
+- Grün: lint, typecheck, 764 Unit-Tests, 172 E2E-Tests, build.

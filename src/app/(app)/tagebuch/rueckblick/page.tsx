@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { PrintButton } from '@/components/print/print-button'
 import { Baby } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
-import { prisma } from '@/lib/db'
-import { addDays, formatAge, formatDateLong, startOfLocalDay } from '@/lib/time'
+import { formatAge, formatDateLong } from '@/lib/time'
 import { formatLength, formatWeight, unitPrefsFrom } from '@/lib/units'
 import { dauerText } from '@/lib/audio/notes'
+import { ladeRueckblick } from '@/lib/export/rueckblick'
+import { rueckblickZahlen } from '@/lib/export/rueckblick-zahlen'
 import { EmptyState } from '@/components/ui/empty-state'
 import { BackLink } from '@/components/layout/back-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,32 +37,13 @@ export default async function YearReviewPage({
 
   const params = await searchParams
   const year = Number(params.jahr) || new Date().getFullYear()
-  const from = startOfLocalDay(new Date(Date.UTC(year, 0, 1, 12)), ctx.timezone)
-  const to = addDays(startOfLocalDay(new Date(Date.UTC(year + 1, 0, 1, 12)), ctx.timezone), 0, ctx.timezone)
 
-  const [entries, milestones, measurements, toene] = await Promise.all([
-    prisma.journalEntry.findMany({
-      where: { childId: child.id, happenedAt: { gte: from, lt: to } },
-      include: { media: { take: 3 } },
-      orderBy: { happenedAt: 'asc' },
-    }),
-    prisma.milestone.findMany({
-      where: { childId: child.id, achievedAt: { gte: from, lt: to } },
-      orderBy: { achievedAt: 'asc' },
-    }),
-    prisma.growthMeasurement.findMany({
-      where: { childId: child.id, measuredAt: { gte: from, lt: to } },
-      orderBy: { measuredAt: 'asc' },
-    }),
-    prisma.audioNote.findMany({
-      where: { childId: child.id, recordedAt: { gte: from, lt: to } },
-      orderBy: { recordedAt: 'asc' },
-      select: { id: true, title: true, recordedAt: true, durationSec: true },
-    }),
-  ])
-
-  const first = measurements[0]
-  const last = measurements[measurements.length - 1]
+  const daten = await ladeRueckblick({ childId: child.id, jahr: year, timezone: ctx.timezone })
+  const { eintraege: entries, meilensteine: milestones, toene } = daten
+  const zahlen = rueckblickZahlen(daten, {
+    gewicht: (kg) => formatWeight(kg, units),
+    laenge: (cm) => formatLength(cm, units),
+  })
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,7 +62,7 @@ export default async function YearReviewPage({
             </p>
           )}
         </div>
-        <PrintHint />
+        <PrintHint jahr={year} kind={child.id} />
       </div>
 
       {entries.length === 0 && milestones.length === 0 && toene.length === 0 ? (
@@ -96,25 +78,9 @@ export default async function YearReviewPage({
               <CardTitle className="text-base">Das Jahr in Zahlen</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-3">
-              <Stat label="Tagebucheinträge" value={String(entries.length)} />
-              <Stat label="Meilensteine" value={String(milestones.length)} />
-              <Stat label="Aufnahmen" value={String(toene.length)} />
-              <Stat
-                label="Fotos"
-                value={String(entries.reduce((sum, entry) => sum + entry.media.length, 0))}
-              />
-              {first && last && first.weightKg !== null && last.weightKg !== null && (
-                <Stat
-                  label="Gewicht"
-                  value={`+${formatWeight(last.weightKg - first.weightKg, units)}`}
-                />
-              )}
-              {first && last && first.lengthCm !== null && last.lengthCm !== null && (
-                <Stat
-                  label="Gewachsen"
-                  value={`+${formatLength(last.lengthCm - first.lengthCm, units)}`}
-                />
-              )}
+              {zahlen.map(([label, wert]) => (
+                <Stat key={label} label={label} value={wert} />
+              ))}
             </CardContent>
           </Card>
 
@@ -227,6 +193,11 @@ function Stat({ label, value }: { label: string; value: string }) {
  * selbst. In der installierten App gibt es kein Browser-Menue, deshalb ein
  * echter Knopf.
  */
-function PrintHint() {
-  return <PrintButton label="Rückblick drucken" />
+function PrintHint({ jahr, kind }: { jahr: number; kind: string }) {
+  return (
+    <PrintButton
+      label="Rückblick drucken"
+      pdfHref={`/api/rueckblick/pdf?jahr=${jahr}&kind=${kind}`}
+    />
+  )
 }

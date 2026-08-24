@@ -72,13 +72,16 @@ test.describe('Stillprotokoll', () => {
 
   test('liefert ein PDF aus', async ({ page }) => {
     await page.goto('/protokoll')
-    const link = page.getByRole('link', { name: 'Als PDF herunterladen' })
+    const link = page.getByRole('link', { name: 'Als PDF öffnen' })
     const href = await link.getAttribute('href')
     expect(href).toContain('/api/protokoll/pdf')
 
     const antwort = await page.request.get(href!)
     expect(antwort.status()).toBe(200)
     expect(antwort.headers()['content-type']).toBe('application/pdf')
+    // inline, nicht attachment: In der installierten App auf dem iPhone tut
+    // ein Download nichts Sichtbares.
+    expect(antwort.headers()['content-disposition']).toContain('inline;')
     expect(antwort.headers()['content-disposition']).toContain('stillprotokoll-lina-')
     // Ein PDF beginnt mit %PDF.
     expect((await antwort.body()).subarray(0, 4).toString()).toBe('%PDF')
