@@ -49,7 +49,7 @@ test.describe('Auslieferungszustand', () => {
     await expect(page.getByRole('link', { name: 'Entwicklung', exact: true })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Stillprotokoll' })).toBeVisible()
     // Die Einstellungen liegen hinter einer Zeile und bleiben immer erreichbar.
-    await expect(page.getByRole('link', { name: 'Einstellungen' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Einstellungen', exact: true })).toBeVisible()
 
     // Auch direkt über die URL gibt es sie nicht.
     await page.goto('/auswertung')
@@ -241,7 +241,7 @@ test.describe('Mehr', () => {
     await expect(page.getByRole('link', { name: 'Backup & Daten' })).toHaveCount(0)
 
     // … sondern eine Ebene tiefer, und dort vollständig.
-    await page.getByRole('link', { name: 'Einstellungen' }).click()
+    await page.getByRole('link', { name: 'Einstellungen', exact: true }).click()
     await expect(page).toHaveURL(/\/mehr\/einstellungen$/)
     for (const name of [
       'Kindprofil',

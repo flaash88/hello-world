@@ -62,7 +62,10 @@ test.describe('Tagebuch', () => {
       buffer: Buffer.from('Das ist in Wahrheit Text, kein Bild.'),
     })
 
-    await expect(page.getByText(/abgelehnt/)).toBeVisible({ timeout: 20_000 })
+    // Die Meldung nennt seit Phase 12 die Datei und den Grund, statt nur zu
+    // zaehlen, wie viele abgelehnt wurden.
+    await expect(page.getByText('Nicht hochgeladen')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText(/gefaelscht\.jpg: .*kein lesbares Bild/)).toBeVisible()
   })
 
   test('markiert ein Monatsfoto und zeigt es in der Galerie', async ({ page }) => {

@@ -22,7 +22,9 @@ test.describe('Notfallkarte', () => {
     await expect(page.getByRole('heading', { name: 'Notfall' })).toBeVisible()
 
     const notrufe = page.getByRole('region', { name: 'Notrufnummern' })
-    await expect(notrufe.getByRole('link', { name: /144/ })).toHaveAttribute('href', 'tel:144')
+    // /144/ allein trifft seit Phase 12 auch die Vergiftungszentrale: deren
+    // Hinweis verweist bei Atemnot ausdruecklich auf 144.
+    await expect(notrufe.getByRole('link', { name: /Rettung/ })).toHaveAttribute('href', 'tel:144')
     await expect(notrufe.getByRole('link', { name: /Vergiftungsinformationszentrale/ })).toHaveAttribute(
       'href',
       'tel:014064343',
@@ -112,7 +114,7 @@ test.describe('Notfallkarte', () => {
     await expect(page.getByRole('heading', { name: 'Notfall' })).toBeVisible()
     await expect(page.getByText('A Rh−')).toBeVisible()
     await expect(page.getByText('Hauptstraße 1, 5020 Salzburg')).toBeVisible()
-    await expect(page.getByRole('link', { name: /144/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Rettung/ })).toBeVisible()
     await context.setOffline(false)
   })
 
