@@ -267,15 +267,16 @@ Danach:
   sind einzeln widerrufbar und stehen nur einmal im Klartext da. Die Anleitung
   mit fertigen Snippets liegt in `docs/homeassistant.md`.
 - **Drucken und Weitergeben:** Jede Ansicht, die aus der Hand gegeben wird, hat
-  einen Knopf **Als PDF öffnen**: Stillprotokoll, Arzt-Zettel aus dem
-  Fieberverlauf, Jahresrückblick, Etikettenbogen, Zahnschema und Wochenbericht.
-  Das PDF entsteht auf dem Server und öffnet in einem neuen Tab; von dort führen
-  der Teilen-Knopf zu Drucken, „In Dateien sichern" und AirDrop. Das ist der
-  Weg, der auf allen Geräten gleich funktioniert – in der vom Startbildschirm
-  gestarteten App auf dem iPhone bewirkt `window.print()` nichts und ein
-  Download landet nirgends. Deshalb steht der zusätzliche Knopf **Drucken** nur
-  dort, wo er auch etwas tut: am Rechner, auf Android und im Safari.
-  Stillprotokoll und Arzt-Zettel sind dabei A4 hochkant, schwarzweiß und ohne
+  einen Knopf dafür: Stillprotokoll, Arzt-Zettel aus dem Fieberverlauf,
+  Jahresrückblick, Etikettenbogen, Zahnschema und Wochenbericht. Das PDF
+  entsteht auf dem Server. Auf dem Handy heißt der Knopf **PDF teilen** und gibt
+  die Datei an das Teilen-Blatt des Geräts – dort gibt es Drucken, „In Dateien
+  sichern", AirDrop und Mail. In der vom Startbildschirm gestarteten App ist das
+  der einzige Weg nach draußen: Es gibt dort keine Bedienleiste, `window.print()`
+  bewirkt nichts, und ein Download landet nirgends. Wo der Browser keine Dateien
+  teilen kann – am Rechner, auf Android –, heißt der Knopf **Als PDF öffnen** und
+  öffnet einen neuen Tab; der zusätzliche Knopf **Drucken** steht ebenfalls nur
+  dort. Stillprotokoll und Arzt-Zettel sind A4 hochkant, schwarzweiß und ohne
   Navigation; der Etikettenbogen trifft die 70 × 37 mm der Universaletiketten,
   was über den Browser-Druck nicht verlässlich geht.
 - **Wo was liegt:** Unter **Mehr** stehen die Bereiche als Kacheln, sortiert

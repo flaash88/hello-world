@@ -102,3 +102,52 @@ test.describe('Tracker', () => {
     await expect(page.getByTestId('event-list').getByText('Windel · Nass').first()).toBeVisible()
   })
 })
+
+test.describe('Zahleneingabe', () => {
+  test.beforeEach(async ({ page }) => {
+    const code = await createHouseholdInvite()
+    await register(page, { name: 'Mama', email: uniqueEmail('stepper'), code })
+    await setUpChild(page, 'Lina', 120)
+    await page.goto('/heute')
+    await page.getByRole('button', { name: 'Etwas anderes eintragen' }).click()
+    await page.getByRole('button', { name: 'Gesundheit', exact: true }).click()
+  })
+
+  test('nimmt eine getippte Temperatur so, wie sie getippt wurde', async ({ page }) => {
+    // Der Fehler: Nach der ersten Ziffer wurde die 3 auf das Minimum 30
+    // hochgezogen, die zweite machte daraus 308 und damit das Maximum 45.
+    const feld = page.getByRole('textbox', { name: /^Temperatur/ })
+    await feld.click()
+    await feld.pressSequentially('38')
+    await expect(feld).toHaveValue('38')
+
+    await page.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.getByTestId('event-list').getByText(/38,0 °C/).first()).toBeVisible()
+  })
+
+  test('begrenzt erst beim Verlassen des Feldes', async ({ page }) => {
+    const feld = page.getByRole('textbox', { name: /^Temperatur/ })
+    await feld.click()
+    await feld.pressSequentially('99')
+    await feld.blur()
+    await expect(feld).toHaveValue('45')
+  })
+
+  test('lässt die Zahl beim Halten weiterlaufen', async ({ page }) => {
+    const feld = page.getByRole('textbox', { name: /^Temperatur/ })
+    await feld.click()
+    await feld.fill('37')
+    await feld.blur()
+
+    const plus = page.getByRole('button', { name: 'Temperatur erhöhen' })
+    await plus.hover()
+    await page.mouse.down()
+    await page.waitForTimeout(1500)
+    await page.mouse.up()
+
+    // Ein einzelner Tap gäbe 37,1. Gehalten muss deutlich mehr herauskommen,
+    // sonst braucht 36 auf 40 Grad vierzig Taps.
+    const wert = Number((await feld.inputValue()).replace(',', '.'))
+    expect(wert).toBeGreaterThan(38)
+  })
+})
