@@ -212,4 +212,4 @@ Ein Block pro Phase, maximal zehn Zeilen.
   iOS tut es nichts, dort führt allein das PDF weiter.
 - PDF-Bausteine brechen jetzt Seiten um; Tabellen wiederholen ihre Kopfzeile.
 - Fieberdaten und Rückblick werden von Seite und PDF aus derselben Quelle geladen.
-- Grün: lint, typecheck, 764 Unit-Tests, 172 E2E-Tests, build.
+- Grün: lint, typecheck, 752 Unit-Tests, 172 E2E-Tests, build.
