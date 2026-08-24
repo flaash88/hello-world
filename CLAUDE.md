@@ -105,9 +105,11 @@ e2e/                   Playwright-Tests
 - **Was aus der App herausgeht, geht als PDF heraus.** Eine neue Druckansicht
   bekommt eine Bauroutine über `src/lib/print/document.ts` und eine Route unter
   `src/app/api/…/pdf`, ausgeliefert mit `pdfAntwort()` (`inline`, nie
-  `attachment`). `window.print()` ist in der vom Startbildschirm gestarteten App
-  auf iOS wirkungslos und ein `download`-Link ebenso; geprüft wird das über
-  `src/lib/pwa/umgebung.ts`, nicht geraten.
+  `attachment`) und über `PrintButton` angeboten. Der gibt die Datei per
+  `navigator.share` an das Teilen-Blatt; in der installierten App auf iOS ist
+  das der einzige Weg nach draußen, weil es dort keine Bedienleiste gibt,
+  `window.print()` nichts bewirkt und ein `download`-Link nirgends landet.
+  Geprüft wird das über `src/lib/pwa/`, nicht geraten.
 - **Push nur über die Erlaubnisliste.** Eine neue Benachrichtigung muss in
   `src/lib/push/kategorien.ts` eingetragen werden, sonst wird sie nie
   verschickt. Standardmäßig an ist ausschließlich die Terminfrist.

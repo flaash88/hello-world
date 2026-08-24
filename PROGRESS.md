@@ -213,3 +213,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - PDF-Bausteine brechen jetzt Seiten um; Tabellen wiederholen ihre Kopfzeile.
 - Fieberdaten und Rückblick werden von Seite und PDF aus derselben Quelle geladen.
 - Grün: lint, typecheck, 752 Unit-Tests, 172 E2E-Tests, build.
+
+## Phase 13b – Zahleneingabe und Teilen (abgeschlossen)
+
+- Zahlenfelder begrenzen erst beim Verlassen: „38" eintippen ergab bei einem Feld
+  von 30 bis 45 vorher 45.
+- Plus und Minus laufen beim Halten weiter und werden nach kurzer Zeit gröber.
+- PDFs gehen über `navigator.share` an das Teilen-Blatt des Geräts – in der
+  installierten App ist das der einzige Weg zu Drucken, Sichern und AirDrop.
+  Ohne Datei-Teilen im Browser bleibt der neue Tab.
+- Verfällt die Nutzergeste über dem Laden, bittet der Knopf um einen zweiten Tap,
+  statt einen Fehler zu melden.
+- Grün: lint, typecheck, 783 Unit-Tests, 175 E2E-Tests, build.

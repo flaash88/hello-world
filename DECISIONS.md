@@ -945,3 +945,35 @@ sie wieder da.
 Import, damit ein Server-Modul nicht im Browser-Bündel landet. In Vitest gibt es
 diese Trennung nicht, und ohne den Ersatz ließe sich kein einziger PDF-Baustein
 prüfen. Der Alias steht in `vitest.config.ts` und gilt nur dort.
+
+**Begrenzt wird beim Verlassen des Feldes, nicht beim Tippen.** Wer bei einem
+Feld von 30 bis 45 die „38" eintippte, bekam 45: Nach der ersten Ziffer stand
+eine 3 im Feld, die sofort auf das Minimum 30 hochgezogen wurde, und die zweite
+Ziffer machte daraus 308 und damit das Maximum. Während des Tippens gilt jetzt,
+was im Feld steht; gerechnet und begrenzt wird erst beim Verlassen.
+
+**Plus und Minus laufen beim Halten weiter.** Nach 0,4 Sekunden alle 90
+Millisekunden ein Schritt, ab der achten Wiederholung fünf Schritte auf einmal.
+Am Anfang fein, damit ein einzelner Schritt noch trifft; danach grob, damit 36
+auf 40 Grad keine vierzig Taps braucht. Der Takt liest den Wert aus einer
+Referenz, nicht aus dem Abschluss – sonst rechnete jeder Schritt vom selben
+Ausgangswert und die Zahl bliebe stehen. Für die Tastatur bleibt ein
+`onClick`, das nur bei `detail === 0` zählt: Enter und Leertaste lösen keinen
+Zeiger aus.
+
+**Das PDF geht ans Teilen-Blatt, nicht in einen neuen Tab.** Der neue Tab war
+die falsche Antwort: In der vom Startbildschirm gestarteten App gibt es keine
+Bedienleiste, also öffnet sich das PDF dort innerhalb der App und steht
+bildschirmfüllend da – ohne Teilen, ohne Drucken, ohne Zurück. Über
+`navigator.share` mit der Datei kommt das Teilen-Blatt des Geräts, und dort gibt
+es Drucken, „In Dateien sichern", AirDrop und Mail. Wo der Browser keine Dateien
+teilen kann – am Rechner, auf Android –, bleibt der neue Tab; dort ist er das
+Richtige.
+
+**Ein zweiter Tap ist eingeplant.** `navigator.share` verlangt eine frische
+Nutzergeste. Zwischen dem Antippen und dem Aufruf liegt aber das Laden des PDFs,
+und darüber kann die Geste verfallen (`NotAllowedError`). Die geladene Datei
+bleibt deshalb liegen, und der Knopf bittet um einen zweiten Tap, statt einen
+Fehler zu melden – beim zweiten Mal liegt sie bereit und es geht sofort.
+Weitergegeben wird nur die Datei, ohne Titel: Mit beidem gibt iOS teils den Text
+weiter statt der Datei.
