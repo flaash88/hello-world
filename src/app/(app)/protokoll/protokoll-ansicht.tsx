@@ -127,10 +127,7 @@ export function ProtokollAnsicht({ daten }: { daten: ProtokollDaten }) {
         Leere Zellen heißen: nichts eingetragen.
       </p>
 
-      <PrintButton
-        pdfHref={`/api/protokoll/pdf?tage=${daten.tage}&kind=${daten.childId}`}
-        pdfLabel="Als PDF herunterladen"
-      />
+      <PrintButton pdfHref={`/api/protokoll/pdf?tage=${daten.tage}&kind=${daten.childId}`} />
 
       <TagDialog childId={daten.childId} zeile={offen} onClose={() => setOffen(null)} />
     </div>

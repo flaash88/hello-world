@@ -30,6 +30,7 @@ export type IntervallView = {
 }
 
 export type FieberDaten = {
+  childId: string
   childName: string
   /** Kopfzeile des Arztzettels – dieselbe wie im Stillprotokoll. */
   kopf: Kopf

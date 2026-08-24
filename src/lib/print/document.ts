@@ -69,6 +69,20 @@ export async function neuesDokument(titel: string): Promise<Doc> {
   }
 }
 
+/**
+ * Sorgt fuer Platz auf der Seite. Reicht der Rest fuer `hoehe` Punkte nicht
+ * mehr, faengt eine neue Seite an.
+ *
+ * Ohne das endete alles, was laenger als eine Seite wird, unterhalb des
+ * Papierrands – im PDF ist der Text dann da, sichtbar ist er nicht.
+ */
+export function platzSchaffen(doc: Doc, hoehe: number): boolean {
+  if (doc.cursor.y - hoehe >= MARGIN) return false
+  doc.cursor.page = doc.pdf.addPage([A4_BREITE, A4_HOEHE])
+  doc.cursor.y = A4_HOEHE - MARGIN
+  return true
+}
+
 export function drawText(
   cursor: Cursor,
   text: string,
@@ -193,12 +207,19 @@ export function drawTable(
     cursor.page.drawText(sauber, { x: links + versatz, y: cursor.y, size, font, color })
   }
 
-  spalten.forEach((spalte, index) => zelle(spalte.titel, index, bold, gedaempft, SMALL_SIZE))
-  cursor.y -= SMALL_SIZE + 4
-  drawRule(cursor, width, opts.schwarzweiss ? SCHWARZ : RULE)
-  cursor.y += 8
+  const kopfzeile = () => {
+    spalten.forEach((spalte, index) => zelle(spalte.titel, index, bold, gedaempft, SMALL_SIZE))
+    cursor.y -= SMALL_SIZE + 4
+    drawRule(cursor, width, opts.schwarzweiss ? SCHWARZ : RULE)
+    cursor.y += 8
+  }
+
+  kopfzeile()
 
   for (const zeile of zeilen) {
+    // Auf einer neuen Seite steht die Kopfzeile noch einmal, sonst weiss
+    // niemand mehr, welche Spalte welche ist.
+    if (platzSchaffen(doc, BODY_SIZE + 5)) kopfzeile()
     zeile.forEach((text, index) => zelle(text, index, regular, tinte))
     cursor.y -= BODY_SIZE + 5
   }

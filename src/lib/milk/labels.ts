@@ -35,3 +35,20 @@ export async function qrSvg(id: string): Promise<string | null> {
     color: { dark: '#000000', light: '#ffffff' },
   })
 }
+
+/**
+ * Derselbe Code als Punktraster statt als SVG.
+ *
+ * Das PDF wird mit `pdf-lib` gezeichnet, und das kann kein SVG einbetten – ein
+ * QR-Code ist aber ohnehin nur ein Raster aus schwarzen Quadraten, das sich
+ * direkt zeichnen lässt.
+ */
+export async function qrRaster(id: string): Promise<{ groesse: number; punkte: boolean[] } | null> {
+  const url = absoluteUrl(portionPfad(id))
+  if (!url) return null
+  const code = QRCode.create(url, { errorCorrectionLevel: 'M' })
+  return {
+    groesse: code.modules.size,
+    punkte: Array.from(code.modules.data, (wert) => wert === 1),
+  }
+}

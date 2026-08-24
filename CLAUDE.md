@@ -65,6 +65,8 @@ src/
     parents/           Eltern-Signal und Unterstützungskontakte
     settings/          Startbildschirm, Schnellaktionen, Bestätigungswort,
                        Feature-Schalter (`features.ts`, Auslieferung = Protokoll)
+    print/             Bausteine für alle PDFs (A4, Tabellen, Seitenumbruch)
+    pwa/               Woran die App läuft – Standalone-Modus, Drucken möglich?
     backup/            Lesezugriff auf das Backup-Volume
     units.ts           Einheiten-Umrechnung für die Anzeige (Speicher: metrisch)
     i18n.ts            Sprache und Regionsformat (nur `de` ausgeliefert)
@@ -100,6 +102,12 @@ e2e/                   Playwright-Tests
   einen Schalter in `src/lib/settings/features.ts` und steht dort ab Werk auf
   aus. Abgeschaltet heißt: aus der Navigation raus, Route leitet auf `/heute`,
   Berechnung läuft nicht – keine graue Kachel.
+- **Was aus der App herausgeht, geht als PDF heraus.** Eine neue Druckansicht
+  bekommt eine Bauroutine über `src/lib/print/document.ts` und eine Route unter
+  `src/app/api/…/pdf`, ausgeliefert mit `pdfAntwort()` (`inline`, nie
+  `attachment`). `window.print()` ist in der vom Startbildschirm gestarteten App
+  auf iOS wirkungslos und ein `download`-Link ebenso; geprüft wird das über
+  `src/lib/pwa/umgebung.ts`, nicht geraten.
 - **Push nur über die Erlaubnisliste.** Eine neue Benachrichtigung muss in
   `src/lib/push/kategorien.ts` eingetragen werden, sonst wird sie nie
   verschickt. Standardmäßig an ist ausschließlich die Terminfrist.

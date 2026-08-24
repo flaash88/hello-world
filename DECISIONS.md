@@ -883,3 +883,65 @@ liefert Chunks einer alten Build-ID aus. Im Browser sieht das aus wie
 „Application error: a client-side exception", und die Fehlersuche landet an
 Stellen, die in Ordnung sind – einmal einen halben Nachmittag lang. Die paar
 Sekunden Startzeit sind das billigere Ende.
+
+## Phase 13 – Drucken, Teilen, Fieber eintragen
+
+**Der Fieberbereich bekommt seinen eigenen Eintrag.** „Temperatur eintragen"
+war ein Link auf `/heute`. Dort landet man auf dem Dashboard und muss sich den
+Weg über „Etwas anderes eintragen" → „Gesundheit" selbst suchen – drei Taps,
+von denen keiner angekündigt war. Der Knopf öffnet jetzt den Dialog direkt, und
+er steht auch während einer laufenden Episode auf der Seite: nachgemessen wird
+mehrmals, und der Weg dorthin gehört dahin, wo man gerade ist.
+
+**`window.print()` gibt es in der installierten App auf dem iPhone nicht.** Im
+Standalone-Modus bleibt der Aufruf wirkungslos – kein Fehler, keine Rückmeldung,
+nichts. Der frühere Kommentar an dieser Stelle behauptete das Gegenteil; das war
+falsch und ungeprüft. Auch ein `download`-Link führt dort ins Leere: es gibt
+kein Downloadmenü und kein Teilen-Blatt. Beides zusammen heißt: Die beiden
+Wege, auf denen bisher etwas aus der App herauskam, funktionieren ausgerechnet
+dort nicht, wo die App zu 95 % benutzt wird.
+
+**Jede Druckansicht liefert jetzt ein PDF.** Fieber-Arztzettel, Jahresrückblick,
+Etikettenbogen und Zahnschema haben eigene Bauroutinen bekommen, wie das
+Stillprotokoll sie schon hatte. Ein serverseitig gebautes PDF ist verlässlicher
+als das, was der Browser aus der Seite macht – beim Etikettenbogen ist es sogar
+die einzige Möglichkeit, die 70 × 37 mm zu treffen, weil der Browser den
+Ausdruck nach eigenem Gutdünken skaliert.
+
+**PDFs gehen `inline` heraus, nicht als `attachment`, und werden in einem neuen
+Tab geöffnet.** Damit landet man im PDF-Betrachter des Browsers, und dort führt
+der Teilen-Knopf zu Drucken, „In Dateien sichern" und AirDrop. Das ist der
+einzige Weg, der auf allen drei Geräten gleich funktioniert.
+
+**Der Drucken-Knopf erscheint nur, wo er etwas bewirkt.** `src/lib/pwa/umgebung.ts`
+prüft auf iOS im Standalone-Modus und lässt ihn dort weg – erst nach dem
+Einhängen, weil der Server nicht wissen kann, woran die App läuft. Ein Knopf,
+der nichts tut, ist schlimmer als keiner. Auf Android, am Rechner und im Safari
+auf demselben iPhone steht er weiterhin.
+
+**Das Zahnschema wird auf Papier eine Liste.** Am Bildschirm ist der gezeichnete
+Kiefer das Hilfreiche: man tippt den Zahn an, den man meint. Auf Papier zählt
+die andere Frage – wann kam welcher Zahn –, und dafür ist eine Tabelle das
+bessere Format. Aufgeführt wird nur, was eingetragen ist; zwanzig leere Zeilen
+läsen sich wie eine Mängelliste.
+
+**Der Rückblick nimmt die Fotos mit.** Er ist das eine Dokument aus dieser App,
+das jemand ausdruckt, um es aufzuheben – deshalb in Farbe und mit Bildern,
+anders als Stillprotokoll und Arztzettel. Gespeichert wird WebP, einbetten kann
+`pdf-lib` nur JPEG und PNG, also kodiert die Route um. Ein Bild, das fehlt oder
+sich nicht lesen lässt, fällt still weg.
+
+**Laden steht jetzt an einer Stelle.** Fieberdaten und Rückblick wurden von der
+Seite und vom PDF getrennt abgefragt. Zwei Abfragen für dieselbe Ansicht laufen
+auseinander, sobald eine davon angepasst wird – jetzt teilen sie sich
+`src/lib/fever/daten.ts` bzw. `src/lib/export/rueckblick.ts`.
+
+**„+0,0 kg" fällt weg.** Der Rückblick zeigte bei genau einer Gewichtsmessung
+eine Zunahme von null an, weil erste und letzte Messung dieselbe waren. Eine
+Zahl, die etwas behauptet, was niemand gemessen hat. Ab zwei Messungen steht
+sie wieder da.
+
+**`server-only` ist in den Tests ein leeres Modul.** Das echte Paket wirft beim
+Import, damit ein Server-Modul nicht im Browser-Bündel landet. In Vitest gibt es
+diese Trennung nicht, und ohne den Ersatz ließe sich kein einziger PDF-Baustein
+prüfen. Der Alias steht in `vitest.config.ts` und gilt nur dort.

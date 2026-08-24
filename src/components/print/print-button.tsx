@@ -1,43 +1,49 @@
 'use client'
-import { Download, Printer } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { FileText, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { druckenMoeglich, umgebungAusBrowser } from '@/lib/pwa/umgebung'
 
 /**
- * Drucken aus der App heraus.
+ * Der Weg von einer Ansicht zu etwas, das man ausdrucken oder weitergeben kann.
  *
- * Bisher stand hier nur der Hinweis „über das Browser-Menü drucken". In der
- * installierten App auf dem iPhone gibt es dieses Menü nicht: Safari läuft im
- * Standalone-Modus ohne Adressleiste und ohne Teilen-Knopf. Der Hinweis war
- * also genau dort falsch, wo die App am häufigsten benutzt wird.
+ * Führend ist das serverseitig gebaute PDF, geöffnet in einem neuen Tab. In der
+ * installierten App auf dem iPhone landet man damit im PDF-Betrachter des
+ * Browsers, und dort führt der Teilen-Knopf zu Drucken, „In Dateien sichern"
+ * und AirDrop. Ein `download`-Link tut an derselben Stelle nichts Sichtbares,
+ * und `window.print()` ebenso wenig.
  *
- * `window.print()` funktioniert auch im Standalone-Modus – iOS öffnet die
- * AirPrint-Auswahl, und über „In Dateien speichern" entsteht daraus ein PDF.
- * Wo es zusätzlich ein serverseitig gebautes PDF gibt (Stillprotokoll,
- * Wochenbericht), steht der Weg daneben: das Ergebnis ist verlässlicher als
- * was der Browser aus der Seite macht.
+ * Der Drucken-Knopf erscheint deshalb nur dort, wo er auch etwas bewirkt –
+ * erst nach dem Einhängen, weil der Server nicht wissen kann, woran die App
+ * gerade läuft.
  */
 export function PrintButton({
-  /** Serverseitig gebautes PDF, falls es eines gibt. */
   pdfHref,
-  pdfLabel = 'Als PDF laden',
+  pdfLabel = 'Als PDF öffnen',
   label = 'Drucken',
 }: {
-  pdfHref?: string
+  pdfHref: string
   pdfLabel?: string
   label?: string
 }) {
+  const [drucken, setDrucken] = useState(false)
+
+  useEffect(() => {
+    setDrucken(druckenMoeglich(umgebungAusBrowser()))
+  }, [])
+
   return (
     <div className="flex flex-wrap gap-2 print:hidden">
-      <Button variant="outline" className="h-12" onClick={() => window.print()}>
-        <Printer aria-hidden />
-        {label}
+      <Button asChild variant="outline" className="h-12">
+        <a href={pdfHref} target="_blank" rel="noopener noreferrer">
+          <FileText aria-hidden />
+          {pdfLabel}
+        </a>
       </Button>
-      {pdfHref && (
-        <Button asChild variant="outline" className="h-12">
-          <a href={pdfHref} download>
-            <Download aria-hidden />
-            {pdfLabel}
-          </a>
+      {drucken && (
+        <Button variant="outline" className="h-12" onClick={() => window.print()}>
+          <Printer aria-hidden />
+          {label}
         </Button>
       )}
     </div>

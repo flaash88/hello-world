@@ -5,6 +5,7 @@ import { addDays, formatDateShort, startOfLocalDay } from '@/lib/time'
 import { localeTag } from '@/lib/i18n'
 import { unitPrefsFrom } from '@/lib/units'
 import { druckDateiname, druckKopf } from '@/lib/print/kopf'
+import { pdfAntwort } from '@/lib/print/antwort'
 import { PROTOKOLL_STANDARD, PROTOKOLL_TAGE, protokoll } from '@/lib/protokoll/days'
 import { buildProtokollPdf } from '@/lib/protokoll/pdf'
 import type { StatEvent } from '@/lib/stats/aggregate'
@@ -91,11 +92,5 @@ export async function GET(request: Request): Promise<Response> {
     zahl: (value) => value.toLocaleString(localeTag(), { maximumFractionDigits: 1 }),
   })
 
-  return new Response(Buffer.from(bytes), {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${druckDateiname('stillprotokoll', child.name, now, tz)}"`,
-      'Cache-Control': 'no-store',
-    },
-  })
+  return pdfAntwort(bytes, druckDateiname('stillprotokoll', child.name, now, tz))
 }

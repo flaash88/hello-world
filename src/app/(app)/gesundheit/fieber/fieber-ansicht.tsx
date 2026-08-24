@@ -22,14 +22,15 @@ import {
   type Messort,
   type Zeitraum,
 } from '@/lib/fever/episode'
+import { dosis, grad, tagText } from '@/lib/fever/format'
 import { formatDateLong, formatDateTime, formatTime } from '@/lib/time'
-import { localeTag } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MedicalDisclaimer } from '@/components/medical-disclaimer'
 import { PrintHeader } from '@/components/print/print-header'
-import type { FieberDaten, GabeView, MessungView } from './types'
+import { TemperaturKnopf } from './temperatur-knopf'
+import type { FieberDaten, GabeView, MessungView } from '@/lib/fever/views'
 
 const HINWEIS_KEY = 'sp_fieber_hinweis'
 
@@ -39,17 +40,6 @@ const ORT_FORM: Record<Messort, 'circle' | 'square' | 'triangle' | 'diamond'> = 
   ear: 'square',
   forehead: 'triangle',
   armpit: 'diamond',
-}
-
-function grad(value: number): string {
-  return `${value.toLocaleString(localeTag(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} °C`
-}
-
-function dosis(gabe: { doseMl: number | null; doseMg: number | null }): string {
-  const teile: string[] = []
-  if (gabe.doseMl !== null) teile.push(`${gabe.doseMl.toLocaleString(localeTag())} ml`)
-  if (gabe.doseMg !== null) teile.push(`${gabe.doseMg.toLocaleString(localeTag())} mg`)
-  return teile.join(' · ')
 }
 
 export function FieberAnsicht({ daten }: { daten: FieberDaten }) {
@@ -110,8 +100,12 @@ export function FieberAnsicht({ daten }: { daten: FieberDaten }) {
             {daten.hoechste ? ` · höchste ${grad(daten.hoechste.temperatureC)}` : ''}
           </p>
         </div>
-        <PrintButton />
+        <PrintButton pdfHref={`/api/fieber/pdf?kind=${daten.childId}`} />
       </div>
+
+      {/* Waehrend einer Episode wird oft nachgemessen – der Weg dorthin gehoert
+          auf diese Seite, nicht auf das Dashboard. */}
+      <TemperaturKnopf childId={daten.childId} className="w-full print:hidden" />
 
       {hinweisOffen && (
         <Card className="print:hidden">
@@ -342,11 +336,7 @@ function Arztzettel({ daten }: { daten: FieberDaten }) {
         </div>
         <div className="col-span-2">
           <dt className="text-muted-foreground">Letzte 24 Stunden</dt>
-          <dd className="font-semibold">
-            {daten.tag.trinkmengeMl > 0 ? `${daten.tag.trinkmengeMl} ml aus der Flasche` : 'keine Flasche'}
-            {daten.tag.stillminuten > 0 ? ` · ${daten.tag.stillminuten} Min gestillt` : ''} ·{' '}
-            {daten.tag.windelnNass} nasse, {daten.tag.windelnStuhl} volle Windeln
-          </dd>
+          <dd className="font-semibold">{tagText(daten.tag)}</dd>
         </div>
       </dl>
 
