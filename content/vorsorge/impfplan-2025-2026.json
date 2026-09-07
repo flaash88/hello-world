@@ -2,9 +2,9 @@
   "quelle": "Impfplan Österreich 2025/2026, Bundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz, sozialministerium.gv.at/impfplan",
   "version": "1.1",
   "stand": "2025-10-10",
-  "abgerufenAm": "2026-08-23",
+  "abgerufenAm": "2026-09-07",
   "geprueft": false,
-  "pruefhinweis": "ACHTUNG: Diese Daten wurden NICHT aus dem Original-PDF übernommen. Der Download von sozialministerium.gv.at und gesundheit.gv.at war aus der Entwicklungsumgebung heraus gesperrt. Die Einträge stammen aus Zusammenfassungen der offiziellen Seiten und sind vor der Verwendung gegen den Impfplan Österreich 2025/2026 (Version 1.1 vom 10.10.2025) zu prüfen. Zu prüfen ist dabei ausdrücklich auch die Umrechnung der Zeitangaben: die Quellen formulieren teils ordinal („im 3. Lebensmonat“), teils vollendet („ab der vollendeten 7. Lebenswoche“); hier steht alles in vollendeten Einheiten, was um bis zu eine Woche bzw. einen Monat abweichen kann. Einträge ohne belegtes Zeitfenster tragen fenster: null und sind in der App ausdrücklich als ungeprüft gekennzeichnet.",
+  "pruefhinweis": "ACHTUNG, ungeprüft. Diese Daten stammen NICHT aus dem Original-PDF – der Download von sozialministerium.gv.at, gesundheit.gv.at und auch von der Spiegelung auf pii.meduniwien.ac.at ist aus der Entwicklungsumgebung gesperrt. Vor der Verwendung gegen den Impfplan Österreich 2025/2026 (Version 1.1 vom 10.10.2025) prüfen. Besonders zu prüfen: (1) das Feld kostenfrei. Österreich hat das kostenfreie Kinderimpfprogramm zuletzt erweitert; für Varizellen und die Kinder-Influenza deuten Recherchen im September 2026 darauf hin, dass sie inzwischen enthalten sind – hier stehen sie noch als kostenpflichtig bzw. unbekannt. (2) die Umrechnung der Zeitangaben: die Quellen formulieren teils ordinal („im 3. Lebensmonat“), teils vollendet („ab der vollendeten 7. Lebenswoche“); hier steht alles in vollendeten Einheiten, was um bis zu eine Woche bzw. einen Monat abweichen kann. Einträge ohne belegtes Zeitfenster tragen fenster: null und sind in der App als ungeprüft gekennzeichnet.",
   "einheiten": "Alle Zahlen in fenster sind vollendete Lebenswochen bzw. Lebensmonate, gerechnet ab dem Geburtstag. Der Wortlaut der Quelle steht unverändert in fensterText bzw. hinweis. Beispiel: „im 3. Lebensmonat“ ist vonMonaten 2 / bisMonaten 3.",
   "impfungen": [
     {

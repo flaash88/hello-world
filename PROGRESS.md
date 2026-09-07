@@ -242,3 +242,15 @@ Ein Block pro Phase, maximal zehn Zeilen.
   Eintrag im Umkreis von 25 Minuten.
 - Kein Ring dünner als 22 Einheiten, Scheibe nutzt die volle Breite.
 - Vier E2E-Tests messen Beschriftungen, Markengröße und den Tap daneben.
+
+## Phase 14 – Datenherkunft geprüft (abgeschlossen)
+
+- `DATENHERKUNFT.md` neu: jeder mitgelieferte Datensatz mit Quelle und Prüfstand.
+- Geprüft und bestätigt: WHO-Wachstumsdaten (Kontrollpunkte auf vier Nachkommastellen,
+  0 ungültige LMS-Tripel), Zahndurchbruch und -ausfall nach ADA, Milchaufbewahrung
+  Zimmertemperatur/Kühlschrank/Tiefkühler nach CDC, Familienzeitbonus 2026, KBG-Rückwirkung.
+- Korrigiert: Gefrierfach im Kühlschrank stand mit 6 Monaten in den Vorgaben – die CDC
+  nennt zwei Wochen. Das war die Zahl für eine Truhe an der falschen Stelle.
+- Offen und in den Prüfhinweisen benannt: Nummerierung der Eltern-Kind-Pass-Untersuchungen
+  ab der vierten, sowie das Feld `kostenfrei` im Impfplan. Beide Quellen sind aus der
+  Entwicklungsumgebung gesperrt; nichts wurde auf Verdacht geändert.

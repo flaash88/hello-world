@@ -38,10 +38,17 @@ function portion(over: Partial<Portion> = {}): Portion {
 }
 
 describe('Haltbarkeiten', () => {
-  it('hält die Vorgaben: 4 Tage Kühlschrank, 6 Monate Gefrierfach, 12 Monate Tiefkühler', () => {
+  it('hält die Vorgaben: 4 Tage Kühlschrank, 2 Wochen Gefrierfach, 12 Monate Tiefkühler', () => {
     expect(HALTBARKEIT_VORGABE.kuehlschrank).toBe(96)
-    expect(HALTBARKEIT_VORGABE.gefrierfach).toBe(6 * 30 * 24)
-    expect(HALTBARKEIT_VORGABE.tiefkuehler).toBe(12 * 30 * 24)
+    // Das Fach im Kühlschrank ist kein Tiefkühler: Die CDC nennt dafür zwei
+    // Wochen. Hier stand ein halbes Jahr – die Zahl für eine Truhe.
+    expect(HALTBARKEIT_VORGABE.gefrierfach).toBe(14 * 24)
+    expect(HALTBARKEIT_VORGABE.tiefkuehler).toBe(8640)
+  })
+
+  it('gibt dem Gefrierfach eine kürzere Frist als dem Tiefkühler', () => {
+    expect(HALTBARKEIT_VORGABE.gefrierfach).toBeLessThan(HALTBARKEIT_VORGABE.tiefkuehler)
+    expect(HALTBARKEIT_VORGABE.kuehlschrank).toBeLessThan(HALTBARKEIT_VORGABE.gefrierfach)
   })
 
   it('gibt aufgetauter Milch ein eigenes, kurzes Fenster', () => {
