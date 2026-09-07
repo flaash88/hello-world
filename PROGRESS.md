@@ -264,3 +264,14 @@ Ein Block pro Phase, maximal zehn Zeilen.
   mehr kennt – vorher zeigte sie Gewicht und Allergien eines gelöschten Kindes unbegrenzt weiter.
 - Vier E2E-Tests: Kartenhelligkeit in beiden Themen, Farbschema der Seite, gerenderte
   Schriftfamilie der Nummer und das Wegwerfen des Spiegels.
+
+## Phase 16 – Systemleiste auf dem iPhone (abgeschlossen)
+
+- `theme-color` entspricht jetzt exakt dem Seitenhintergrund; vorher wichen beide
+  Werte leicht ab und ergaben oben eine feine Kante.
+- Je eine Marke für helle und dunkle Systemdarstellung, damit schon vor dem ersten
+  Skriptlauf die passende gilt; die App setzt danach beide um.
+- Fünf Unit-Tests, darunter einer, der die Farbwerte gegen `--background` in
+  `globals.css` prüft.
+- Nicht behebbar in der App: Den Streifen hinter Uhrzeit und Dynamic Island färbt iOS
+  in der installierten App nach der System-Darstellung, nicht nach dem Nachtmodus.

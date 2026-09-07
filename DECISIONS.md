@@ -1081,3 +1081,28 @@ Kartengrunds in beiden Themen, prüfen, dass die Seite kein Hellschema erzwingt,
 und lesen die tatsächlich gerenderte Schriftfamilie der Notrufnummer aus. Eine
 Behauptung im Kommentar hätte diesen Fehler nicht verhindert – er stand ja
 genau dort.
+
+## Phase 16 – Systemleiste auf dem iPhone
+
+**Die Leistenfarbe stimmte nicht mit dem Hintergrund überein.** `theme-color`
+stand auf `#faf6f0` und im Nachtmodus auf `#0b0908`; die tatsächlichen
+Hintergründe sind `#fbf8f4` und `#0c0a08`. Zwei Werte, die fast stimmen, ergeben
+oben eine feine Kante statt einer durchgehenden Fläche. Die Farben stehen jetzt
+in `src/lib/pwa/statusleiste.ts`, und ein Test liest `--background` aus
+`globals.css`, rechnet HSL in Hex um und vergleicht – damit können sie beim
+nächsten Themenwechsel nicht wieder auseinanderlaufen.
+
+**Zwei Marken statt einer.** Vor dem ersten Skriptlauf gab es nur den hellen
+Wert. Jetzt liegt je eine Marke für helle und dunkle Systemdarstellung bereit;
+sobald die App ihren eigenen Nachtmodus kennt, setzt sie beide um. Beide ist
+nötig: Eine Marke mit passender Medienabfrage schlägt sonst die ohne, und die
+Entscheidung der App wäre wirkungslos.
+
+**Was das nicht löst.** In der vom Startbildschirm gestarteten App richtet sich
+iOS beim Streifen hinter Uhrzeit und Dynamic Island nach der
+**System**-Darstellung, nicht nach dem Nachtmodus dieser App. Steht das iPhone
+auf Hell und hier der Nachtmodus an, bleibt der Streifen hell. Dagegen hilft nur
+die Systemeinstellung. `apple-mobile-web-app-status-bar-style` wäre der einzige
+weitere Hebel, taugt hier aber nicht: `black` gäbe auch tagsüber einen schwarzen
+Balken über einer sandfarbenen App, und `black-translucent` zeichnet die
+Uhrzeit immer hell – auf dem hellen Tageshintergrund also unlesbar.
