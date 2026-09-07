@@ -260,5 +260,7 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Notfallkarte folgt wieder dem Thema: am Tag schwarz auf weiss, nachts hell auf
   fast schwarz. Vorher stand dort fest verdrahtetes Weiss samt erzwungenem Hellschema.
 - Notrufnummern in Nunito statt Fraunces, eine Stufe grösser und mit Tabellenziffern.
-- Drei E2E-Tests messen Kartenhelligkeit in beiden Themen, das Farbschema der Seite
-  und die gerenderte Schriftfamilie der Nummer.
+- Die für offline gespiegelte Notfallkarte wird verworfen, sobald der Server kein Kind
+  mehr kennt – vorher zeigte sie Gewicht und Allergien eines gelöschten Kindes unbegrenzt weiter.
+- Vier E2E-Tests: Kartenhelligkeit in beiden Themen, Farbschema der Seite, gerenderte
+  Schriftfamilie der Nummer und das Wegwerfen des Spiegels.

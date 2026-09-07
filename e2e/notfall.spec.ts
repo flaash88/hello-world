@@ -1,5 +1,11 @@
 import { test, expect, type Page } from '@playwright/test'
-import { createHouseholdInvite, register, setUpChild, uniqueEmail } from './helpers'
+import {
+  createHouseholdInvite,
+  loescheKinder,
+  register,
+  setUpChild,
+  uniqueEmail,
+} from './helpers'
 
 async function trageGesundheitEin(page: Page, art: string, feld: string, wert: string) {
   await page.goto('/heute')
@@ -175,5 +181,56 @@ test.describe('Notfallkarte im Nachtmodus', () => {
     // Fraunces setzt Ziffern schmal und mit Serifen – im Notfall die falsche Wahl.
     expect(schrift).not.toMatch(/Fraunces/i)
     expect(schrift).toMatch(/Nunito/i)
+  })
+})
+
+/**
+ * Die Karte wird fuer den Offline-Fall in den Browser gespiegelt. Diese Kopie
+ * ueberlebte das Loeschen des Kindes unbegrenzt: Der Server lieferte nichts
+ * mehr, die Ansicht griff auf den Spiegel zurueck und zeigte weiter Gewicht,
+ * Allergien und Geburtsdatum eines Kindes, das es nicht mehr gibt. Im Notfall
+ * liest jemand daraus vor.
+ */
+test.describe('Notfallkarte nach dem Löschen des Kindes', () => {
+  test('wirft die gespiegelte Karte weg, sobald der Server kein Kind mehr kennt', async ({
+    page,
+  }) => {
+    const code = await createHouseholdInvite()
+    const email = uniqueEmail('nfweg')
+    await register(page, { name: 'Mama', email, code })
+    await setUpChild(page, 'Testkind', 60)
+
+    await page.goto('/mehr/notfall')
+    await page.getByLabel(/^Blutgruppe/).fill('0 Rh+')
+    await page.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
+
+    await page.goto('/notfall')
+    await expect(page.getByRole('heading', { name: 'Testkind' })).toBeVisible()
+
+    await loescheKinder(email)
+
+    await page.goto('/notfall')
+    await expect(page.getByRole('heading', { name: 'Notfall' })).toBeVisible()
+    // Die Notrufnummern bleiben – die gehören keinem Kind.
+    await expect(page.getByRole('link', { name: /Rettung/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Testkind' })).toHaveCount(0)
+    await expect(page.getByText('0 Rh+')).toHaveCount(0)
+
+    // Und die Kopie ist wirklich weg, nicht nur ausgeblendet.
+    const gespiegelt = await page.evaluate(async () => {
+      const request = indexedDB.open('sproessling')
+      await new Promise<void>((resolve, reject) => {
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
+      const db = request.result
+      const eintrag = await new Promise<unknown>((resolve) => {
+        const anfrage = db.transaction('notfall', 'readonly').objectStore('notfall').get('aktuell')
+        anfrage.onsuccess = () => resolve(anfrage.result)
+      })
+      return eintrag ?? null
+    })
+    expect(gespiegelt).toBeNull()
   })
 })

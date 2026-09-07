@@ -10,7 +10,7 @@ import {
   telHref,
   type NotfallKarte,
 } from '@/lib/emergency/card'
-import { gespiegelteNotfallKarte, spiegleNotfallKarte } from '@/lib/offline/queue'
+import { gespiegelteNotfallKarte, loescheNotfallSpiegel, spiegleNotfallKarte } from '@/lib/offline/queue'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
@@ -30,13 +30,28 @@ export function NotfallAnsicht({
   const [karte, setKarte] = useState<NotfallKarte | null>(vomServer)
   const [ausSpiegel, setAusSpiegel] = useState(false)
 
-  // Was der Server geliefert hat, wandert in den lokalen Bestand. Kam nichts
-  // (offline geoeffnet), wird von dort gelesen.
+  /*
+   * Was der Server geliefert hat, wandert in den lokalen Bestand. Kam nichts,
+   * gibt es zwei Faelle, die sich nicht gleich behandeln lassen:
+   *
+   * Offline geoeffnet – dann ist die Spiegelung genau das, wofuer sie da ist.
+   *
+   * Online, und der Server sagt: es gibt kein Kind mehr. Dann muss die
+   * Spiegelung weg. Eine Notfallkarte mit Gewicht, Allergien und Geburtsdatum
+   * eines geloeschten Kindes bleibt sonst fuer immer stehen, und im Notfall
+   * liest jemand daraus vor.
+   */
   useEffect(() => {
     let abgebrochen = false
 
     if (vomServer) {
       void spiegleNotfallKarte(vomServer).catch(() => {})
+      return
+    }
+
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
+    if (!offline) {
+      void loescheNotfallSpiegel().catch(() => {})
       return
     }
 

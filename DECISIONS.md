@@ -1067,6 +1067,15 @@ Telefonnummer, die man um drei Uhr früh treffen muss, die falsche Wahl. Die
 Nummern stehen jetzt in Nunito, eine Stufe grösser, fett und mit
 Tabellenziffern.
 
+**Die gespiegelte Notfallkarte überlebte das gelöschte Kind.** Die Karte wird
+für den Offline-Fall in IndexedDB gespiegelt. Lieferte der Server nichts, griff
+die Ansicht auf den Spiegel zurück – und tat das auch dann, wenn der Server
+online antwortete und nur eben kein Kind mehr kannte. Ergebnis: Gewicht,
+Allergien, Blutgruppe und Geburtsdatum eines gelöschten Kindes standen
+unbegrenzt weiter da. Für eine Karte, aus der im Notfall jemand vorliest, ist
+das der schlimmste Fehler von allen. Jetzt wird unterschieden: offline gilt der
+Spiegel, online ohne Kind wird er weggeworfen.
+
 **Drei E2E-Tests halten das fest.** Sie messen die tatsächliche Helligkeit des
 Kartengrunds in beiden Themen, prüfen, dass die Seite kein Hellschema erzwingt,
 und lesen die tatsächlich gerenderte Schriftfamilie der Notrufnummer aus. Eine
