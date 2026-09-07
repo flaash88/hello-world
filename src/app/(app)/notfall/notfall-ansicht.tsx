@@ -10,7 +10,7 @@ import {
   telHref,
   type NotfallKarte,
 } from '@/lib/emergency/card'
-import { gespiegelteNotfallKarte, spiegleNotfallKarte } from '@/lib/offline/queue'
+import { gespiegelteNotfallKarte, loescheNotfallSpiegel, spiegleNotfallKarte } from '@/lib/offline/queue'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
@@ -30,13 +30,28 @@ export function NotfallAnsicht({
   const [karte, setKarte] = useState<NotfallKarte | null>(vomServer)
   const [ausSpiegel, setAusSpiegel] = useState(false)
 
-  // Was der Server geliefert hat, wandert in den lokalen Bestand. Kam nichts
-  // (offline geoeffnet), wird von dort gelesen.
+  /*
+   * Was der Server geliefert hat, wandert in den lokalen Bestand. Kam nichts,
+   * gibt es zwei Faelle, die sich nicht gleich behandeln lassen:
+   *
+   * Offline geoeffnet – dann ist die Spiegelung genau das, wofuer sie da ist.
+   *
+   * Online, und der Server sagt: es gibt kein Kind mehr. Dann muss die
+   * Spiegelung weg. Eine Notfallkarte mit Gewicht, Allergien und Geburtsdatum
+   * eines geloeschten Kindes bleibt sonst fuer immer stehen, und im Notfall
+   * liest jemand daraus vor.
+   */
   useEffect(() => {
     let abgebrochen = false
 
     if (vomServer) {
       void spiegleNotfallKarte(vomServer).catch(() => {})
+      return
+    }
+
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
+    if (!offline) {
+      void loescheNotfallSpiegel().catch(() => {})
       return
     }
 
@@ -54,7 +69,7 @@ export function NotfallAnsicht({
   }, [vomServer])
 
   return (
-    <div className="flex flex-col gap-4 [color-scheme:light]">
+    <div className="flex flex-col gap-4">
       <h1 className="font-display text-3xl font-bold">Notfall</h1>
 
       <section aria-label="Notrufnummern" className="flex flex-col gap-2">
@@ -63,22 +78,28 @@ export function NotfallAnsicht({
             key={notruf.key}
             href={telHref(notruf.nummer)}
             className={cn(
-              // Weisser Grund und schwarze Schrift geben den hoechsten Kontrast,
-              // den es gibt. Die dringenden Nummern heben sich ueber eine
-              // breite Kante ab, nicht ueber eine schwarze Flaeche: die las
-              // sich wie eine Todesanzeige und war schlechter zu lesen.
-              'flex min-h-20 w-full items-center gap-4 rounded-xl border-2 border-black bg-white py-3 pr-4 text-black',
-              notruf.dringend ? 'border-l-[10px] border-l-[#c2582c] pl-3' : 'pl-4',
+              // Hoechster Kontrast, den das jeweilige Thema hergibt – nicht
+              // fest weiss. Ein Notfall passiert nachts, und dann stand hier
+              // eine leuchtend weisse Flaeche in einer sonst tiefdunklen App.
+              // Die dringenden Nummern heben sich ueber eine breite Kante ab,
+              // nicht ueber eine gefuellte Flaeche.
+              'flex min-h-20 w-full items-center gap-4 rounded-xl border-2 border-foreground bg-card py-3 pr-4 text-card-foreground',
+              notruf.dringend ? 'border-l-[10px] border-l-primary pl-3' : 'pl-4',
             )}
           >
             <Phone
-              className={cn('size-7 shrink-0', notruf.dringend && 'text-[#c2582c]')}
+              className={cn('size-7 shrink-0', notruf.dringend && 'text-primary')}
               aria-hidden
             />
             <span className="min-w-0 flex-1">
-              <span className="block font-display text-2xl font-bold tabular">{notruf.nummer}</span>
+              {/* Die Nummer in der Grotesk, nicht in der Display-Serife:
+                  Fraunces setzt Ziffern schmal und mit Serifen, und genau die
+                  muss man im Notfall auf einen Blick treffen. */}
+              <span className="block font-sans text-3xl font-extrabold leading-tight tracking-wide tabular">
+                {notruf.nummer}
+              </span>
               <span className="block text-base font-semibold">{notruf.name}</span>
-              <span className="block text-sm leading-snug text-black/70">{notruf.hinweis}</span>
+              <span className="block text-sm leading-snug text-muted-foreground">{notruf.hinweis}</span>
             </span>
           </a>
         ))}
@@ -90,7 +111,7 @@ export function NotfallAnsicht({
         <>
           <section
             aria-label="Angaben zum Kind"
-            className="rounded-xl border-2 border-black bg-white p-4 text-black"
+            className="rounded-xl border-2 border-foreground bg-card p-4 text-card-foreground"
           >
             <h2 className="font-display text-2xl font-bold">{karte.kind.name}</h2>
             <dl className="mt-2 flex flex-col gap-2 text-lg">
@@ -121,15 +142,15 @@ export function NotfallAnsicht({
                 <a
                   key={kontakt.id}
                   href={telHref(kontakt.nummer)}
-                  className="flex min-h-20 w-full items-center gap-4 rounded-xl border-2 border-black bg-white px-4 py-3 text-black"
+                  className="flex min-h-20 w-full items-center gap-4 rounded-xl border-2 border-foreground bg-card px-4 py-3 text-card-foreground"
                 >
                   <Phone className="size-6 shrink-0" aria-hidden />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-display text-xl font-bold tabular">
+                    <span className="block font-sans text-2xl font-extrabold leading-tight tracking-wide tabular">
                       {kontakt.nummer}
                     </span>
                     <span className="block text-base font-semibold">{kontakt.name}</span>
-                    <span className="block text-sm text-black/70">
+                    <span className="block text-sm text-muted-foreground">
                       {KONTAKT_ROLLE_LABEL[kontakt.rolle]}
                     </span>
                   </span>
@@ -141,7 +162,7 @@ export function NotfallAnsicht({
           {karte.impfungen.length > 0 && (
             <section
               aria-label="Zuletzt dokumentierte Impfungen"
-              className="rounded-xl border-2 border-black bg-white p-4 text-black"
+              className="rounded-xl border-2 border-foreground bg-card p-4 text-card-foreground"
             >
               <h2 className="text-base font-bold uppercase tracking-wide">Zuletzt geimpft</h2>
               <ul className="mt-1 text-base">
@@ -191,7 +212,7 @@ export function NotfallAnsicht({
         Gewicht keine Dosierung ab.
       </p>
 
-      <p className="pb-4 text-xs leading-snug text-black/60">
+      <p className="pb-4 text-xs leading-snug text-muted-foreground">
         {NOTRUF_QUELLE.text} Stand {NOTRUF_QUELLE.stand}.
       </p>
     </div>
@@ -211,10 +232,10 @@ function Zeile({
 }) {
   return (
     <div>
-      <dt className="text-sm font-semibold uppercase tracking-wide text-black/60">{label}</dt>
-      <dd className={cn('font-semibold', wert ? '' : 'text-black/60')}>
+      <dt className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className={cn('font-semibold', wert ? '' : 'text-muted-foreground')}>
         {wert ?? leer}
-        {wert && zusatz ? <span className="font-normal text-black/60"> · {zusatz}</span> : null}
+        {wert && zusatz ? <span className="font-normal text-muted-foreground"> · {zusatz}</span> : null}
       </dd>
     </div>
   )
@@ -227,14 +248,14 @@ function Adresse({ adresse }: { adresse: string }) {
   return (
     <section
       aria-label="Adresse"
-      className="rounded-xl border-2 border-black bg-white p-4 text-black"
+      className="rounded-xl border-2 border-foreground bg-card p-4 text-card-foreground"
     >
-      <h2 className="text-sm font-bold uppercase tracking-wide text-black/60">Wir sind hier</h2>
+      <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">Wir sind hier</h2>
       <p className="mt-1 font-display text-2xl font-bold leading-tight">{adresse}</p>
       <Button
         variant="outline"
         size="lg"
-        className="mt-3 w-full border-black text-black"
+        className="mt-3 w-full border-foreground text-card-foreground"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(adresse)

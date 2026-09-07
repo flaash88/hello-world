@@ -1047,3 +1047,37 @@ Impfplan. Auch das steht im Prüfhinweis.
 bisher verstreut in Dateikommentaren. Wer wissen will, ob er einer Zahl trauen
 kann, soll das an einer Stelle nachlesen können – und sehen, was geprüft ist und
 was nicht.
+
+## Phase 15 – Notfallkarte im Nachtmodus
+
+**Feste Farben zurückgenommen.** In Phase 12 bekam die Notfallkarte weissen
+Grund, schwarze Schrift und `[color-scheme:light]` – mit der Begründung
+„höchster Kontrast, den es gibt". Der Satz war richtig und die Umsetzung
+falsch: Diese App hat einen Nachtmodus, der ab 20 Uhr von selbst greift, und
+damit stand ausgerechnet auf der Seite, die man nachts aufmacht, eine
+leuchtend weisse Fläche in einer sonst tiefdunklen Oberfläche. Höchster
+Kontrast heisst am Tag schwarz auf weiss und nachts hell auf fast schwarz –
+also `bg-card` / `text-card-foreground` / `border-foreground`, nicht `bg-white`.
+Der Akzent der dringenden Nummern hängt jetzt ebenfalls am Thema (`primary`)
+statt an einem festen Hex-Wert.
+
+**Notrufnummern in der Grotesk statt in der Display-Serife.** Fraunces setzt
+Ziffern schmal und mit Serifen; das ist für eine Überschrift schön und für eine
+Telefonnummer, die man um drei Uhr früh treffen muss, die falsche Wahl. Die
+Nummern stehen jetzt in Nunito, eine Stufe grösser, fett und mit
+Tabellenziffern.
+
+**Die gespiegelte Notfallkarte überlebte das gelöschte Kind.** Die Karte wird
+für den Offline-Fall in IndexedDB gespiegelt. Lieferte der Server nichts, griff
+die Ansicht auf den Spiegel zurück – und tat das auch dann, wenn der Server
+online antwortete und nur eben kein Kind mehr kannte. Ergebnis: Gewicht,
+Allergien, Blutgruppe und Geburtsdatum eines gelöschten Kindes standen
+unbegrenzt weiter da. Für eine Karte, aus der im Notfall jemand vorliest, ist
+das der schlimmste Fehler von allen. Jetzt wird unterschieden: offline gilt der
+Spiegel, online ohne Kind wird er weggeworfen.
+
+**Drei E2E-Tests halten das fest.** Sie messen die tatsächliche Helligkeit des
+Kartengrunds in beiden Themen, prüfen, dass die Seite kein Hellschema erzwingt,
+und lesen die tatsächlich gerenderte Schriftfamilie der Notrufnummer aus. Eine
+Behauptung im Kommentar hätte diesen Fehler nicht verhindert – er stand ja
+genau dort.

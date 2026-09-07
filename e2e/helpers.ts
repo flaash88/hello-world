@@ -154,3 +154,9 @@ export async function apiTokenFor(email: string, name = 'E2E'): Promise<string> 
   })
   return token
 }
+
+/** Entfernt alle Kinder eines Haushalts – fuer Tests, die den Zustand danach pruefen. */
+export async function loescheKinder(email: string): Promise<void> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } })
+  await prisma.child.deleteMany({ where: { householdId: user.householdId } })
+}

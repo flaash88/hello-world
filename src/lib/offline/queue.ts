@@ -241,6 +241,19 @@ export async function gespiegelteNotfallKarte(): Promise<NotfallSpiegel | null> 
   return (await database.get(NOTFALL_STORE, 'aktuell')) ?? null
 }
 
+/**
+ * Die gespiegelte Karte wegwerfen.
+ *
+ * Noetig, sobald der Server sagt, dass es das Kind nicht mehr gibt. Eine
+ * Notfallkarte, die Gewicht, Allergien und Geburtsdatum eines geloeschten
+ * Kindes zeigt, ist schlimmer als gar keine – im Notfall liest jemand daraus
+ * vor.
+ */
+export async function loescheNotfallSpiegel(): Promise<void> {
+  const database = await db()
+  await database.delete(NOTFALL_STORE, 'aktuell')
+}
+
 // ---------------------------------------------------- Geteilte Dateien --
 
 export async function pendingGeteilt(): Promise<GeteilteDatei[]> {

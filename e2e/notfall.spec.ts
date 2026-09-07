@@ -1,5 +1,11 @@
 import { test, expect, type Page } from '@playwright/test'
-import { createHouseholdInvite, register, setUpChild, uniqueEmail } from './helpers'
+import {
+  createHouseholdInvite,
+  loescheKinder,
+  register,
+  setUpChild,
+  uniqueEmail,
+} from './helpers'
 
 async function trageGesundheitEin(page: Page, art: string, feld: string, wert: string) {
   await page.goto('/heute')
@@ -122,5 +128,109 @@ test.describe('Notfallkarte', () => {
     await page.goto('/mehr')
     await page.getByRole('link', { name: 'Notfallkarte' }).click()
     await expect(page.getByRole('heading', { name: 'Notfall' })).toBeVisible()
+  })
+})
+
+/**
+ * Die Notfallkarte hatte fest verdrahtete Farben – weisser Grund, schwarze
+ * Schrift, dazu [color-scheme:light]. Im Nachtmodus, der ab 20 Uhr von selbst
+ * greift, stand damit eine leuchtend weisse Flaeche in einer sonst tiefdunklen
+ * App. Ausgerechnet auf der Seite, die man nachts aufmacht.
+ */
+test.describe('Notfallkarte im Nachtmodus', () => {
+  test.beforeEach(async ({ page }) => {
+    const code = await createHouseholdInvite()
+    await register(page, { name: 'Mama', email: uniqueEmail('nfnacht'), code })
+    await setUpChild(page, 'Lina', 60)
+  })
+
+  async function grundfarbe(page: import('@playwright/test').Page): Promise<number> {
+    const karte = page.getByRole('link', { name: /Rettung/ })
+    const farbe = await karte.evaluate((el) => getComputedStyle(el).backgroundColor)
+    const [r, g, b] = farbe.match(/\d+/g)!.map(Number) as [number, number, number]
+    // Grobe Helligkeit reicht: hell gegen dunkel ist die ganze Frage.
+    return 0.299 * r + 0.587 * g + 0.114 * b
+  }
+
+  test('ist am Tag hell und in der Nacht dunkel', async ({ page }) => {
+    await page.goto('/notfall')
+    const tag = await grundfarbe(page)
+    expect(tag).toBeGreaterThan(200)
+
+    await page.evaluate(() => window.localStorage.setItem('sp.theme-mode', 'night'))
+    await page.goto('/notfall')
+    const nacht = await grundfarbe(page)
+    expect(nacht).toBeLessThan(80)
+  })
+
+  test('zwingt die Seite nicht ins Hellschema', async ({ page }) => {
+    await page.evaluate(() => window.localStorage.setItem('sp.theme-mode', 'night'))
+    await page.goto('/notfall')
+    // [color-scheme:light] hat auch Formularelemente und Scrollbalken hell
+    // gemacht – das galt fuer die ganze Seite, nicht nur fuer die Karten.
+    const schema = await page
+      .getByRole('heading', { name: 'Notfall' })
+      .evaluate((el) => getComputedStyle(el.parentElement!).colorScheme)
+    expect(schema).not.toBe('light')
+  })
+
+  test('setzt die Notrufnummern in der Grotesk, nicht in der Display-Serife', async ({ page }) => {
+    await page.goto('/notfall')
+    const nummer = page.getByRole('link', { name: /Rettung/ }).getByText('144', { exact: true })
+    const schrift = await nummer.evaluate((el) => getComputedStyle(el).fontFamily)
+    // Fraunces setzt Ziffern schmal und mit Serifen – im Notfall die falsche Wahl.
+    expect(schrift).not.toMatch(/Fraunces/i)
+    expect(schrift).toMatch(/Nunito/i)
+  })
+})
+
+/**
+ * Die Karte wird fuer den Offline-Fall in den Browser gespiegelt. Diese Kopie
+ * ueberlebte das Loeschen des Kindes unbegrenzt: Der Server lieferte nichts
+ * mehr, die Ansicht griff auf den Spiegel zurueck und zeigte weiter Gewicht,
+ * Allergien und Geburtsdatum eines Kindes, das es nicht mehr gibt. Im Notfall
+ * liest jemand daraus vor.
+ */
+test.describe('Notfallkarte nach dem Löschen des Kindes', () => {
+  test('wirft die gespiegelte Karte weg, sobald der Server kein Kind mehr kennt', async ({
+    page,
+  }) => {
+    const code = await createHouseholdInvite()
+    const email = uniqueEmail('nfweg')
+    await register(page, { name: 'Mama', email, code })
+    await setUpChild(page, 'Testkind', 60)
+
+    await page.goto('/mehr/notfall')
+    await page.getByLabel(/^Blutgruppe/).fill('0 Rh+')
+    await page.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
+
+    await page.goto('/notfall')
+    await expect(page.getByRole('heading', { name: 'Testkind' })).toBeVisible()
+
+    await loescheKinder(email)
+
+    await page.goto('/notfall')
+    await expect(page.getByRole('heading', { name: 'Notfall' })).toBeVisible()
+    // Die Notrufnummern bleiben – die gehören keinem Kind.
+    await expect(page.getByRole('link', { name: /Rettung/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Testkind' })).toHaveCount(0)
+    await expect(page.getByText('0 Rh+')).toHaveCount(0)
+
+    // Und die Kopie ist wirklich weg, nicht nur ausgeblendet.
+    const gespiegelt = await page.evaluate(async () => {
+      const request = indexedDB.open('sproessling')
+      await new Promise<void>((resolve, reject) => {
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
+      const db = request.result
+      const eintrag = await new Promise<unknown>((resolve) => {
+        const anfrage = db.transaction('notfall', 'readonly').objectStore('notfall').get('aktuell')
+        anfrage.onsuccess = () => resolve(anfrage.result)
+      })
+      return eintrag ?? null
+    })
+    expect(gespiegelt).toBeNull()
   })
 })

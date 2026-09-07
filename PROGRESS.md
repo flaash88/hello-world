@@ -254,3 +254,13 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Offen und in den Prüfhinweisen benannt: Nummerierung der Eltern-Kind-Pass-Untersuchungen
   ab der vierten, sowie das Feld `kostenfrei` im Impfplan. Beide Quellen sind aus der
   Entwicklungsumgebung gesperrt; nichts wurde auf Verdacht geändert.
+
+## Phase 15 – Notfallkarte im Nachtmodus (abgeschlossen)
+
+- Notfallkarte folgt wieder dem Thema: am Tag schwarz auf weiss, nachts hell auf
+  fast schwarz. Vorher stand dort fest verdrahtetes Weiss samt erzwungenem Hellschema.
+- Notrufnummern in Nunito statt Fraunces, eine Stufe grösser und mit Tabellenziffern.
+- Die für offline gespiegelte Notfallkarte wird verworfen, sobald der Server kein Kind
+  mehr kennt – vorher zeigte sie Gewicht und Allergien eines gelöschten Kindes unbegrenzt weiter.
+- Vier E2E-Tests: Kartenhelligkeit in beiden Themen, Farbschema der Seite, gerenderte
+  Schriftfamilie der Nummer und das Wegwerfen des Spiegels.
