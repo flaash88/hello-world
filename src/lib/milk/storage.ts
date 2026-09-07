@@ -27,14 +27,26 @@ export const LAGERORT_LABEL: Record<Lagerort, string> = {
 
 export const LAGERORT_HINWEIS: Record<Lagerort, string> = {
   kuehlschrank: 'Hinten im Kühlschrank, nicht in der Tür – dort ist es am kältesten.',
-  gefrierfach: 'Das Fach im Kühlschrank. Kälter als der Kühlschrank, wärmer als eine Truhe.',
+  gefrierfach:
+    'Das Fach im Kühlschrank. Hält die −18 °C meist nicht durchgehend – deshalb die kurze Frist. Wenn deines das schafft, stell den Wert in den Einstellungen höher.',
   tiefkuehler: 'Eigenes Gerät oder Truhe bei etwa −18 °C.',
 }
 
-/** Vorgaben in Stunden. */
+/**
+ * Vorgaben in Stunden.
+ *
+ * Das Gefrierfach im Kuehlschrank ist **kein** Tiefkuehler: Die CDC nennt
+ * dafuer zwei Wochen, nicht Monate. Der Grund ist nicht die Bauart, sondern die
+ * Temperatur – ein Fach, dessen Tuer mehrmals taeglich aufgeht, haelt die
+ * −18 °C nicht zuverlaessig. Hier stand vorher ein halbes Jahr; das war die
+ * Zahl fuer eine Truhe, an der falschen Stelle.
+ *
+ * Wessen Fach echte −18 °C haelt, stellt den Wert unter Einstellungen →
+ * Milchvorrat hoeher. Die Vorgabe ist bewusst die vorsichtige.
+ */
 export const HALTBARKEIT_STUNDEN: Record<Lagerort, number> = {
   kuehlschrank: 4 * 24,
-  gefrierfach: 6 * 30 * 24,
+  gefrierfach: 14 * 24,
   tiefkuehler: 12 * 30 * 24,
 }
 

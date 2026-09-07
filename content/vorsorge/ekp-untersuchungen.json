@@ -2,9 +2,9 @@
   "quelle": "Eltern-Kind-Pass-Verordnung, dargestellt auf gesundheit.gv.at und oesterreich.gv.at",
   "version": "EKPG 2023",
   "stand": "2026-08-23",
-  "abgerufenAm": "2026-08-23",
+  "abgerufenAm": "2026-09-07",
   "geprueft": false,
-  "pruefhinweis": "ACHTUNG: Der direkte Abruf von gesundheit.gv.at und oesterreich.gv.at war aus der Entwicklungsumgebung gesperrt. Belegte Zeitfenster tragen quelle; alles mit fenster: null ist NICHT belegt und muss vor der Verwendung im Eltern-Kind-Pass oder auf gesundheit.gv.at nachgesehen werden. Es wurden keine Zeitfenster geraten. Zu prüfen ist auch die Umrechnung: die Quelle formuliert ordinal („4. bis 7. Lebenswoche“), hier stehen vollendete Einheiten.",
+  "pruefhinweis": "ACHTUNG, ungeprüft. Der direkte Abruf von gesundheit.gv.at und oesterreich.gv.at ist aus der Entwicklungsumgebung gesperrt. Zwei Punkte sind offen und beide stehen im Eltern-Kind-Pass selbst, den ihr in der Hand habt: (1) Die NUMMERIERUNG ab der vierten Untersuchung ist unsicher. Recherchen im September 2026 legen nahe, dass die Untersuchung im 7. bis 9. Lebensmonat die VIERTE ist und die im 10. bis 14. Lebensmonat die FÜNFTE (mit der ersten Augenuntersuchung) – hier steht 7.–9. Lebensmonat als fünfte. Zwei Quellen widersprachen sich, deshalb wurde nichts umnummeriert. (2) Einträge mit fenster: null sind NICHT belegt und wurden nicht geraten. Zu prüfen ist auch die Umrechnung: die Quelle formuliert ordinal („4. bis 7. Lebenswoche“), hier stehen vollendete Einheiten.",
   "einheiten": "Alle Zahlen in fenster sind vollendete Lebenswochen bzw. Lebensmonate, gerechnet ab dem Geburtstag. Der Wortlaut der Quelle steht unverändert in fensterText bzw. hinweis. Beispiel: „im 3. Lebensmonat“ ist vonMonaten 2 / bisMonaten 3.",
   "mutter": {
     "anzahl": 5,

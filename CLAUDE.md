@@ -129,6 +129,11 @@ lizenzierten Quellen (WHO Child Growth Standards). Jede Auswertung mit
 medizinischem Anschein (Wehen, Perzentile, Wachfenster) trägt einen kurzen
 Hinweis, dass sie Hebamme und Ärztin nicht ersetzt.
 
+**Herkunft steht in `DATENHERKUNFT.md`.** Jeder mitgelieferte Datensatz ist dort
+mit Quelle und Prüfstand aufgeführt – geprüft, korrigiert oder offen. Wer Daten
+ändert oder ergänzt, ändert die Zeile dort mit. Eine Zahl ohne Herkunft hat in
+dieser App nichts verloren.
+
 **Termine werden nicht erfunden.** Was nicht belegt ist, steht als `null` in den
 Daten und in der UI als „bitte nachsehen“ – nie als geratenes Datum. Jede
 Vorsorgedatei trägt `quelle`, `version`, `stand`, `abgerufenAm` und `geprueft`;

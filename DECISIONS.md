@@ -1020,3 +1020,30 @@ treffen. Die Umkehrrechnung (`minuteAusPunkt`, `ringFuerRadius`) steht in
 **Kein Ring ist dünner als 22 Einheiten.** Der innerste hatte 12. Vier Ringe auf
 einer Scheibe sind ohnehin eng; wenn einer davon so schmal ist, dass ein
 Eintrag darin zum Haarstrich wird, ist er als Ring nichts wert.
+
+## Phase 14 – Datenherkunft
+
+**Zwei Wochen statt sechs Monate fürs Gefrierfach.** Der Lagerort „Gefrierfach"
+trug die Haltbarkeit einer Tiefkühltruhe. Die CDC trennt beides ausdrücklich:
+Das Fach im Kühlschrank hält die −18 °C nicht durchgehend, weil die Tür
+mehrmals täglich aufgeht. Sechs Monate an dieser Stelle heißt im schlechtesten
+Fall verdorbene Milch – die Vorgabe ist jetzt die vorsichtige, und wer ein Fach
+mit echten −18 °C hat, stellt sie höher.
+
+**Nichts umnummeriert, was zwei Recherchen unterschiedlich sagen.** Bei den
+Eltern-Kind-Pass-Untersuchungen deutet vieles darauf hin, dass die Nummerierung
+ab der vierten um eins verschoben ist. Zwei Suchen widersprachen sich aber, und
+die Originalseiten sind aus dieser Umgebung gesperrt. Eine Zahl zu ändern, weil
+sie wahrscheinlich stimmt, wäre genau das Erfinden, das hier verboten ist. Der
+Verdacht steht stattdessen wörtlich im Prüfhinweis, den die App über der
+Vorsorgeseite anzeigt.
+
+**`kostenfrei` im Impfplan bleibt stehen, obwohl es vermutlich falsch ist.**
+Für Varizellen und die Kinder-Influenza spricht viel dafür, dass sie inzwischen
+im kostenfreien Kinderimpfprogramm sind. Eine Zusammenfassung ist aber kein
+Impfplan. Auch das steht im Prüfhinweis.
+
+**`DATENHERKUNFT.md` statt Quellenangaben nur im Quelltext.** Die Herkunft stand
+bisher verstreut in Dateikommentaren. Wer wissen will, ob er einer Zahl trauen
+kann, soll das an einer Stelle nachlesen können – und sehen, was geprüft ist und
+was nicht.
