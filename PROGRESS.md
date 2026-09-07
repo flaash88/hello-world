@@ -254,3 +254,11 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Offen und in den Prüfhinweisen benannt: Nummerierung der Eltern-Kind-Pass-Untersuchungen
   ab der vierten, sowie das Feld `kostenfrei` im Impfplan. Beide Quellen sind aus der
   Entwicklungsumgebung gesperrt; nichts wurde auf Verdacht geändert.
+
+## Phase 15 – Notfallkarte im Nachtmodus (abgeschlossen)
+
+- Notfallkarte folgt wieder dem Thema: am Tag schwarz auf weiss, nachts hell auf
+  fast schwarz. Vorher stand dort fest verdrahtetes Weiss samt erzwungenem Hellschema.
+- Notrufnummern in Nunito statt Fraunces, eine Stufe grösser und mit Tabellenziffern.
+- Drei E2E-Tests messen Kartenhelligkeit in beiden Themen, das Farbschema der Seite
+  und die gerenderte Schriftfamilie der Nummer.
