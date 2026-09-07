@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { DEFAULT_LOCALE } from '@/lib/i18n'
+import { LEISTE_NACHT, LEISTE_TAG } from '@/lib/pwa/statusleiste'
 
 export const metadata: Metadata = {
   title: { default: 'Sprössling', template: '%s · Sprössling' },
@@ -28,7 +29,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
-  themeColor: '#faf6f0',
+  // Zwei Varianten, damit schon vor dem ersten Skriptlauf die passende gilt.
+  // Sobald die App ihren eigenen Nachtmodus kennt, setzt sie beide um.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: LEISTE_TAG },
+    { media: '(prefers-color-scheme: dark)', color: LEISTE_NACHT },
+  ],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
