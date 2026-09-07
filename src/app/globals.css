@@ -118,6 +118,41 @@
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
+
+  /*
+   * Datums- und Zeitfelder auf iOS.
+   *
+   * Safari gibt diesen Feldern ein eigenes Aussehen: der Wert steht mittig,
+   * das Feld bekommt eine eigene Breite und ignoriert `width: 100%`. Auf dem
+   * iPhone sah der Wert dadurch aus, als waere er aus dem Rahmen gerutscht.
+   * Hier wird beides zurueckgeholt – der Wert steht links wie in jedem anderen
+   * Eingabefeld, das Feld nutzt die Breite, die es bekommt.
+   */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'],
+  input[type='month'] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    text-align: left;
+  }
+  input[type='date']::-webkit-date-and-time-value,
+  input[type='time']::-webkit-date-and-time-value,
+  input[type='datetime-local']::-webkit-date-and-time-value,
+  input[type='month']::-webkit-date-and-time-value {
+    text-align: left;
+    /* Ohne eigene Zeilenhoehe sitzt der Wert in Safari zu hoch im Feld. */
+    line-height: 1.5;
+    margin: 0;
+  }
+  /* Leere Felder zeigen in Safari einen hellgrauen Platzhalter – der soll
+     aussehen wie unsere anderen Platzhalter, nicht wie deaktivierter Text. */
+  input[type='date']::-webkit-datetime-edit,
+  input[type='time']::-webkit-datetime-edit,
+  input[type='datetime-local']::-webkit-datetime-edit {
+    @apply text-foreground;
+  }
 }
 
 @layer utilities {
@@ -126,6 +161,14 @@
   }
   .safe-top {
     padding-top: max(env(safe-area-inset-top), 0rem);
+  }
+  /*
+   * Hoehe der Kopfzeile: Sicherheitsabstand oben, 3.5rem Inhalt, 1px Linie.
+   * Wer etwas direkt unter der Kopfzeile festhaelt, braucht diesen Wert –
+   * geraten stimmt er auf dem iPhone mit Insel nicht.
+   */
+  .unter-kopf {
+    top: calc(max(env(safe-area-inset-top), 0rem) + 3.5rem + 1px);
   }
   .tabular {
     font-variant-numeric: tabular-nums;
@@ -143,12 +186,37 @@
 
 /* Der Jahresrückblick soll sich ordentlich ausdrucken lassen. */
 @media print {
-  body {
-    background: white;
-    color: black;
+  /* A4 hochkant, schwarzweiss. Der Ausdruck geht an Hebamme oder Ordination –
+     dort hilft weder der Nachtmodus noch eine Akzentfarbe. */
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
   }
-  header,
-  nav,
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    /* Nachtmodus abschalten: die Variablen werden hier hart ueberschrieben,
+       damit auch Komponenten mit Token-Farben schwarz auf weiss drucken. */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 100%;
+    --muted-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
+  }
+  /* Toasts und Hinweisbanner gehoeren nicht aufs Papier. Die App-Huelle
+     (Kopf, Tab-Leiste, Timer-Leiste) traegt dafuer `print:hidden` – ein
+     pauschales `header, nav { display: none }` haette auch die Kopfzeile der
+     Druckansichten erwischt. */
   [role='status'] {
     display: none !important;
   }
@@ -158,5 +226,10 @@
   }
   .print\:hidden {
     display: none !important;
+  }
+  /* Tabellenzeilen nicht ueber den Seitenrand hinweg zerreissen. */
+  tr,
+  li {
+    break-inside: avoid;
   }
 }

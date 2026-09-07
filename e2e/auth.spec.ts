@@ -25,6 +25,9 @@ test.describe('Anmeldung', () => {
     await page.getByLabel('Passwort wiederholen').fill(PASSWORD)
     await page.getByRole('button', { name: 'Konto anlegen' }).click()
 
+    // Beim ersten Start steht die Erklaerung zum Protokollmodus davor.
+    await expect(page).toHaveURL(/\/willkommen$/)
+    await page.getByRole('button', { name: 'Kind oder Schwangerschaft anlegen' }).click()
     await expect(page).toHaveURL(/\/onboarding$/)
     await expect(page.getByRole('heading', { name: 'Kurz vorweg' })).toBeVisible()
 

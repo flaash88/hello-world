@@ -49,10 +49,24 @@ export function uniqueEmail(prefix: string): string {
   return `${prefix}-${randomBytes(4).toString('hex')}@example.org`
 }
 
-/** Registriert einen User und laesst ihn angemeldet auf /onboarding zurueck. */
+/**
+ * Registriert einen User und laesst ihn angemeldet auf /onboarding zurueck.
+ * Dazwischen liegt seit Phase 11 die Erklaerung zum Protokollmodus – sie kommt
+ * genau einmal pro Haushalt.
+ *
+ * Standardmaessig werden danach alle Bereiche eingeschaltet: die App liefert
+ * seit Phase 11 im Protokollmodus aus, und die meisten Tests pruefen etwas,
+ * das dort abgeschaltet ist. Wer den Auslieferungszustand selbst pruefen will,
+ * uebergibt `bereiche: 'auslieferung'`.
+ */
 export async function register(
   page: Page,
-  { name, email, code }: { name: string; email: string; code: string },
+  {
+    name,
+    email,
+    code,
+    bereiche = 'alle',
+  }: { name: string; email: string; code: string; bereiche?: 'alle' | 'auslieferung' },
 ): Promise<void> {
   await page.goto('/register')
   await page.getByLabel('Einladungscode').fill(code)
@@ -61,7 +75,18 @@ export async function register(
   await page.getByLabel('Passwort', { exact: true }).fill(PASSWORD)
   await page.getByLabel('Passwort wiederholen').fill(PASSWORD)
   await page.getByRole('button', { name: 'Konto anlegen' }).click()
-  await page.waitForURL(/\/onboarding$/)
+  // Die Wurzel entscheidet, wo es weitergeht: die Erklaerung zum Protokollmodus
+  // kommt einmal pro Haushalt, danach das Dashboard bzw. die Einrichtung. Wer
+  // als zweite Person zu einem eingerichteten Haushalt dazukommt, sieht beides
+  // nicht mehr.
+  await page.waitForURL(/\/(willkommen|onboarding|heute)$/)
+  if (page.url().endsWith('/willkommen')) {
+    const zurEinrichtung = page.getByRole('button', { name: 'Kind oder Schwangerschaft anlegen' })
+    if (await zurEinrichtung.count()) await zurEinrichtung.click()
+    else await page.getByRole('button', { name: /Los geht/ }).click()
+    await page.waitForURL(/\/(onboarding|heute)$/)
+  }
+  if (bereiche === 'alle') await alleBereicheAn(email)
 }
 
 export async function login(page: Page, email: string): Promise<void> {
@@ -70,7 +95,7 @@ export async function login(page: Page, email: string): Promise<void> {
   await page.getByLabel('Passwort').fill(PASSWORD)
   await page.getByRole('button', { name: 'Anmelden' }).click()
   // Die Wurzel leitet auf den eingestellten Startbildschirm weiter.
-  await page.waitForURL(/\/(heute|onboarding)$/)
+  await page.waitForURL(/\/(heute|onboarding|willkommen)$/)
 }
 
 /** Legt Schwangerschaft mit `days` Tagen bis zum ET an (ab /onboarding). */
@@ -97,4 +122,41 @@ export function dateInput(days: number): string {
   const date = new Date()
   date.setDate(date.getDate() + days)
   return date.toISOString().slice(0, 10)
+}
+
+/**
+ * Schaltet fuer den Haushalt von `email` alle Bereiche ein.
+ *
+ * Ab Phase 11 liefert die App im Protokollmodus aus: Auswertung, Entwicklung,
+ * Schlafrhythmus, Kreisuhr, Perzentile und der Eltern-Check-in sind aus. Tests,
+ * die genau das pruefen, schalten es hier gezielt ein – der Auslieferungs-
+ * zustand selbst hat einen eigenen Test.
+ */
+export async function alleBereicheAn(email: string): Promise<void> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } })
+  await prisma.household.update({
+    where: { id: user.householdId },
+    data: { featureLevel: 'voll', featureOverrides: {}, featurePauseUntil: null },
+  })
+}
+
+/** Legt einen Integrationstoken fuer den Haushalt von `email` an. */
+export async function apiTokenFor(email: string, name = 'E2E'): Promise<string> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } })
+  const token = `sp_${randomBytes(24).toString('base64url')}`
+  await prisma.integrationToken.create({
+    data: {
+      householdId: user.householdId,
+      userId: user.id,
+      name,
+      tokenHash: hashToken(token),
+    },
+  })
+  return token
+}
+
+/** Entfernt alle Kinder eines Haushalts – fuer Tests, die den Zustand danach pruefen. */
+export async function loescheKinder(email: string): Promise<void> {
+  const user = await prisma.user.findUniqueOrThrow({ where: { email } })
+  await prisma.child.deleteMany({ where: { householdId: user.householdId } })
 }

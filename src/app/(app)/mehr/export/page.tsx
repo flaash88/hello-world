@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { EVENT_CATEGORIES, EVENT_TYPES } from '@/lib/events/types'
 import { BackLink } from '@/components/layout/back-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +10,11 @@ export const metadata: Metadata = { title: 'Export' }
 
 export default async function ExportPage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
   const childId = ctx.activeChild?.id
+  // Der Wochenbericht ist eine Auswertung und haengt am selben Schalter. Die
+  // Rohdaten darunter nicht: die gehoeren euch immer.
+  const wochenbericht = features.aktiv.has('auswertung')
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,35 +56,37 @@ export default async function ExportPage() {
 
       {childId && (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="size-4 text-muted-foreground" aria-hidden />
-                Wochenbericht als PDF
-              </CardTitle>
-              <CardDescription>
-                Eine Seite mit den Zahlen der Woche – gut zum Ausdrucken oder für den Termin bei
-                der Kinderärztin.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              <a
-                href={`/api/export/pdf?kind=${childId}`}
-                download
-                className="flex min-h-14 items-center justify-center gap-2 rounded-xl border-2 border-border px-4 font-semibold"
-              >
-                <Download className="size-5" aria-hidden />
-                Diese Woche
-              </a>
-              <a
-                href={`/api/export/pdf?kind=${childId}&offset=-1`}
-                download
-                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-border px-4 text-sm font-semibold"
-              >
-                Vorige Woche
-              </a>
-            </CardContent>
-          </Card>
+          {wochenbericht && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="size-4 text-muted-foreground" aria-hidden />
+                  Wochenbericht als PDF
+                </CardTitle>
+                <CardDescription>
+                  Eine Seite mit den Zahlen der Woche – gut zum Ausdrucken oder für den Termin bei
+                  der Kinderärztin.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <a
+                  href={`/api/export/pdf?kind=${childId}`}
+                  download
+                  className="flex min-h-14 items-center justify-center gap-2 rounded-xl border-2 border-border px-4 font-semibold"
+                >
+                  <Download className="size-5" aria-hidden />
+                  Diese Woche
+                </a>
+                <a
+                  href={`/api/export/pdf?kind=${childId}&offset=-1`}
+                  download
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-border px-4 text-sm font-semibold"
+                >
+                  Vorige Woche
+                </a>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

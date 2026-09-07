@@ -41,7 +41,7 @@ type Appointment = {
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  mkp: 'Mutter-Kind-Pass',
+  ekp: 'Eltern-Kind-Pass',
   doctor: 'Ärztin',
   midwife: 'Hebamme',
   course: 'Kurs',
@@ -131,8 +131,8 @@ export function AppointmentList({
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 {range && <Badge variant={soon ? 'default' : 'muted'}>{range}</Badge>}
-                {overdue && <Badge variant="destructive">Zeitfenster vorbei</Badge>}
-                {appointment.category !== 'mkp' && (
+                {overdue && <Badge variant="outline">Zeitfenster vorbei</Badge>}
+                {appointment.category !== 'ekp' && (
                   <Badge variant="outline">{CATEGORY_LABEL[appointment.category] ?? 'Termin'}</Badge>
                 )}
               </div>
@@ -203,7 +203,7 @@ export function AppointmentList({
 
       <p className="text-xs text-muted-foreground">
         Aktuell: SSW {currentWeek}. Die Zeitfenster folgen dem üblichen Schema – verbindlich ist
-        immer, was im Mutter-Kind-Pass steht.
+        immer, was im Eltern-Kind-Pass steht.
       </p>
 
       <AppointmentDialog
@@ -235,7 +235,7 @@ function AppointmentDialog({
       const result = await saveAppointmentAction({
         id: appointment?.id,
         title: String(formData.get('title') ?? ''),
-        category: (formData.get('category') as 'mkp' | 'doctor' | 'midwife' | 'course' | 'other') ?? 'other',
+        category: (formData.get('category') as 'ekp' | 'doctor' | 'midwife' | 'course' | 'other') ?? 'other',
         scheduledAt: String(formData.get('scheduledAt') ?? '') || undefined,
         location: String(formData.get('location') ?? ''),
         note: String(formData.get('note') ?? ''),

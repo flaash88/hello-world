@@ -2,20 +2,59 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { EVENT_CATEGORIES, type EventType } from '@/lib/events/types'
-import { arcPath, minuteLabel, polarPoint, type DaySegment } from '@/lib/dashboard/day-segments'
+import {
+  arcPath,
+  minuteAusPunkt,
+  minuteLabel,
+  polarPoint,
+  radiusAusPunkt,
+  ringFuerRadius,
+  segmentBeiMinute,
+  type DaySegment,
+} from '@/lib/dashboard/day-segments'
 import { formatDuration } from '@/lib/time'
 import { cn } from '@/lib/utils'
 
-const SIZE = 300
+/**
+ * Die Zeichenflaeche ist groesser als die Scheibe: Die Stundenbeschriftungen
+ * liegen ausserhalb des Rings, und bei 300 Einheiten lagen alle vier von ihnen
+ * rechnerisch neben der Flaeche – 00:00 bei y = -8. Sie wurden schlicht
+ * abgeschnitten.
+ */
+const SIZE = 340
 const CENTER = SIZE / 2
 
-/** Jede Kategorie bekommt ihren eigenen Ring – so ueberlagert sich nichts. */
+/**
+ * Die vier Stundenbeschriftungen.
+ *
+ * Links und rechts stehen sie etwas weiter innen und haengen sich an ihr
+ * aeusseres Ende, statt mittig ueber dem Strich zu sitzen: „18:00" ist bei
+ * 13 Pixeln rund 36 Einheiten breit, und mittig gesetzt ragt die Haelfte davon
+ * aus der Zeichenflaeche. Oben und unten ist Platz, dort bleibt es mittig.
+ */
+const STUNDEN_LABELS: { minute: number; radius: number; anchor: 'middle' | 'start' | 'end' }[] = [
+  { minute: 0, radius: 156, anchor: 'middle' },
+  { minute: 360, radius: 152, anchor: 'end' },
+  { minute: 720, radius: 156, anchor: 'middle' },
+  { minute: 1080, radius: 152, anchor: 'start' },
+]
+/** Aussenkante der Grundscheibe. */
+const SCHEIBE = 142
+
+/**
+ * Jede Kategorie bekommt ihren eigenen Ring – so ueberlagert sich nichts.
+ * Kein Ring ist duenner als 22 Einheiten; der innerste hatte vorher 12, und
+ * darin war ein einzelner Eintrag anderthalb Einheiten breit.
+ */
 const RINGS: { types: EventType[]; outer: number; inner: number }[] = [
   { types: ['sleep'], outer: 140, inner: 112 },
-  { types: ['nursing', 'bottle', 'solids', 'pumping'], outer: 108, inner: 86 },
-  { types: ['diaper'], outer: 82, inner: 66 },
-  { types: ['mood', 'health', 'other'], outer: 62, inner: 50 },
+  { types: ['nursing', 'bottle', 'solids', 'pumping'], outer: 108, inner: 80 },
+  { types: ['diaper'], outer: 76, inner: 54 },
+  { types: ['mood', 'health', 'other'], outer: 50, inner: 28 },
 ]
+
+/** Radius der Marke fuer einen Eintrag ohne Dauer. */
+const PUNKT_RADIUS = 7
 
 export type PlannedWindow = { fromMin: number; toMin: number; label: string }
 
@@ -54,6 +93,31 @@ export function DayClock({
 
   const hourTicks = Array.from({ length: 24 }, (_, hour) => hour * 60)
 
+  /**
+   * Ausgewaehlt wird ueber die Scheibe, nicht ueber den Bogen. Ein Eintrag
+   * ohne Dauer ist als Bogen keine zwei Pixel breit – wer den treffen muss,
+   * trifft ihn nachts nicht. Der Tap sagt nur, in welchem Ring und zu welcher
+   * Uhrzeit er lag; welcher Eintrag gemeint war, rechnet
+   * `segmentBeiMinute` aus.
+   */
+  function waehleBeiTap(event: React.MouseEvent<SVGSVGElement>) {
+    const flaeche = event.currentTarget.getBoundingClientRect()
+    if (flaeche.width === 0 || flaeche.height === 0) return
+    const x = ((event.clientX - flaeche.left) / flaeche.width) * SIZE
+    const y = ((event.clientY - flaeche.top) / flaeche.height) * SIZE
+
+    const ringIndex = ringFuerRadius(radiusAusPunkt(x, y, CENTER), RINGS)
+    if (ringIndex === null) {
+      setSelected(null)
+      return
+    }
+    const treffer = segmentBeiMinute(
+      rings[ringIndex]?.items ?? [],
+      minuteAusPunkt(x, y, CENTER),
+    )
+    setSelected(treffer)
+  }
+
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="flex w-full items-center justify-between">
@@ -90,9 +154,10 @@ export function DayClock({
       >
         <svg
           viewBox={`0 0 ${SIZE} ${SIZE}`}
-          className="w-full max-w-[320px]"
+          className="w-full max-w-[420px] cursor-pointer"
           role="img"
           aria-label={`Tagesübersicht für ${dayLabel} mit ${segments.length} Einträgen`}
+          onClick={waehleBeiTap}
         >
           <defs>
             <pattern id="geplant" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
@@ -102,11 +167,11 @@ export function DayClock({
           </defs>
 
           {/* Grundscheibe und Stundenraster */}
-          <circle cx={CENTER} cy={CENTER} r={144} fill="hsl(var(--muted))" opacity={0.4} />
+          <circle cx={CENTER} cy={CENTER} r={SCHEIBE} fill="hsl(var(--muted))" opacity={0.4} />
           {hourTicks.map((minute) => {
             const major = minute % 360 === 0
-            const outer = polarPoint(minute, 146, CENTER)
-            const inner = polarPoint(minute, major ? 132 : 140, CENTER)
+            const outer = polarPoint(minute, SCHEIBE + 2, CENTER)
+            const inner = polarPoint(minute, major ? SCHEIBE - 12 : SCHEIBE - 4, CENTER)
             return (
               <line
                 key={minute}
@@ -119,16 +184,16 @@ export function DayClock({
               />
             )
           })}
-          {[0, 360, 720, 1080].map((minute) => {
-            const point = polarPoint(minute, 158, CENTER)
+          {STUNDEN_LABELS.map(({ minute, radius, anchor }) => {
+            const point = polarPoint(minute, radius, CENTER)
             return (
               <text
                 key={minute}
                 x={point.x}
                 y={point.y}
-                textAnchor="middle"
+                textAnchor={anchor}
                 dominantBaseline="middle"
-                className="fill-muted-foreground text-[10px] font-semibold"
+                className="fill-muted-foreground text-[13px] font-semibold"
               >
                 {minuteLabel(minute)}
               </text>
@@ -146,20 +211,46 @@ export function DayClock({
             </path>
           )}
 
-          {/* Eintraege je Ring */}
+          {/*
+           * Eintraege je Ring. Was eine Dauer hat, wird ein Bogen; was keine
+           * hat – eine Windel, ein Fieberwert –, wird eine Marke. Als Bogen
+           * waere so ein Eintrag anderthalb Einheiten breit und damit ein
+           * Strich, den man weder sieht noch trifft.
+           */}
           {rings.map((ring) =>
             ring.items.map((segment) => {
               const category = EVENT_CATEGORIES[segment.type as EventType]
+              const farbe = `hsl(var(--cat-${category?.color ?? 'other'}))`
+              const gewaehlt = selected?.id === segment.id
+              const umriss = gewaehlt ? 'hsl(var(--foreground))' : 'none'
+
+              if (segment.isPoint) {
+                const mitte = polarPoint(segment.fromMin, (ring.inner + ring.outer) / 2, CENTER)
+                return (
+                  <circle
+                    key={segment.id}
+                    data-eintrag={segment.type}
+                    cx={mitte.x}
+                    cy={mitte.y}
+                    r={PUNKT_RADIUS}
+                    fill={farbe}
+                    stroke={umriss}
+                    strokeWidth={gewaehlt ? 2 : 0}
+                  >
+                    <title>{segment.label}</title>
+                  </circle>
+                )
+              }
+
               return (
                 <path
                   key={segment.id}
+                  data-eintrag={segment.type}
                   d={arcPath(segment.fromMin, segment.toMin, ring.inner, ring.outer, CENTER)}
-                  fill={`hsl(var(--cat-${category?.color ?? 'other'}))`}
+                  fill={farbe}
                   opacity={segment.running ? 0.75 : 1}
-                  stroke={selected?.id === segment.id ? 'hsl(var(--foreground))' : 'none'}
-                  strokeWidth={selected?.id === segment.id ? 2 : 0}
-                  className="cursor-pointer"
-                  onClick={() => setSelected(segment)}
+                  stroke={umriss}
+                  strokeWidth={gewaehlt ? 2 : 0}
                 >
                   <title>{segment.label}</title>
                 </path>
@@ -173,22 +264,22 @@ export function DayClock({
               <line
                 x1={CENTER}
                 y1={CENTER}
-                x2={polarPoint(nowMinutes, 148, CENTER).x}
-                y2={polarPoint(nowMinutes, 148, CENTER).y}
+                x2={polarPoint(nowMinutes, SCHEIBE + 4, CENTER).x}
+                y2={polarPoint(nowMinutes, SCHEIBE + 4, CENTER).y}
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 strokeLinecap="round"
               />
               <circle
-                cx={polarPoint(nowMinutes, 148, CENTER).x}
-                cy={polarPoint(nowMinutes, 148, CENTER).y}
-                r={4}
+                cx={polarPoint(nowMinutes, SCHEIBE + 4, CENTER).x}
+                cy={polarPoint(nowMinutes, SCHEIBE + 4, CENTER).y}
+                r={5}
                 fill="hsl(var(--primary))"
               />
             </>
           )}
 
-          <circle cx={CENTER} cy={CENTER} r={44} fill="hsl(var(--card))" />
+          <circle cx={CENTER} cy={CENTER} r={26} fill="hsl(var(--card))" />
         </svg>
       </div>
 
@@ -214,7 +305,7 @@ export function DayClock({
           <p className="text-sm text-muted-foreground">
             {segments.length === 0
               ? 'Für diesen Tag gibt es noch keine Einträge.'
-              : 'Tippe auf ein Segment für Details, wische für andere Tage.'}
+              : 'Tippe in einen Ring für Details, wische für andere Tage.'}
           </p>
         )}
       </div>

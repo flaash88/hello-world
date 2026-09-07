@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { isWithinWindow } from '@/lib/time'
+import { setzeLeistenfarbe } from '@/lib/pwa/statusleiste'
 
 export type ThemeMode = 'auto' | 'day' | 'night'
 type Resolved = 'day' | 'night'
@@ -49,8 +50,7 @@ export function ThemeProvider({
       setResolved(next)
       document.documentElement.dataset.theme = next
       document.documentElement.style.colorScheme = next === 'night' ? 'dark' : 'light'
-      const meta = document.querySelector('meta[name="theme-color"]')
-      if (meta) meta.setAttribute('content', next === 'night' ? '#0b0908' : '#faf6f0')
+      setzeLeistenfarbe(next, document)
     }
     apply()
     // Minuetlich pruefen reicht – der Wechsel darf ruhig ein paar Sekunden dauern.

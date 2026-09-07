@@ -1,0 +1,166 @@
+{
+  "quelle": "Eltern-Kind-Pass-Verordnung, dargestellt auf gesundheit.gv.at und oesterreich.gv.at",
+  "version": "EKPG 2023",
+  "stand": "2026-08-23",
+  "abgerufenAm": "2026-09-07",
+  "geprueft": false,
+  "pruefhinweis": "ACHTUNG, ungeprüft. Der direkte Abruf von gesundheit.gv.at und oesterreich.gv.at ist aus der Entwicklungsumgebung gesperrt. Zwei Punkte sind offen und beide stehen im Eltern-Kind-Pass selbst, den ihr in der Hand habt: (1) Die NUMMERIERUNG ab der vierten Untersuchung ist unsicher. Recherchen im September 2026 legen nahe, dass die Untersuchung im 7. bis 9. Lebensmonat die VIERTE ist und die im 10. bis 14. Lebensmonat die FÜNFTE (mit der ersten Augenuntersuchung) – hier steht 7.–9. Lebensmonat als fünfte. Zwei Quellen widersprachen sich, deshalb wurde nichts umnummeriert. (2) Einträge mit fenster: null sind NICHT belegt und wurden nicht geraten. Zu prüfen ist auch die Umrechnung: die Quelle formuliert ordinal („4. bis 7. Lebenswoche“), hier stehen vollendete Einheiten.",
+  "einheiten": "Alle Zahlen in fenster sind vollendete Lebenswochen bzw. Lebensmonate, gerechnet ab dem Geburtstag. Der Wortlaut der Quelle steht unverändert in fensterText bzw. hinweis. Beispiel: „im 3. Lebensmonat“ ist vonMonaten 2 / bisMonaten 3.",
+  "mutter": {
+    "anzahl": 5,
+    "hinweis": "Fünf ärztliche Untersuchungen in der Schwangerschaft, dazu drei Ultraschalluntersuchungen und Laborbefunde. Die Termine dazu stehen in der App unter Schwangerschaft → Termine.",
+    "quelle": "oesterreich.gv.at, Eltern-Kind-Pass-Untersuchungen in der Schwangerschaft"
+  },
+  "kind": [
+    {
+      "nummer": 1,
+      "bezeichnung": "Erstuntersuchung des Neugeborenen",
+      "fenster": {
+        "vonWochen": 0,
+        "bisWochen": 1
+      },
+      "fensterText": "in der 1. Lebenswoche",
+      "durchfuehrendeStelle": "Krankenhaus oder Kinderarzt",
+      "separaterTermin": false,
+      "kbgRelevant": true,
+      "inhalt": "Grunduntersuchung des Neugeborenen, dazu in der ersten Lebenswoche eine Ultraschalluntersuchung der Hüftgelenke.",
+      "quelle": "gesundheit.gv.at, Erste bis dritte Untersuchung des Kindes"
+    },
+    {
+      "nummer": 2,
+      "bezeichnung": "Untersuchung in der 4. bis 7. Lebenswoche",
+      "fenster": {
+        "vonWochen": 3,
+        "bisWochen": 7
+      },
+      "fensterText": "4. bis 7. Lebenswoche",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": true,
+      "inhalt": "Ärztliche Untersuchung; die zweite Hüftultraschall-Untersuchung ist in der 6. bis 8. Lebenswoche vorgesehen.",
+      "quelle": "gesundheit.gv.at, Erste bis dritte Untersuchung des Kindes"
+    },
+    {
+      "nummer": 3,
+      "bezeichnung": "Untersuchung im 3. bis 5. Lebensmonat",
+      "fenster": {
+        "vonMonaten": 2,
+        "bisMonaten": 5
+      },
+      "fensterText": "3. bis 5. Lebensmonat",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": true,
+      "inhalt": "Körperliche und geistige Entwicklung stehen im Vordergrund.",
+      "quelle": "gesundheit.gv.at, Erste bis dritte Untersuchung des Kindes"
+    },
+    {
+      "nummer": 4,
+      "bezeichnung": "4. Untersuchung",
+      "fenster": null,
+      "fensterText": "Zeitraum nicht belegt – bitte im Eltern-Kind-Pass nachsehen",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": true,
+      "inhalt": "Inhalt nicht belegt.",
+      "quelle": null
+    },
+    {
+      "nummer": 5,
+      "bezeichnung": "Untersuchung im 7. bis 9. Lebensmonat",
+      "fenster": {
+        "vonMonaten": 6,
+        "bisMonaten": 9
+      },
+      "fensterText": "7. bis 9. Lebensmonat",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": true,
+      "inhalt": "Besonderes Augenmerk auf das Hören – unerkannte Hörstörungen beeinträchtigen die Sprachentwicklung.",
+      "quelle": "gesundheit.gv.at, Vierte bis sechste Untersuchung des Kindes"
+    },
+    {
+      "nummer": 6,
+      "bezeichnung": "6. Untersuchung",
+      "fenster": null,
+      "fensterText": "Zeitraum nicht belegt – bitte im Eltern-Kind-Pass nachsehen",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": false,
+      "inhalt": "Inhalt nicht belegt.",
+      "quelle": null
+    },
+    {
+      "nummer": 7,
+      "bezeichnung": "Untersuchung im 22. bis 26. Lebensmonat",
+      "fenster": {
+        "vonMonaten": 21,
+        "bisMonaten": 26
+      },
+      "fensterText": "22. bis 26. Lebensmonat",
+      "durchfuehrendeStelle": "Kinderarzt, Allgemeinmedizin oder Eltern-Kind-Beratungsstelle",
+      "separaterTermin": false,
+      "kbgRelevant": false,
+      "inhalt": "Sprache, Motorik und Verhalten. Im selben Zeitraum steht die zweite Augenuntersuchung an.",
+      "quelle": "gesundheit.gv.at, Siebte bis zehnte Untersuchung des Kindes"
+    },
+    {
+      "nummer": 8,
+      "bezeichnung": "Augenuntersuchung im 22. bis 26. Lebensmonat",
+      "fenster": {
+        "vonMonaten": 21,
+        "bisMonaten": 26
+      },
+      "fensterText": "22. bis 26. Lebensmonat",
+      "durchfuehrendeStelle": "Fachärztin oder Facharzt für Augenheilkunde",
+      "separaterTermin": true,
+      "kbgRelevant": false,
+      "inhalt": "Zweite Augenuntersuchung. Darf ausschließlich von Fachärztinnen und Fachärzten für Augenheilkunde bzw. in augenfachärztlichen Ambulanzen durchgeführt werden und braucht einen eigenen Termin.",
+      "quelle": "gesundheit.gv.at, Siebte bis zehnte Untersuchung des Kindes"
+    },
+    {
+      "nummer": 9,
+      "bezeichnung": "9. Untersuchung",
+      "fenster": null,
+      "fensterText": "Zeitraum nicht belegt – bitte im Eltern-Kind-Pass nachsehen",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": false,
+      "inhalt": "Inhalt nicht belegt.",
+      "quelle": null
+    },
+    {
+      "nummer": 10,
+      "bezeichnung": "10. Untersuchung",
+      "fenster": {
+        "bisMonaten": 62
+      },
+      "fensterText": "bis zum 62. Lebensmonat",
+      "durchfuehrendeStelle": "Kinderarzt oder Allgemeinmedizin",
+      "separaterTermin": false,
+      "kbgRelevant": false,
+      "inhalt": "Letzte Untersuchung des Programms. Bis zum 62. Lebensmonat sind insgesamt zehn Untersuchungen des Kindes vorgesehen, darunter eine orthopädische, eine HNO- und zwei Augenuntersuchungen.",
+      "quelle": "oesterreich.gv.at, Eltern-Kind-Pass-Untersuchungen des Kindes"
+    }
+  ],
+  "kbg": {
+    "hinweis": "Die Höhe des Kinderbetreuungsgeldes hängt am Nachweis der ersten zehn Untersuchungen – fünf der Mutter in der Schwangerschaft und fünf des Kindes. Fehlt ein Nachweis, wird der Betrag gekürzt; die Kürzung trifft beide Elternteile getrennt.",
+    "kuerzungEuro": 1300,
+    "fristen": [
+      {
+        "key": "kbg-nachweis-1",
+        "bezeichnung": "Erste sechs Untersuchungen nachweisen",
+        "wann": "bei Antragstellung des Kinderbetreuungsgeldes",
+        "bisMonaten": null,
+        "quelle": "oesterreich.gv.at, Eltern-Kind-Pass-Untersuchungen als Voraussetzung für das Kinderbetreuungsgeld"
+      },
+      {
+        "key": "kbg-nachweis-2",
+        "bezeichnung": "Weitere vier Untersuchungen nachweisen",
+        "wann": "bis zum 15. Lebensmonat des Kindes",
+        "bisMonaten": 15,
+        "quelle": "oesterreich.gv.at, Eltern-Kind-Pass-Untersuchungen als Voraussetzung für das Kinderbetreuungsgeld"
+      }
+    ]
+  }
+}

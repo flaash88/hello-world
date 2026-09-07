@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Baby, CalendarRange, Images } from 'lucide-react'
+import { Baby, CalendarRange, Images, Music } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { knownJournalTagsAction } from '@/lib/actions/journal'
@@ -13,7 +13,13 @@ export const metadata: Metadata = { title: 'Tagebuch' }
 export default async function JournalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; monat?: string }>
+  searchParams: Promise<{
+    tag?: string
+    monat?: string
+    geteilt?: string
+    titel?: string
+    geteiltOffline?: string
+  }>
 }) {
   const ctx = await getAppContext()
   const child = ctx.activeChild
@@ -31,6 +37,28 @@ export default async function JournalPage({
   const params = await searchParams
   const tagFilter = params.tag?.trim() || null
   const monthFilter = params.monat?.trim() || null
+
+  // Ueber "Teilen" gekommene Fotos haengen schon am neuen Eintrag. Die Ids
+  // stehen in der URL, geladen wird nur, was wirklich diesem Kind gehoert.
+  const geteilteIds = (params.geteilt ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean)
+    .slice(0, 12)
+  const geteilteFotos =
+    geteilteIds.length > 0
+      ? (
+          await prisma.mediaAsset.findMany({
+            where: { id: { in: geteilteIds }, childId: child.id },
+            select: { id: true, path: true, thumbPath: true, takenAt: true },
+          })
+        ).map((asset) => ({
+          id: asset.id,
+          path: asset.path,
+          thumbPath: asset.thumbPath ?? asset.path,
+          takenAt: asset.takenAt ? asset.takenAt.toISOString() : null,
+        }))
+      : []
 
   const entries = await prisma.journalEntry.findMany({
     where: {
@@ -59,6 +87,13 @@ export default async function JournalPage({
         <h1 className="font-display text-2xl font-bold">Tagebuch</h1>
         <div className="flex gap-1">
           <Link
+            href="/tagebuch/toene"
+            aria-label="Töne"
+            className="flex size-12 items-center justify-center rounded-lg border border-border"
+          >
+            <Music className="size-5" aria-hidden />
+          </Link>
+          <Link
             href="/tagebuch/monatsfotos"
             aria-label="Monatsfotos"
             className="flex size-12 items-center justify-center rounded-lg border border-border"
@@ -82,6 +117,9 @@ export default async function JournalPage({
         knownTags={tags}
         activeTag={tagFilter}
         activeMonth={monthFilter}
+        geteilteFotos={geteilteFotos}
+        geteilterTitel={params.titel?.trim() || null}
+        geteiltOffline={params.geteiltOffline === '1'}
         availableMonths={[
           ...new Set(entries.map((entry) => entry.happenedAt.toISOString().slice(0, 7))),
         ].sort((a, b) => b.localeCompare(a))}

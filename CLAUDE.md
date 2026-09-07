@@ -49,6 +49,9 @@ src/
     ui/                shadcn-Bausteine (Button, Card, Dialog …)
     layout/            Header, Tab-Leiste, Kind-Umschalter
     tracker/           Timer, Schnellaktionen, Event-Listen
+    teeth/             Zahnschema als SVG
+    audio/             Aufnahme, Abspieler, Wellenform
+    print/             Kopfzeile für die Druckansichten
     dashboard/         24h-Kreisuhr, Schlafdruck, Vorhersage-Karten
   lib/
     auth/              Passwort, Session, CSRF, Rate-Limit
@@ -56,14 +59,21 @@ src/
     sleep/             Wachfenster-Modell, Vorhersage, Schlafdruck
     growth/            WHO-LMS-Daten und Perzentil-Rechnung
     stats/             Aggregationen für die Auswertungen
-    content/           Wochen-Content, Sprünge, Übungen, Meilensteine
+    content/           Wochen-Content, Sprünge, Übungen, Meilensteine,
+                       Ernährung, Lebensmittel-Check, Geburtsvorbereitung,
+                       Behördenwege AT, Stillen, Wochenbett, Rezepte
     parents/           Eltern-Signal und Unterstützungskontakte
-    settings/          Startbildschirm, Schnellaktionen, Bestätigungswort
+    settings/          Startbildschirm, Schnellaktionen, Bestätigungswort,
+                       Feature-Schalter (`features.ts`, Auslieferung = Protokoll)
+    print/             Bausteine für alle PDFs (A4, Tabellen, Seitenumbruch)
+    pwa/               Woran die App läuft – Standalone-Modus, Drucken möglich?
     backup/            Lesezugriff auf das Backup-Volume
     units.ts           Einheiten-Umrechnung für die Anzeige (Speicher: metrisch)
     i18n.ts            Sprache und Regionsformat (nur `de` ausgeliefert)
     actions/           Server Actions
 content/weeks/de/      Woche-für-Woche-Inhalte (Markdown + Frontmatter)
+content/vorsorge/      Impfplan und Eltern-Kind-Pass als versionierte JSON-Dateien
+                       (mit `quelle`, `version`, `stand`, `abgerufenAm`, `geprueft`)
 prisma/                Schema, Migrationen, Seed
 docker/                Entrypoint, Backup-Sidecar
 e2e/                   Playwright-Tests
@@ -86,6 +96,29 @@ e2e/                   Playwright-Tests
 - **Server Actions** geben `{ error: string }` statt zu werfen, wenn der Fehler
   in der UI landen soll. Alle Eingaben werden mit zod validiert.
 - **Kein Placeholder-Code.** Was in einer Phase steht, ist fertig.
+- **Neue Bereiche werden ausgeschaltet ausgeliefert.** Der Auslieferungszustand
+  ist der Modus „Nur Protokoll" (`Household.featureLevel`). Alles, was rechnet,
+  vergleicht, vorhersagt oder von selbst eine Benachrichtigung auslöst, bekommt
+  einen Schalter in `src/lib/settings/features.ts` und steht dort ab Werk auf
+  aus. Abgeschaltet heißt: aus der Navigation raus, Route leitet auf `/heute`,
+  Berechnung läuft nicht – keine graue Kachel.
+- **Was aus der App herausgeht, geht als PDF heraus.** Eine neue Druckansicht
+  bekommt eine Bauroutine über `src/lib/print/document.ts` und eine Route unter
+  `src/app/api/…/pdf`, ausgeliefert mit `pdfAntwort()` (`inline`, nie
+  `attachment`) und über `PrintButton` angeboten. Der gibt die Datei per
+  `navigator.share` an das Teilen-Blatt; in der installierten App auf iOS ist
+  das der einzige Weg nach draußen, weil es dort keine Bedienleiste gibt,
+  `window.print()` nichts bewirkt und ein `download`-Link nirgends landet.
+  Geprüft wird das über `src/lib/pwa/`, nicht geraten.
+- **Push nur über die Erlaubnisliste.** Eine neue Benachrichtigung muss in
+  `src/lib/push/kategorien.ts` eingetragen werden, sonst wird sie nie
+  verschickt. Standardmäßig an ist ausschließlich die Terminfrist.
+- **Sprachregister:** beschreibend statt anweisend, Spannen statt Punktwerte,
+  kein Soll, keine Wertung, keine Ausrufezeichen. Der Absatz in `DESIGN.md`
+  ist verbindlich, auch für Bestandstexte.
+- **Kein Prettier.** Das Repo hat keine Prettier-Konfiguration und ist von Hand
+  gesetzt; ein Lauf über eine bestehende Datei formatiert sie um. Geprüft wird
+  mit `npm run lint`.
 - **Keine externen Requests zur Laufzeit** – keine CDNs, keine Tracker,
   Schriften liegen unter `public/fonts`.
 
@@ -95,3 +128,24 @@ Alle Texte sind selbst formuliert. Datensätze stammen ausschließlich aus offen
 lizenzierten Quellen (WHO Child Growth Standards). Jede Auswertung mit
 medizinischem Anschein (Wehen, Perzentile, Wachfenster) trägt einen kurzen
 Hinweis, dass sie Hebamme und Ärztin nicht ersetzt.
+
+**Herkunft steht in `DATENHERKUNFT.md`.** Jeder mitgelieferte Datensatz ist dort
+mit Quelle und Prüfstand aufgeführt – geprüft, korrigiert oder offen. Wer Daten
+ändert oder ergänzt, ändert die Zeile dort mit. Eine Zahl ohne Herkunft hat in
+dieser App nichts verloren.
+
+**Termine werden nicht erfunden.** Was nicht belegt ist, steht als `null` in den
+Daten und in der UI als „bitte nachsehen“ – nie als geratenes Datum. Jede
+Vorsorgedatei trägt `quelle`, `version`, `stand`, `abgerufenAm` und `geprueft`;
+solange `geprueft: false` ist, zeigt die App den Prüfhinweis sichtbar an.
+
+**Keine Dosierungen.** Die App rechnet keine Medikamentenmengen aus – weder nach
+Gewicht noch nach Alter –, schlägt kein Präparat vor und prüft keine
+Höchstmenge. Sie erinnert ausschließlich an Intervalle, die selbst eingetragen
+wurden. Das Gewicht auf der Notfallkarte steht dort, weil Rettung und Ärztin
+danach fragen – abgeleitet wird daraus nichts.
+
+**Notfalldaten nur an einer Stelle.** Die Notfallkarte liest Allergien,
+Dauermedikamente, Gewicht und Impfungen aus den vorhandenen Quellen. Neu
+gepflegt wird nur, was es sonst nirgends gibt. Zwei Orte für dieselbe Angabe
+sind schlimmer als keiner.

@@ -4,6 +4,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import path from 'node:path'
 import sharp from 'sharp'
 import { AUDIO_MIME, MAX_AUDIO_BYTES, detectAudioFormat, safeSoundName } from './audio'
+import { aufnahmezeitAus } from './aufnahmezeit'
 
 /**
  * Bildablage auf der lokalen Platte.
@@ -38,31 +39,17 @@ function monthDir(now: Date): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-/** Liest das Aufnahmedatum aus den EXIF-Daten, bevor sie verworfen werden. */
+/**
+ * Liest das Aufnahmedatum aus den EXIF-Daten, bevor sie verworfen werden.
+ * Das Datumsmuster selbst steckt in `aufnahmezeit.ts` – dieselbe Funktion
+ * benutzt der Browser, bevor er ein Bild verkleinert und die EXIF-Daten dabei
+ * verliert.
+ */
 async function readTakenAt(buffer: Buffer): Promise<Date | null> {
   try {
     const metadata = await sharp(buffer).metadata()
-    const exif = metadata.exif
-    if (!exif) return null
-
-    // EXIF-Datumsfelder haben das Format "YYYY:MM:DD HH:MM:SS".
-    const text = exif.toString('latin1')
-    const match = /(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(text)
-    if (!match) return null
-
-    const [, year, month, day, hour, minute, second] = match
-    const date = new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day),
-      Number(hour),
-      Number(minute),
-      Number(second),
-    )
-    if (Number.isNaN(date.getTime())) return null
-    // Offensichtlich falsche Kameradaten aussortieren.
-    if (date.getFullYear() < 1990 || date.getTime() > Date.now() + 86400000) return null
-    return date
+    if (!metadata.exif) return null
+    return aufnahmezeitAus(metadata.exif.toString('latin1'))
   } catch {
     return null
   }

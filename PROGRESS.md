@@ -101,4 +101,177 @@ Ein Block pro Phase, maximal zehn Zeilen.
 - Eigene Audiodateien als Einschlafgeräusch: Format wird an der Signatur geprüft, Wiedergabe in
   Schleife über denselben Regler samt Timer, Ausblenden und Sperrbildschirm.
 - Meilensteine mit Datum, Notiz und Foto; Sprache und Regionsformat hängen an `src/lib/i18n.ts`.
-- Grün: lint, typecheck, 350 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.
+- Zugriff von außen: Cloudflare Tunnel als optionales Compose-Profil, `APP_URL` für ntfy-Links.
+- Grün: lint, typecheck, 354 Unit-Tests (97,7 % Coverage auf der Logik), 60 E2E-Tests, build.
+
+## Phase 8 – Wissen (abgeschlossen)
+
+- Neuer Bereich `/wissen` mit sieben Seiten, erreichbar über „Mehr“.
+- Ernährung je Trimester: Nährstoffe mit Lebensmitteln, Energiebedarf, typische Beschwerden.
+- „Darf ich das essen?“: über 50 Lebensmittel mit Synonymsuche, drei Einordnungen und Zubereitung.
+- Geburtsvorbereitung ab SSW 34: 16 Maßnahmen mit Zeitpunkt und 11 Übungen (Yoga, Atem, Beckenboden).
+- Behördenwege Österreich: 19 Meldepflichten mit Frist und Stelle, abhakbar und für beide sichtbar.
+- Stillen: Anlegen, Positionen, Probleme mit Warnzeichen, Aufbewahrung abgepumpter Milch.
+- Wochenbett: Verlauf, Körper, Babyblues gegen Wochenbettdepression, rote Warnzeichen zuerst.
+- 15 Rezepte mit höchstens 15 Minuten aktiver Zeit, filterbar, die Hälfte einhändig essbar.
+- Grün: lint, typecheck, 389 Unit-Tests, 70 E2E-Tests, build.
+
+## Phase 9 – Vorsorge, Zähne, Fieber, Vorrat, Töne (abgeschlossen)
+
+- Mutter-Kind-Pass durchgehend in Eltern-Kind-Pass umbenannt, inklusive Datenmigration.
+- `/vorsorge`: Impfungen und die zehn Untersuchungen des Kindes mit Zeitfenster, Status und
+  Zeitstrahl über fünf Jahre; Erledigt mit Datum, Ort, Notiz und Foto, Impfung schreibt ein Event.
+- KBG-Fristen mit der Kürzung von 1.300 € je fehlendem Nachweis; Erinnerung 14 und 3 Tage vorher.
+- Quelle und Stand stehen unter jeder Ansicht; ungeprüfte Daten sagen das ausdrücklich.
+- `/zaehne`: 20 Milchzähne nach FDI als SVG, Tap für Durchbruch, Ausfall, Notiz und Foto;
+  der erste Zahn setzt den Meilenstein von selbst.
+- `/gesundheit/fieber` ab 37,5 °C in 72 Stunden: Verlauf mit Medikamenten-Markern, Messort,
+  Intervall-Countdown, einseitiger Zettel für die Ordination. Keine Dosisberechnung.
+- `/vorrat`: Milchportionen nach Lagerort, FIFO-Vorschlag, Teilentnahme, eigenes Fenster für
+  aufgetaute Milch, Push einen Tag vor Ablauf, Etiketten 70 × 37 mm mit QR-Code, 24 auf A4.
+- `/tagebuch/toene`: Aufnahme bis drei Minuten, Transkodierung nach Opus, Wellenform,
+  gemerkte Abspielstelle, Schlagworte, Meilenstein-Verknüpfung, Offline-Queue.
+- Grün: lint, typecheck, 510 Unit-Tests (94,6 % Coverage), 103 E2E-Tests, build.
+
+## Phase 10 – Wochenbett & Zwei-Personen-Betrieb (abgeschlossen)
+
+- `/wachstum` zeigt bis Lebenswoche sechs den Weg zurück aufs Geburtsgewicht statt der Perzentile:
+  Differenz in Gramm und Prozent, Verlauf über 28 Tage, Marken bei −7 und −10 %.
+- Der Hinweis auf die Hebamme kommt einmal, in Grau: mehr als 10 % Verlust oder Geburtsgewicht
+  bis Lebenstag 14 nicht wieder erreicht. Ist es wieder da, tritt die Prozentanzeige zurück.
+- `/protokoll`: eine Zeile je Tag mit Lebenstag, Anlegen, ⌀ Dauer, Flasche, ml, Windeln, Schlaf und
+  Gewicht; 1/3/7/14 Tage, Durchschnitt in der Fußzeile, Tag antippen zeigt die Einzelereignisse.
+- Beide Druckansichten teilen sich Kopfzeile und Layout über `src/lib/print/`; A4 hochkant,
+  schwarzweiß, ohne Navigation – nachgeprüft: je genau eine Seite.
+- `/notfall`: feste Notrufnummern (144, Vergiftungszentrale, 1450), Kontakte als `tel:`-Links,
+  Adresse groß und kopierbar. Ohne Netz vollständig aus IndexedDB.
+- Die Karte liest Allergien, Dauermedikamente, Gewicht und Impfungen aus den vorhandenen Quellen;
+  neu gepflegt werden nur Blutgruppe, Vorerkrankungen, Adresse und Kontakte.
+- Doppelerfassung: tragen beide dasselbe ein, kommt ein nicht-modaler Hinweis mit drei Wegen.
+  Offene Fälle zählen nicht in den Wachfenster-Median; ab vier steht der Hinweis auf `/auswertung`.
+- Vier PWA-Verknüpfungen mit eigenen Icons (die alten zeigten auf Routen, die es nie gab),
+  Share Target für Bilder und Ton, offline über die bestehende Schreib-Queue.
+- `/api/v1` für Home Assistant: eigene Tokens, 60 Anfragen pro Minute, Audit-Log, Webhooks,
+  `docs/homeassistant.md` mit fertigen Snippets. Der Typ-Enum kommt aus der Ereignis-Registry.
+- Grün: lint, typecheck, 600 Unit-Tests (88,2 % Coverage), 154 E2E-Tests, build.
+
+## Phase 11 – Zurückhaltung als Standard (abgeschlossen)
+
+- Neue Haushalte starten im Modus „Nur Protokoll": Schlafrhythmus, Kreisuhr, Auswertung,
+  Entwicklung, Perzentilkurven und Eltern-Check-in sind aus. Der Code bleibt vollständig.
+- Umschalten unter **Mehr → Was die App anzeigt**: drei Stufen als Voreinstellung, dazu ein
+  Schalter je Bereich. Abgeschaltetes verschwindet aus Leiste und Menü, seine Route leitet auf
+  `/heute`, seine Abfragen laufen nicht – auch `/api/export/pdf` und `/api/v1/status` prüfen mit.
+- Alle Push-Nachrichten aus außer den Eltern-Kind-Pass-Fristen. `lib/push/kategorien.ts` ist eine
+  Erlaubnisliste: Aufforderungen, Wochenrückblicke und Tracking-Erinnerungen gehen nie raus.
+  Ruhezeit gilt für alles; das Zeitfenster wird einmal beim ersten Einschalten erfragt.
+- Abgebaut: Tagesziel mit Balken, Konfidenz in Prozent, roter Übermüdungs-Alarm, „überfällige"
+  Meilensteine samt `concernAfterWeeks`, Zähler „x von y" und der Balken im Sprungfenster.
+- Vorhersagen sprechen als Beobachtung („Ungefähr ab 13:40 könnte Müdigkeit kommen"). Der Satz
+  „Euer Kind kennt seinen Rhythmus besser als die App" steht fest darunter. Regeln in `DESIGN.md`,
+  Texte in `lib/sleep/wording.ts`, dort gegen Imperativ, „jetzt", Prozent und Wertung getestet.
+- „Mehreres nachtragen" auf `/heute`: Liste statt Assistent, Zeit als Text („vor 2 Stunden",
+  „halb drei"), Ein-Tap-Vorschläge ab drei gleichen Werten. Nachgetragenes ist nicht markiert.
+- `/willkommen` erklärt beim ersten Start den Protokollmodus – ohne Feature-Rundgang. In den
+  Einstellungen: „Auf Protokollmodus zurücksetzen" und „Pause" für 1, 3, 7 oder 30 Tage.
+
+## Phase 12 – Nachbesserungen aus dem echten Betrieb (abgeschlossen)
+
+- Notfallkarte: Die Vergiftungsinformationszentrale beriet laut Text bei „etwas verschluckt" –
+  falsch und im Ernstfall gefährlich. Sie ist für den Verdacht auf Vergiftung zuständig und
+  verweist jetzt bei Atemnot ausdrücklich auf 144. Quelle mit Stand steht auf der Karte.
+- Die schwarz hinterlegten Notrufkarten sind weiß mit terrakottafarbener Kante: gleicher
+  Kontrast, ohne wie eine Traueranzeige auszusehen.
+- Fotos werden vor dem Upload im Browser auf 2048 px verkleinert (etwa ein Zehntel der
+  Datenmenge), einzeln statt gebündelt geschickt, und das Aufnahmedatum wird vorher aus den
+  EXIF-Daten gelesen und getrennt mitgeschickt. Damit geht der Upload auch über Mobilfunk durch.
+- Die Fehlermeldung nennt den echten Grund statt immer „Keine Verbindung zum Server".
+- Druck-Knöpfe statt des Hinweises „über das Browser-Menü drucken" – den es in der installierten
+  App auf iOS nicht gibt. Wo ein serverseitiges PDF existiert, steht es daneben.
+- Datums- und Zeitfelder: Safari zentrierte den Wert und ignorierte die Feldbreite.
+- „Mehr" neu geordnet: Bereiche als Kacheln in zwei Spalten in Gebrauchsreihenfolge, alle
+  Einstellungen hinter einer Zeile auf `/mehr/einstellungen`. Von 21 offenen Zeilen auf 7 Reihen.
+- Ladezeiten: der Server braucht 40–170 ms; die Zähigkeit kam von der Netzrunde bei jedem
+  Wechsel. `staleTimes`, vorgeladene Tab-Ziele und vorgeladene Schriften. Das zuerst gebaute
+  `loading.tsx` ist wieder raus: es hat den E2E-Satz von 36 Sekunden auf 5:41 gebracht und
+  wäre auch als Bedienung schlechter gewesen (graue Rechtecke bei jedem Wechsel).
+- `npm run test:e2e` läuft eigenständig: Datenbank (Docker oder vorhandener Postgres),
+  Migration, Build, Server, Tests, Aufräumen. globalTimeout 15 Minuten, Reporter `line`,
+  kein Wiederverwenden alter Server.
+
+## Phase 13 – Drucken, Teilen, Fieber eintragen (abgeschlossen)
+
+- „Temperatur eintragen" öffnet den Gesundheits-Dialog, statt auf `/heute` zu verlinken;
+  der Knopf steht auch während einer laufenden Episode auf der Fieberseite.
+- Vier neue PDF-Ausgaben: Arztzettel (`/api/fieber/pdf`), Jahresrückblick mit Fotos
+  (`/api/rueckblick/pdf`), Etikettenbogen in echten 70 × 37 mm (`/api/etiketten/pdf`),
+  Zahnschema als Liste (`/api/zaehne/pdf`).
+- Alle PDFs gehen `inline` heraus und öffnen in einem neuen Tab: erst dort gibt es auf
+  dem iPhone Drucken, „In Dateien sichern" und AirDrop.
+- Drucken-Knopf nur, wo `window.print()` etwas bewirkt – in der installierten App auf
+  iOS tut es nichts, dort führt allein das PDF weiter.
+- PDF-Bausteine brechen jetzt Seiten um; Tabellen wiederholen ihre Kopfzeile.
+- Fieberdaten und Rückblick werden von Seite und PDF aus derselben Quelle geladen.
+- Grün: lint, typecheck, 752 Unit-Tests, 172 E2E-Tests, build.
+
+## Phase 13b – Zahleneingabe und Teilen (abgeschlossen)
+
+- Zahlenfelder begrenzen erst beim Verlassen: „38" eintippen ergab bei einem Feld
+  von 30 bis 45 vorher 45.
+- Plus und Minus laufen beim Halten weiter und werden nach kurzer Zeit gröber.
+- PDFs gehen über `navigator.share` an das Teilen-Blatt des Geräts – in der
+  installierten App ist das der einzige Weg zu Drucken, Sichern und AirDrop.
+  Ohne Datei-Teilen im Browser bleibt der neue Tab.
+- Verfällt die Nutzergeste über dem Laden, bittet der Knopf um einen zweiten Tap,
+  statt einen Fehler zu melden.
+- Grün: lint, typecheck, 783 Unit-Tests, 175 E2E-Tests, build.
+
+## Phase 13c – Filterreihe im Verlauf (abgeschlossen)
+
+- Die Reihe bleibt unter der Kopfzeile stehen, statt halb dahinter zu verschwinden.
+- Knöpfe 48 px hoch mit größerer Schrift; der gewählte Filter ist gefüllt, nicht getönt.
+- Beim Öffnen scrollt die Reihe zur gewählten Art.
+- Vier E2E-Tests messen die Lage nach dem Scrollen, statt sie nur zu vermuten.
+
+## Phase 13d – Kreisuhr lesbar und treffbar (abgeschlossen)
+
+- Alle vier Stundenbeschriftungen lagen ausserhalb der Zeichenfläche und wurden
+  abgeschnitten; die Fläche ist jetzt groß genug, die seitlichen hängen am äußeren Ende.
+- Einträge ohne Dauer sind Marken von 15 px statt Bögen von 2 px.
+- Getippt wird in den Ring, nicht auf den Bogen – `segmentBeiMinute` sucht den gemeinten
+  Eintrag im Umkreis von 25 Minuten.
+- Kein Ring dünner als 22 Einheiten, Scheibe nutzt die volle Breite.
+- Vier E2E-Tests messen Beschriftungen, Markengröße und den Tap daneben.
+
+## Phase 14 – Datenherkunft geprüft (abgeschlossen)
+
+- `DATENHERKUNFT.md` neu: jeder mitgelieferte Datensatz mit Quelle und Prüfstand.
+- Geprüft und bestätigt: WHO-Wachstumsdaten (Kontrollpunkte auf vier Nachkommastellen,
+  0 ungültige LMS-Tripel), Zahndurchbruch und -ausfall nach ADA, Milchaufbewahrung
+  Zimmertemperatur/Kühlschrank/Tiefkühler nach CDC, Familienzeitbonus 2026, KBG-Rückwirkung.
+- Korrigiert: Gefrierfach im Kühlschrank stand mit 6 Monaten in den Vorgaben – die CDC
+  nennt zwei Wochen. Das war die Zahl für eine Truhe an der falschen Stelle.
+- Offen und in den Prüfhinweisen benannt: Nummerierung der Eltern-Kind-Pass-Untersuchungen
+  ab der vierten, sowie das Feld `kostenfrei` im Impfplan. Beide Quellen sind aus der
+  Entwicklungsumgebung gesperrt; nichts wurde auf Verdacht geändert.
+
+## Phase 15 – Notfallkarte im Nachtmodus (abgeschlossen)
+
+- Notfallkarte folgt wieder dem Thema: am Tag schwarz auf weiss, nachts hell auf
+  fast schwarz. Vorher stand dort fest verdrahtetes Weiss samt erzwungenem Hellschema.
+- Notrufnummern in Nunito statt Fraunces, eine Stufe grösser und mit Tabellenziffern.
+- Die für offline gespiegelte Notfallkarte wird verworfen, sobald der Server kein Kind
+  mehr kennt – vorher zeigte sie Gewicht und Allergien eines gelöschten Kindes unbegrenzt weiter.
+- Vier E2E-Tests: Kartenhelligkeit in beiden Themen, Farbschema der Seite, gerenderte
+  Schriftfamilie der Nummer und das Wegwerfen des Spiegels.
+
+## Phase 16 – Systemleiste auf dem iPhone (abgeschlossen)
+
+- `theme-color` entspricht jetzt exakt dem Seitenhintergrund; vorher wichen beide
+  Werte leicht ab und ergaben oben eine feine Kante.
+- Je eine Marke für helle und dunkle Systemdarstellung, damit schon vor dem ersten
+  Skriptlauf die passende gilt; die App setzt danach beide um.
+- Fünf Unit-Tests, darunter einer, der die Farbwerte gegen `--background` in
+  `globals.css` prüft.
+- Nicht behebbar in der App: Den Streifen hinter Uhrzeit und Dynamic Island färbt iOS
+  in der installierten App nach der System-Darstellung, nicht nach dem Nachtmodus.

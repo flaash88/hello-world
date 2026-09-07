@@ -25,9 +25,16 @@ export type NavItem = { href: string; label: string; icon: NavIconKey }
 export function navItemsFor({
   hasChild,
   hasPregnancy,
+  entwicklung = true,
 }: {
   hasChild: boolean
   hasPregnancy: boolean
+  /**
+   * Ist der Entwicklungsbereich eingeschaltet? Abgeschaltete Bereiche
+   * verschwinden ganz aus der Leiste – es soll keinen grauen Tab geben, der
+   * auf etwas hinweist, das gerade nicht da ist.
+   */
+  entwicklung?: boolean
 }): NavItem[] {
   const home: NavItem = { href: DASHBOARD_PATH, label: 'Heute', icon: 'home' }
   const more: NavItem = { href: '/mehr', label: 'Mehr', icon: 'more' }
@@ -38,15 +45,11 @@ export function navItemsFor({
     return hasPregnancy ? [home, pregnancy, parents, more] : [home, parents, more]
   }
 
-  const items: NavItem[] = [
-    home,
-    { href: '/verlauf', label: 'Verlauf', icon: 'history' },
-    parents,
-    { href: '/entwicklung', label: 'Entwicklung', icon: 'development' },
-    more,
-  ]
+  const items: NavItem[] = [home, { href: '/verlauf', label: 'Verlauf', icon: 'history' }, parents]
   // Laeuft parallel noch eine Schwangerschaft (Geschwisterkind), verdraengt sie
   // die Entwicklungsseite – die ist einen Tap weiter unter "Mehr".
-  if (hasPregnancy) items.splice(3, 1, pregnancy)
+  if (hasPregnancy) items.push(pregnancy)
+  else if (entwicklung) items.push({ href: '/entwicklung', label: 'Entwicklung', icon: 'development' })
+  items.push(more)
   return items
 }

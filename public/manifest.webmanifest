@@ -17,8 +17,42 @@
     { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Schlaf starten", "url": "/schnell/schlaf", "short_name": "Schlaf" },
-    { "name": "Stillen starten", "url": "/schnell/stillen", "short_name": "Stillen" },
-    { "name": "Windel eintragen", "url": "/schnell/windel", "short_name": "Windel" }
-  ]
+    {
+      "name": "Schlaf starten",
+      "short_name": "Schlaf",
+      "url": "/heute?action=sleep-start",
+      "icons": [{ "src": "/icons/shortcut-schlaf.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Stillen starten",
+      "short_name": "Stillen",
+      "url": "/heute?action=nursing-start",
+      "icons": [{ "src": "/icons/shortcut-stillen.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Windel eintragen",
+      "short_name": "Windel",
+      "url": "/heute?action=diaper",
+      "icons": [{ "src": "/icons/shortcut-windel.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Notfallkarte",
+      "short_name": "Notfall",
+      "url": "/notfall",
+      "icons": [{ "src": "/icons/shortcut-notfall.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "share_target": {
+    "action": "/api/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "files": [
+        { "name": "media", "accept": ["image/*"] },
+        { "name": "media", "accept": ["audio/*"] }
+      ]
+    }
+  }
 }

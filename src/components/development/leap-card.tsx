@@ -1,7 +1,6 @@
 import { Waves } from 'lucide-react'
 import type { ActiveLeap } from '@/lib/content/leaps'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 
 /**
  * Wird nur angezeigt, wenn gerade ein Sprungfenster läuft. Der Hinweis auf die
@@ -9,7 +8,7 @@ import { Progress } from '@/components/ui/progress'
  * nicht Angst machen.
  */
 export function LeapCard({ active }: { active: ActiveLeap }) {
-  const { leap, progress } = active
+  const { leap } = active
 
   return (
     <Card className="border-primary/50">
@@ -23,10 +22,9 @@ export function LeapCard({ active }: { active: ActiveLeap }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <Progress
-          value={Math.round(progress * 100)}
-          aria-label={`${Math.round(progress * 100)} Prozent des Sprungfensters`}
-        />
+        {/* Bewusst ohne Fortschrittsbalken: ein Sprungfenster ist keine
+            Strecke, die abgearbeitet wird, und die Wochenangabe ist ohnehin
+            nur eine Spanne. */}
         <p className="text-sm leading-relaxed">{leap.theme}</p>
 
         <div>

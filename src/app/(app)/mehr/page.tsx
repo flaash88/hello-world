@@ -2,23 +2,29 @@ import type { Metadata } from 'next'
 import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import {
-  Baby,
-  BellRing,
   BookHeart,
+  BookOpen,
   ChevronRight,
-  Download,
-  HardDriveDownload,
+  ClipboardList,
+  CopyCheck,
   LineChart,
   LogOut,
-  Moon,
+  Milk,
   Music,
   Ruler,
+  Settings,
+  Siren,
+  Smile,
   Sparkles,
-  SlidersHorizontal,
-  UserPlus,
+  Syringe,
+  Thermometer,
   Users,
 } from 'lucide-react'
 import { getAppContext } from '@/lib/household'
+import { currentFeatures } from '@/lib/settings/features-server'
+import { routeErlaubt } from '@/lib/settings/features'
+import { KACHELN, type MenuIconKey } from '@/lib/settings/menu'
+import { offeneDuplikate } from '@/lib/events/duplicate-service'
 import { logoutAction } from '@/lib/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,38 +33,35 @@ import { InstallHint } from '@/components/install-hint'
 
 export const metadata: Metadata = { title: 'Mehr' }
 
-const GROUPS: { title: string; links: { href: string; label: string; icon: LucideIcon }[] }[] = [
-  {
-    title: 'Für euch',
-    links: [
-      { href: '/tagebuch', label: 'Tagebuch & Erinnerungen', icon: BookHeart },
-      { href: '/sounds', label: 'Einschlafgeräusche', icon: Music },
-      { href: '/wachstum', label: 'Wachstum & Perzentile', icon: Ruler },
-      { href: '/auswertung', label: 'Auswertung', icon: LineChart },
-      { href: '/entwicklung', label: 'Entwicklung & Übungen', icon: Sparkles },
-    ],
-  },
-  {
-    title: 'Einstellungen',
-    links: [
-      { href: '/mehr/kind', label: 'Kindprofil', icon: Baby },
-      { href: '/mehr/einladung', label: 'Zweite Person einladen', icon: UserPlus },
-      { href: '/mehr/benachrichtigungen', label: 'Benachrichtigungen', icon: BellRing },
-      { href: '/mehr/nachtmodus', label: 'Nachtmodus & Anzeige', icon: Moon },
-      { href: '/mehr/darstellung', label: 'Einheiten & Startbildschirm', icon: SlidersHorizontal },
-    ],
-  },
-  {
-    title: 'Daten',
-    links: [
-      { href: '/mehr/export', label: 'Export', icon: Download },
-      { href: '/mehr/daten', label: 'Backup & Daten', icon: HardDriveDownload },
-    ],
-  },
-]
+const ICONS: Record<MenuIconKey, LucideIcon> = {
+  notfall: Siren,
+  protokoll: ClipboardList,
+  tagebuch: BookHeart,
+  vorrat: Milk,
+  wachstum: Ruler,
+  vorsorge: Syringe,
+  fieber: Thermometer,
+  zaehne: Smile,
+  wissen: BookOpen,
+  sounds: Music,
+  auswertung: LineChart,
+  entwicklung: Sparkles,
+  duplikate: CopyCheck,
+}
 
 export default async function MorePage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
+
+  // Abgeschaltete Bereiche stehen nicht als graue Kachel da, sondern gar nicht.
+  const kacheln = KACHELN.filter((kachel) => routeErlaubt(features, kachel.href))
+
+  // Ohne Auswertung gaebe es keinen Weg mehr zu den offenen Verdachtsfaellen.
+  // Die Kachel kommt nur, wenn wirklich etwas offen ist – und ohne Zahl.
+  const duplikate = ctx.activeChild ? await offeneDuplikate(ctx.activeChild.id) : 0
+  if (duplikate > 0) {
+    kacheln.push({ href: '/duplikate', label: 'Doppelte Einträge', icon: 'duplikate' })
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -84,27 +87,41 @@ export default async function MorePage() {
         </CardContent>
       </Card>
 
-      {GROUPS.map((group) => (
-        <nav key={group.title} aria-label={group.title}>
-          <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-            {group.title}
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {group.links.map(({ href, label, icon: Icon }) => (
+      {/*
+       * Zwei Spalten statt einer langen Liste: halbe Höhe, und man findet ein
+       * Ziel am Symbol, statt zwölf Zeilenanfänge zu lesen.
+       */}
+      <nav aria-label="Bereiche">
+        <ul className="grid grid-cols-2 gap-2">
+          {kacheln.map(({ href, label, icon }) => {
+            const Icon = ICONS[icon]
+            return (
               <li key={href}>
                 <Link
                   href={href}
-                  className="flex min-h-14 items-center gap-3 rounded-xl border border-border bg-card px-4 font-semibold"
+                  className="flex min-h-24 flex-col justify-center gap-1.5 rounded-xl border border-border bg-card px-3 py-3"
                 >
-                  <Icon className="size-5 text-muted-foreground" aria-hidden />
-                  <span className="flex-1">{label}</span>
-                  <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                  <Icon className="size-6 text-muted-foreground" aria-hidden />
+                  <span className="text-sm font-semibold leading-tight">{label}</span>
                 </Link>
               </li>
-            ))}
-          </ul>
-        </nav>
-      ))}
+            )
+          })}
+        </ul>
+      </nav>
+
+      {/*
+       * Alles, was man einmal einstellt: hinter einer Zeile. Vorher standen hier
+       * zehn weitere Links offen, die im Alltag nie gebraucht werden.
+       */}
+      <Link
+        href="/mehr/einstellungen"
+        className="flex min-h-14 items-center gap-3 rounded-xl border border-border bg-card px-4 font-semibold"
+      >
+        <Settings className="size-5 text-muted-foreground" aria-hidden />
+        <span className="flex-1">Einstellungen</span>
+        <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+      </Link>
 
       <InstallHint />
 

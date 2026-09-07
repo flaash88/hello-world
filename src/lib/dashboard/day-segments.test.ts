@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest'
 import {
   MINUTES_PER_DAY,
   arcPath,
+  minuteAusPunkt,
   minuteLabel,
   polarPoint,
+  ringFuerRadius,
+  segmentBeiMinute,
   toDaySegments,
+  type DaySegment,
   type SegmentSource,
 } from './day-segments'
 import { addDays, startOfLocalDay } from '@/lib/time'
@@ -159,5 +163,91 @@ describe('minuteLabel', () => {
     expect(minuteLabel(875)).toBe('14:35')
     expect(minuteLabel(1439)).toBe('23:59')
     expect(minuteLabel(1440)).toBe('00:00')
+  })
+})
+
+// --------------------------------------------------- Treffer auf der Scheibe
+
+describe('minuteAusPunkt', () => {
+  const C = 170
+
+  it('liest Mitternacht oben ab', () => {
+    expect(minuteAusPunkt(C, C - 100, C)).toBeCloseTo(0)
+  })
+
+  it('liest Mittag unten ab', () => {
+    expect(minuteAusPunkt(C, C + 100, C)).toBeCloseTo(720)
+  })
+
+  it('liest 06:00 rechts und 18:00 links ab', () => {
+    expect(minuteAusPunkt(C + 100, C, C)).toBeCloseTo(360)
+    expect(minuteAusPunkt(C - 100, C, C)).toBeCloseTo(1080)
+  })
+
+  it('ist die Umkehrung von polarPoint', () => {
+    for (const minute of [0, 137, 500, 719, 1200, 1439]) {
+      const punkt = polarPoint(minute, 120, C)
+      expect(minuteAusPunkt(punkt.x, punkt.y, C)).toBeCloseTo(minute, 3)
+    }
+  })
+})
+
+describe('ringFuerRadius', () => {
+  const RINGE = [
+    { inner: 112, outer: 140 },
+    { inner: 80, outer: 108 },
+  ]
+
+  it('findet den Ring, in dem der Punkt liegt', () => {
+    expect(ringFuerRadius(126, RINGE, 0)).toBe(0)
+    expect(ringFuerRadius(94, RINGE, 0)).toBe(1)
+  })
+
+  it('nimmt einen Tap knapp daneben noch an', () => {
+    // Zwischen zwei Ringen liegen vier Einheiten – ein Tap dort soll nicht
+    // ins Leere gehen.
+    expect(ringFuerRadius(110, RINGE)).toBe(0)
+  })
+
+  it('gibt null zurück, wenn der Punkt weit weg liegt', () => {
+    expect(ringFuerRadius(10, RINGE)).toBeNull()
+    expect(ringFuerRadius(200, RINGE)).toBeNull()
+  })
+})
+
+describe('segmentBeiMinute', () => {
+  const segment = (id: string, fromMin: number, toMin: number): DaySegment => ({
+    id,
+    type: 'diaper',
+    fromMin,
+    toMin,
+    isPoint: toMin - fromMin <= 6,
+    running: false,
+    label: id,
+  })
+
+  it('trifft ein Segment, das die Minute abdeckt', () => {
+    const treffer = segmentBeiMinute([segment('a', 100, 160), segment('b', 400, 460)], 130)
+    expect(treffer?.id).toBe('a')
+  })
+
+  it('trifft einen Eintrag ohne Dauer auch daneben', () => {
+    // Genau das war der Punkt: eine Windel um 20:53 als Bogen von sechs
+    // Minuten trifft niemand mit dem Daumen.
+    const treffer = segmentBeiMinute([segment('windel', 1253, 1259)], 1245)
+    expect(treffer?.id).toBe('windel')
+  })
+
+  it('nimmt den näheren von zwei Einträgen', () => {
+    const treffer = segmentBeiMinute([segment('a', 600, 606), segment('b', 640, 646)], 635)
+    expect(treffer?.id).toBe('b')
+  })
+
+  it('wählt nichts aus, wenn weit und breit nichts liegt', () => {
+    expect(segmentBeiMinute([segment('a', 100, 160)], 800)).toBeNull()
+  })
+
+  it('wählt bei leerem Ring nichts aus', () => {
+    expect(segmentBeiMinute([], 500)).toBeNull()
   })
 })

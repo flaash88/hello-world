@@ -2,13 +2,21 @@ import type { Metadata } from 'next'
 import { getAppContext } from '@/lib/household'
 import { prisma } from '@/lib/db'
 import { addDays, localDateKey, startOfLocalDay } from '@/lib/time'
-import { SUPPORT_LOOKBACK_DAYS, evaluateSupportSignal, type ParentDay } from '@/lib/parents/support'
+import {
+  SUPPORT_LOOKBACK_DAYS,
+  evaluateSupportSignal,
+  type ParentDay,
+  type SupportSignal,
+} from '@/lib/parents/support'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { ParentsView } from './parents-view'
 
 export const metadata: Metadata = { title: 'Wir' }
 
 export default async function ParentsPage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
+  const checkin = features.aktiv.has('elternCheckin')
   const today = startOfLocalDay(new Date(), ctx.timezone)
   const since = addDays(today, -SUPPORT_LOOKBACK_DAYS, ctx.timezone)
   const todayKey = localDateKey(new Date(), ctx.timezone)
@@ -71,7 +79,10 @@ export default async function ParentsPage() {
     childWakesByDate.set(key, (childWakesByDate.get(key) ?? 0) + (payload.wakeCount ?? 0))
   }
 
-  const signal = evaluateSupportSignal(days)
+  // Ohne Check-in gibt es nichts auszuwerten – dann laeuft das Signal nicht.
+  const signal: SupportSignal = checkin
+    ? evaluateSupportSignal(days)
+    : { show: false, reason: null, sampleSize: 0 }
   const todayShift = shifts.find((shift) => localDateKey(shift.date, 'UTC') === todayKey) ?? null
 
   return (
@@ -92,6 +103,7 @@ export default async function ParentsPage() {
       days={days}
       childWakes={days.map((day) => childWakesByDate.get(day.date) ?? 0)}
       signal={signal}
+      checkin={checkin}
       journal={journal.map((entry) => ({
         id: entry.id,
         body: entry.body,

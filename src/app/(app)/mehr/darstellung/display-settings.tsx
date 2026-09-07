@@ -65,12 +65,15 @@ const UNIT_ROWS: UnitRow[] = [
 export function DisplaySettings({
   units,
   startScreen,
+  startScreens,
   quickActions,
   hasChild,
   hasPregnancy,
 }: {
   units: UnitPrefs
   startScreen: StartScreen
+  /** Nur diese Startbildschirme sind gerade erreichbar. */
+  startScreens: StartScreen[]
   quickActions: EventType[]
   hasChild: boolean
   hasPregnancy: boolean
@@ -80,6 +83,7 @@ export function DisplaySettings({
       <UnitsCard units={units} />
       <StartScreenCard
         startScreen={startScreen}
+        startScreens={startScreens}
         hasChild={hasChild}
         hasPregnancy={hasPregnancy}
         quickActions={quickActions}
@@ -159,11 +163,13 @@ function UnitsCard({ units }: { units: UnitPrefs }) {
 
 function StartScreenCard({
   startScreen,
+  startScreens,
   quickActions,
   hasChild,
   hasPregnancy,
 }: {
   startScreen: StartScreen
+  startScreens: StartScreen[]
   quickActions: EventType[]
   hasChild: boolean
   hasPregnancy: boolean
@@ -213,7 +219,7 @@ function StartScreenCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          {START_SCREEN_OPTIONS.map((option) => {
+          {START_SCREEN_OPTIONS.filter((option) => startScreens.includes(option.value)).map((option) => {
             const disabled =
               (option.needsChild && !hasChild) || (option.needsPregnancy && !hasPregnancy)
             return (

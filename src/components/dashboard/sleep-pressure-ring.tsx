@@ -1,24 +1,15 @@
+import { formatDuration } from '@/lib/time'
 import { clamp } from '@/lib/utils'
 
-const COLORS = {
-  fresh: 'hsl(var(--cat-solids))',
-  building: 'hsl(var(--cat-feed))',
-  ready: 'hsl(var(--primary))',
-  overtired: 'hsl(var(--destructive))',
-} as const
-
 /**
- * Schlafdruck als Ring: fuellt sich seit dem letzten Aufwachen. Ueber 100 %
- * laeuft ein zweiter, duennerer Ring weiter – so sieht man auch deutliche
- * Uebermuedung.
+ * Wie lange schon wach, im Verhaeltnis zum sonst ueblichen Abstand.
+ *
+ * Bewusst einfarbig und ohne Prozentzahl in der Mitte: eine Ampel, die auf Rot
+ * springt, sagt „ihr habt etwas verpasst" – und genau das ist hier nicht
+ * gemeint. Ist mehr Zeit vergangen als sonst, laeuft ein zweiter, duennerer
+ * Ring weiter, in derselben Farbe. In der Mitte steht die Zeit selbst.
  */
-export function SleepPressureRing({
-  ratio,
-  level,
-}: {
-  ratio: number
-  level: keyof typeof COLORS
-}) {
+export function SleepPressureRing({ ratio, awakeMin }: { ratio: number; awakeMin: number }) {
   const size = 92
   const stroke = 10
   const radius = (size - stroke) / 2
@@ -33,15 +24,22 @@ export function SleepPressureRing({
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         role="img"
-        aria-label={`Schlafdruck ${Math.round(ratio * 100)} Prozent`}
+        aria-label={`Wach seit ${formatDuration(awakeMin * 60)}`}
       >
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={COLORS[level]}
+          stroke="hsl(var(--muted))"
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="hsl(var(--cat-sleep))"
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -54,7 +52,7 @@ export function SleepPressureRing({
             cy={size / 2}
             r={radius - stroke}
             fill="none"
-            stroke={COLORS.overtired}
+            stroke="hsl(var(--cat-sleep))"
             strokeWidth={3}
             strokeLinecap="round"
             strokeDasharray={2 * Math.PI * (radius - stroke)}
@@ -63,8 +61,11 @@ export function SleepPressureRing({
           />
         )}
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-display text-lg font-bold tabular">
-        {Math.round(ratio * 100)}%
+      <span
+        aria-hidden
+        className="absolute inset-0 flex items-center justify-center px-2 text-center font-display text-sm font-bold tabular leading-tight"
+      >
+        {formatDuration(awakeMin * 60)}
       </span>
     </div>
   )

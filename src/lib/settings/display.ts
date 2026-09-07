@@ -67,13 +67,25 @@ export function parseStartScreen(value: unknown): StartScreen {
  */
 export function startScreenPath(
   value: unknown,
-  { hasChild, hasPregnancy }: { hasChild: boolean; hasPregnancy: boolean },
+  {
+    hasChild,
+    hasPregnancy,
+    erlaubt = () => true,
+  }: {
+    hasChild: boolean
+    hasPregnancy: boolean
+    /** Ist die Zielseite gerade eingeschaltet? Siehe lib/settings/features.ts. */
+    erlaubt?: (pfad: string) => boolean
+  },
 ): string {
   const screen = parseStartScreen(value)
   const option = START_SCREEN_OPTIONS.find((entry) => entry.value === screen)
   if (!option) return DASHBOARD_PATH
   if (option.needsChild && !hasChild) return DASHBOARD_PATH
   if (option.needsPregnancy && !hasPregnancy) return DASHBOARD_PATH
+  // Ein Startbildschirm, den es gerade nicht gibt, waere schlimmer als der
+  // falsche – dann lieber zurueck aufs Dashboard.
+  if (!erlaubt(option.path)) return DASHBOARD_PATH
   return option.path
 }
 

@@ -8,10 +8,17 @@ export default defineConfig({
   globalSetup: './e2e/reset-db.ts',
   timeout: 60_000,
   expect: { timeout: 10_000 },
+  /*
+   * Harte Obergrenze fuer den ganzen Lauf. Der komplette Satz braucht auf
+   * dieser Maschine etwa acht Minuten; laeuft er deutlich laenger, stimmt
+   * etwas nicht, und dann ist ein Abbruch mit Bericht mehr wert als eine
+   * Warteschleife, in der man raten muss.
+   */
+  globalTimeout: 15 * 60_000,
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
+  reporter: [['line']],
   use: {
     baseURL,
     trace: 'retain-on-failure',
@@ -35,7 +42,14 @@ export default defineConfig({
   webServer: {
     command: `npm run start -- --port ${PORT}`,
     url: `${baseURL}/api/health`,
-    reuseExistingServer: !process.env.CI,
+    /*
+     * Nie einen schon laufenden Server wiederverwenden. Ein Server aus einem
+     * frueheren Lauf liefert Chunks einer alten Build-ID aus; im Browser sieht
+     * das aus wie "Application error: a client-side exception" und kostet
+     * einen halben Tag Fehlersuche an Stellen, die in Ordnung sind. Die paar
+     * Sekunden Startzeit sind das billigere Ende.
+     */
+    reuseExistingServer: false,
     timeout: 120_000,
     // Der Testserver laeuft ueber http – ohne das Secure-Flag kommen die
     // Session-Cookies auch bei API-Anfragen an.

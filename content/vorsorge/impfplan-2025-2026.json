@@ -1,0 +1,271 @@
+{
+  "quelle": "Impfplan Österreich 2025/2026, Bundesministerium für Arbeit, Soziales, Gesundheit, Pflege und Konsumentenschutz, sozialministerium.gv.at/impfplan",
+  "version": "1.1",
+  "stand": "2025-10-10",
+  "abgerufenAm": "2026-09-07",
+  "geprueft": false,
+  "pruefhinweis": "ACHTUNG, ungeprüft. Diese Daten stammen NICHT aus dem Original-PDF – der Download von sozialministerium.gv.at, gesundheit.gv.at und auch von der Spiegelung auf pii.meduniwien.ac.at ist aus der Entwicklungsumgebung gesperrt. Vor der Verwendung gegen den Impfplan Österreich 2025/2026 (Version 1.1 vom 10.10.2025) prüfen. Besonders zu prüfen: (1) das Feld kostenfrei. Österreich hat das kostenfreie Kinderimpfprogramm zuletzt erweitert; für Varizellen und die Kinder-Influenza deuten Recherchen im September 2026 darauf hin, dass sie inzwischen enthalten sind – hier stehen sie noch als kostenpflichtig bzw. unbekannt. (2) die Umrechnung der Zeitangaben: die Quellen formulieren teils ordinal („im 3. Lebensmonat“), teils vollendet („ab der vollendeten 7. Lebenswoche“); hier steht alles in vollendeten Einheiten, was um bis zu eine Woche bzw. einen Monat abweichen kann. Einträge ohne belegtes Zeitfenster tragen fenster: null und sind in der App als ungeprüft gekennzeichnet.",
+  "einheiten": "Alle Zahlen in fenster sind vollendete Lebenswochen bzw. Lebensmonate, gerechnet ab dem Geburtstag. Der Wortlaut der Quelle steht unverändert in fensterText bzw. hinweis. Beispiel: „im 3. Lebensmonat“ ist vonMonaten 2 / bisMonaten 3.",
+  "impfungen": [
+    {
+      "key": "rotavirus-1",
+      "name": "Rotavirus, 1. Teilimpfung",
+      "schutzGegen": [
+        "Rotavirus-Brechdurchfall"
+      ],
+      "dosisNr": 1,
+      "fenster": {
+        "vonWochen": 7,
+        "bisWochen": 12
+      },
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": true,
+      "hinweis": "Schluckimpfung, ehestmöglich ab der vollendeten 7. Lebenswoche. Rotarix und RotaTeq sind nicht austauschbar – die Serie wird mit demselben Impfstoff beendet.",
+      "quelle": "Gesundheitsportal, Impfung gegen Rotaviren"
+    },
+    {
+      "key": "rotavirus-2",
+      "name": "Rotavirus, 2. Teilimpfung",
+      "schutzGegen": [
+        "Rotavirus-Brechdurchfall"
+      ],
+      "dosisNr": 2,
+      "fenster": {
+        "vonWochen": 11,
+        "bisWochen": 24
+      },
+      "mindestabstandZurVordosisWochen": 4,
+      "kostenfrei": true,
+      "hinweis": "Mindestabstand vier Wochen zur ersten Teilimpfung. Die Serie muss spätestens im Alter von 24 Wochen abgeschlossen sein.",
+      "quelle": "Gesundheitsportal, Impfung gegen Rotaviren"
+    },
+    {
+      "key": "rotavirus-3",
+      "name": "Rotavirus, 3. Teilimpfung (nur RotaTeq)",
+      "schutzGegen": [
+        "Rotavirus-Brechdurchfall"
+      ],
+      "dosisNr": 3,
+      "fenster": {
+        "vonWochen": 15,
+        "bisWochen": 24
+      },
+      "mindestabstandZurVordosisWochen": 4,
+      "kostenfrei": true,
+      "hinweis": "Nur bei Verwendung von RotaTeq; Rotarix kommt mit zwei Dosen aus. Abschluss ebenfalls bis zur 24. Lebenswoche.",
+      "quelle": "Gesundheitsportal, Impfung gegen Rotaviren"
+    },
+    {
+      "key": "sechsfach-1",
+      "name": "6-fach-Impfung, 1. Dosis",
+      "schutzGegen": [
+        "Diphtherie",
+        "Tetanus (Wundstarrkrampf)",
+        "Pertussis (Keuchhusten)",
+        "Poliomyelitis (Kinderlähmung)",
+        "Haemophilus influenzae Typ b",
+        "Hepatitis B"
+      ],
+      "dosisNr": 1,
+      "fenster": {
+        "vonMonaten": 2,
+        "bisMonaten": 3
+      },
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": true,
+      "hinweis": "Ehestmöglich ab der vollendeten 7. Lebenswoche, jedenfalls im 3. Lebensmonat.",
+      "quelle": "Gesundheitsportal, Impfungen für Säuglinge und Kleinkinder"
+    },
+    {
+      "key": "sechsfach-2",
+      "name": "6-fach-Impfung, 2. Dosis",
+      "schutzGegen": [
+        "Diphtherie",
+        "Tetanus (Wundstarrkrampf)",
+        "Pertussis (Keuchhusten)",
+        "Poliomyelitis (Kinderlähmung)",
+        "Haemophilus influenzae Typ b",
+        "Hepatitis B"
+      ],
+      "dosisNr": 2,
+      "fenster": {
+        "vonMonaten": 4,
+        "bisMonaten": 5
+      },
+      "mindestabstandZurVordosisWochen": 8,
+      "kostenfrei": true,
+      "hinweis": "Zweite Dosis im 5. Lebensmonat.",
+      "quelle": "Gesundheitsportal, Impfungen für Säuglinge und Kleinkinder"
+    },
+    {
+      "key": "sechsfach-3",
+      "name": "6-fach-Impfung, 3. Dosis",
+      "schutzGegen": [
+        "Diphtherie",
+        "Tetanus (Wundstarrkrampf)",
+        "Pertussis (Keuchhusten)",
+        "Poliomyelitis (Kinderlähmung)",
+        "Haemophilus influenzae Typ b",
+        "Hepatitis B"
+      ],
+      "dosisNr": 3,
+      "fenster": {
+        "vonMonaten": 11,
+        "bisMonaten": 12
+      },
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": true,
+      "hinweis": "Dritte Dosis im 12. Lebensmonat, mit deutlichem Abstand zur zweiten.",
+      "quelle": "Gesundheitsportal, Impfungen für Säuglinge und Kleinkinder"
+    },
+    {
+      "key": "pneumokokken-1",
+      "name": "Pneumokokken, 1. Dosis",
+      "schutzGegen": [
+        "Pneumokokken"
+      ],
+      "dosisNr": 1,
+      "fenster": {
+        "vonWochen": 6,
+        "bisMonaten": 3
+      },
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": true,
+      "hinweis": "Erste Impfung ab der 6. Lebenswoche bis zum 3. Lebensmonat.",
+      "quelle": "Gesundheitsportal, Pneumokokken-Impfung"
+    },
+    {
+      "key": "pneumokokken-2",
+      "name": "Pneumokokken, 2. Dosis",
+      "schutzGegen": [
+        "Pneumokokken"
+      ],
+      "dosisNr": 2,
+      "fenster": {
+        "vonMonaten": 4,
+        "bisMonaten": 5
+      },
+      "mindestabstandZurVordosisWochen": 8,
+      "kostenfrei": true,
+      "hinweis": "Acht Wochen nach der ersten Impfung.",
+      "quelle": "Gesundheitsportal, Pneumokokken-Impfung"
+    },
+    {
+      "key": "pneumokokken-3",
+      "name": "Pneumokokken, 3. Dosis",
+      "schutzGegen": [
+        "Pneumokokken"
+      ],
+      "dosisNr": 3,
+      "fenster": {
+        "vonMonaten": 11,
+        "bisMonaten": 15
+      },
+      "mindestabstandZurVordosisWochen": 24,
+      "kostenfrei": true,
+      "hinweis": "Im Alter von 11 bis 15 Monaten, frühestens sechs Monate nach der zweiten Dosis.",
+      "quelle": "Gesundheitsportal, Pneumokokken-Impfung"
+    },
+    {
+      "key": "mmr-1",
+      "name": "MMR, 1. Dosis",
+      "schutzGegen": [
+        "Masern",
+        "Mumps",
+        "Röteln"
+      ],
+      "dosisNr": 1,
+      "fenster": {
+        "vonMonaten": 9,
+        "bisMonaten": 12
+      },
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": true,
+      "hinweis": "Ab dem vollendeten 9. Lebensmonat. An öffentlichen Impfstellen für alle kostenlos.",
+      "quelle": "Gesundheitsportal, MMR-Impfung"
+    },
+    {
+      "key": "mmr-2",
+      "name": "MMR, 2. Dosis",
+      "schutzGegen": [
+        "Masern",
+        "Mumps",
+        "Röteln"
+      ],
+      "dosisNr": 2,
+      "fenster": {
+        "vonMonaten": 12,
+        "bisMonaten": 24
+      },
+      "mindestabstandZurVordosisWochen": 12,
+      "kostenfrei": true,
+      "hinweis": "Bei Erstimpfung im ersten Lebensjahr drei Monate später; bei Erstimpfung nach dem ersten Geburtstag mindestens vier Wochen Abstand und so früh wie möglich.",
+      "quelle": "Gesundheitsportal, MMR-Impfung"
+    },
+    {
+      "key": "meningokokken-b",
+      "name": "Meningokokken B",
+      "schutzGegen": [
+        "Meningokokken der Gruppe B"
+      ],
+      "dosisNr": null,
+      "fenster": null,
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": false,
+      "hinweis": "Im Impfplan für Säuglinge und Kleinkinder empfohlen, aber nicht im kostenfreien Kinderimpfprogramm – die Kosten tragt ihr selbst. Zeitpunkte und Dosenzahl bitte im Impfplan oder bei der Kinderärztin nachsehen.",
+      "quelle": "Gesundheitsportal, Kinderimpfungen"
+    },
+    {
+      "key": "meningokokken-acwy",
+      "name": "Meningokokken ACWY",
+      "schutzGegen": [
+        "Meningokokken der Gruppen A, C, W und Y"
+      ],
+      "dosisNr": null,
+      "fenster": null,
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": false,
+      "hinweis": "Für Säuglinge und Kleinkinder empfohlen, aber selbst zu zahlen. Kostenfrei erst vom vollendeten 10. bis zum vollendeten 13. Lebensjahr. Zeitpunkte bitte im Impfplan nachsehen.",
+      "quelle": "Gesundheitsportal, Kinderimpfungen"
+    },
+    {
+      "key": "varizellen",
+      "name": "Varizellen (Feuchtblattern)",
+      "schutzGegen": [
+        "Windpocken"
+      ],
+      "dosisNr": null,
+      "fenster": null,
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": false,
+      "hinweis": "Im Impfplan für Säuglinge und Kleinkinder empfohlen, kostenpflichtig. Zeitpunkte und Dosenzahl bitte im Impfplan nachsehen.",
+      "quelle": "Gesundheitsportal, Kinderimpfungen"
+    },
+    {
+      "key": "fsme",
+      "name": "FSME (Zeckenimpfung)",
+      "schutzGegen": [
+        "Frühsommer-Meningoenzephalitis"
+      ],
+      "dosisNr": null,
+      "fenster": null,
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": false,
+      "hinweis": "In Österreich allgemein empfohlen, Zeitpunkt und Schema altersabhängig. Bitte im Impfplan nachsehen – hier steht bewusst kein Termin, weil er nicht belegt werden konnte.",
+      "quelle": null
+    },
+    {
+      "key": "influenza",
+      "name": "Influenza (Grippe)",
+      "schutzGegen": [
+        "Influenza"
+      ],
+      "dosisNr": null,
+      "fenster": null,
+      "mindestabstandZurVordosisWochen": null,
+      "kostenfrei": null,
+      "hinweis": "Jährliche Impfung, für Kinder ab einem bestimmten Alter empfohlen. Umfang und Kostenübernahme ändern sich pro Saison – bitte im aktuellen Impfplan nachsehen.",
+      "quelle": null
+    }
+  ]
+}

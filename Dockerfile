@@ -25,7 +25,8 @@ RUN npx prisma generate && npm run build
 # --------------------------------------------------------------- runner -----
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates wget \
+# ffmpeg wandelt die Aufnahmen aus dem Tonspur-Tagebuch nach Opus um.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates wget ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs nextjs
@@ -40,15 +41,29 @@ ENV NODE_ENV=production \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Prisma-CLI und Migrationen fuer `prisma migrate deploy` beim Start.
+# Schema und generierter Client fuer die Laufzeit.
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --chown=nextjs:nodejs docker/entrypoint.sh ./entrypoint.sh
 COPY --chown=nextjs:nodejs docker/seed.mjs ./docker/seed.mjs
 RUN chmod +x ./entrypoint.sh && mkdir -p /data/uploads && chown -R nextjs:nodejs /data
+
+# Prisma-CLI fuer `migrate deploy` beim Start – bewusst frisch installiert statt
+# aus dem Builder kopiert. Die CLI haengt an einer eigenen Kette (@prisma/config
+# -> effect, @prisma/engines mit dem Schema-Engine-Binary), und `node_modules/
+# .bin/prisma` ist ein Symlink, den COPY zu einer echten Datei macht – die CLI
+# sucht ihre WASM-Dateien dann neben sich im falschen Verzeichnis. Beides faellt
+# sonst erst beim ersten Containerstart auf, in einer Restart-Schleife.
+# Die Version kommt aus der package.json, damit es nur eine Wahrheit gibt, und
+# der Rauchtest am Ende beweist im fertigen Image, dass sie startet.
+RUN PRISMA_VERSION="$(node -p "require('/app/package.json').devDependencies.prisma")" \
+    && mkdir -p /opt/prisma-cli \
+    && cd /opt/prisma-cli \
+    && npm init -y > /dev/null \
+    && npm install --no-audit --no-fund --loglevel=error "prisma@${PRISMA_VERSION}" \
+    && npm cache clean --force > /dev/null 2>&1 \
+    && node /opt/prisma-cli/node_modules/prisma/build/index.js --version > /dev/null
 
 USER nextjs
 EXPOSE 3000

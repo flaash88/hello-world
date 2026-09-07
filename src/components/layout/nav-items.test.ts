@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { navItemsFor } from './nav-items'
 
-const hrefs = (input: { hasChild: boolean; hasPregnancy: boolean }) =>
+const hrefs = (input: { hasChild: boolean; hasPregnancy: boolean; entwicklung?: boolean }) =>
   navItemsFor(input).map((item) => item.href)
 
 describe('navItemsFor', () => {
@@ -52,5 +52,22 @@ describe('navItemsFor', () => {
         expect(hrefs({ hasChild, hasPregnancy })).toContain('/eltern')
       }
     }
+  })
+})
+
+describe('abgeschaltete Bereiche', () => {
+  it('lässt die Entwicklungsseite ganz aus der Leiste', () => {
+    expect(hrefs({ hasChild: true, hasPregnancy: false, entwicklung: false })).toEqual([
+      '/heute',
+      '/verlauf',
+      '/eltern',
+      '/mehr',
+    ])
+  })
+
+  it('ändert nichts, solange ohnehin die Schwangerschaft den Platz hat', () => {
+    expect(hrefs({ hasChild: true, hasPregnancy: true, entwicklung: false })).toEqual(
+      hrefs({ hasChild: true, hasPregnancy: true }),
+    )
   })
 })

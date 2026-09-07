@@ -1,9 +1,16 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  resolve: {
+    alias: {
+      // Siehe vitest.server-only.ts – sonst wirft schon der Import.
+      'server-only': fileURLToPath(new URL('./vitest.server-only.ts', import.meta.url)),
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
@@ -39,6 +46,8 @@ export default defineConfig({
         'src/lib/export/weekly-report.ts',
         'src/lib/pregnancy/seed.ts',
         'src/lib/media/storage.ts',
+        'src/lib/fever/daten.ts',
+        'src/lib/export/rueckblick.ts',
         'src/lib/backup/files.ts',
         'src/lib/sounds/player.ts',
       ],

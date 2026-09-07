@@ -77,7 +77,7 @@ export function RunningTimerBar({ timers }: { timers: RunningTimer[] }) {
   }
 
   return (
-    <div className="safe-bottom fixed inset-x-0 bottom-14 z-40 mx-auto max-w-2xl px-3 pb-2">
+    <div className="safe-bottom fixed inset-x-0 bottom-14 z-40 mx-auto max-w-2xl px-3 pb-2 print:hidden">
       <ul className="flex flex-col gap-2">
         {rows.map(({ timer, elapsed }) => {
           const category = EVENT_CATEGORIES[timer.type as EventType]

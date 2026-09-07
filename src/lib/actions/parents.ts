@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { requireUser } from '@/lib/auth/session'
 import { publish } from '@/lib/realtime'
 import { localDateKey } from '@/lib/time'
+import { sendToHousehold } from '@/lib/push/send'
 
 export type ParentResult<T = unknown> = ({ ok: true } & Partial<T>) | { error: string }
 
@@ -148,6 +149,27 @@ export async function saveNightShiftAction(
     kind: 'save',
     id: localDateKey(date),
   })
+
+  // Die andere Person erfaehrt davon – aber nur, wenn sie das eingeschaltet
+  // hat. Ab Werk ist die Kategorie aus.
+  const wer = parsed.data.userId
+    ? ((await prisma.user.findUnique({
+        where: { id: parsed.data.userId },
+        select: { displayName: true },
+      })) ?? null)
+    : null
+  await sendToHousehold(
+    user.householdId,
+    {
+      title: wer ? `${wer.displayName} übernimmt die Nacht` : 'Die Nachtschicht ist offen',
+      body: data.handoverNote ?? `Eingetragen für ${localDateKey(date)}.`,
+      url: '/eltern',
+      tag: `nachtschicht-${localDateKey(date)}`,
+    },
+    'nachtschicht',
+    user.id,
+  )
+
   revalidatePath('/eltern')
   return { ok: true }
 }

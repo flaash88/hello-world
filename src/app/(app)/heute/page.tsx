@@ -1,5 +1,14 @@
 import Link from 'next/link'
-import { Baby, ChevronRight, HeartHandshake, Plus, Timer, UserPlus } from 'lucide-react'
+import {
+  Baby,
+  ChevronRight,
+  ClipboardList,
+  HeartHandshake,
+  Plus,
+  Thermometer,
+  Timer,
+  UserPlus,
+} from 'lucide-react'
 import { getAppContext } from '@/lib/household'
 import { gestationalAge } from '@/lib/pregnancy/weeks'
 import { pregnancyWeekContent } from '@/lib/pregnancy/content'
@@ -11,7 +20,11 @@ import {
   recentEvents,
 } from '@/lib/events/queries'
 import { unitPrefsFrom } from '@/lib/units'
+import { laufendeFieberEpisode } from '@/lib/fever/current'
+import { istNeugeborenes } from '@/lib/growth/newborn'
 import { parseQuickActions } from '@/lib/settings/display'
+import { GRUNDKATEGORIEN } from '@/lib/settings/features'
+import { currentFeatures } from '@/lib/settings/features-server'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,15 +33,21 @@ import { analyseSleep, persistForecast } from '@/lib/sleep/analysis'
 import { buildDayClockData } from '@/lib/actions/dashboard'
 import { DayClockSection } from '@/components/dashboard/day-clock-section'
 import { SleepForecastCard } from '@/components/dashboard/sleep-forecast-card'
-import { DayGoalCard } from '@/components/dashboard/day-goal-card'
+import { SleepTodayCard } from '@/components/dashboard/sleep-today-card'
 import { QuickActions } from '@/components/tracker/quick-actions'
 import { LastEventsStrip } from '@/components/tracker/last-events-strip'
 import { EventList } from '@/components/tracker/event-list'
 import { AllActionsSheet } from '@/components/tracker/all-actions-sheet'
+import { NachtragSheet } from '@/components/tracker/nachtrag-sheet'
 
 export default async function HomePage() {
   const ctx = await getAppContext()
+  const features = await currentFeatures()
   const units = unitPrefsFrom(ctx.household.settings)
+  // Abgeschaltete Bereiche werden nicht ausgeblendet, sondern gar nicht erst
+  // gerechnet: die Schlafanalyse laeuft dann ueberhaupt nicht.
+  const zeigeSchlaf = features.aktiv.has('schlafanalyse')
+  const zeigeKreisuhr = features.aktiv.has('kreisuhr')
   const partnerMissing = ctx.members.length < 2
   const child = ctx.activeChild
 
@@ -41,17 +60,37 @@ export default async function HomePage() {
         lastEventPerType(child.id),
         knownFoods(child.id),
         lastNursingSide(child.id),
-        analyseSleep(child, ctx.timezone),
-        buildDayClockData(child.id, ctx.timezone, 0, new Date(), units),
+        zeigeSchlaf ? analyseSleep(child, ctx.timezone) : Promise.resolve(null),
+        zeigeKreisuhr
+          ? buildDayClockData(child.id, ctx.timezone, 0, new Date(), units, zeigeSchlaf)
+          : Promise.resolve(null),
       ])
-    : ([[], new Map(), [], null, null, null] as const)
+    : ([
+        [] as Awaited<ReturnType<typeof recentEvents>>,
+        new Map(),
+        [] as string[],
+        null,
+        null,
+        null,
+      ] as const)
 
   // Die aktuelle Vorhersage festhalten – daraus entsteht die Push-Erinnerung.
   if (child && analysis) {
     await persistForecast(child.id, analysis.forecast, analysis.model)
   }
 
-  const quickActions = parseQuickActions(ctx.household.settings?.quickActions)
+  // Laeuft gerade eine Fieberepisode, gehoert sie nach oben – dann sucht
+  // niemand nachts im Menue danach.
+  const fieber = child ? await laufendeFieberEpisode(child.id) : null
+
+  // In den ersten sechs Wochen ist das Protokoll fuer die Hebamme das, was am
+  // haeufigsten gebraucht wird – danach verschwindet die Karte wieder.
+  const wochenbett = istNeugeborenes(child?.birthDate ?? null, new Date(), ctx.timezone)
+
+  // Waehrend einer Pause bleiben nur die vier Grundkategorien stehen.
+  const quickActions = features.pausiert
+    ? GRUNDKATEGORIEN
+    : parseQuickActions(ctx.household.settings?.quickActions)
   const runningTypes = events.filter((e) => e.running).map((e) => e.type)
 
   return (
@@ -81,9 +120,9 @@ export default async function HomePage() {
         </Card>
       )}
 
-      {child && analysis && clock && (
+      {child && (
         <>
-          <SleepForecastCard analysis={analysis} timezone={ctx.timezone} />
+          {analysis && <SleepForecastCard analysis={analysis} timezone={ctx.timezone} />}
 
           <QuickActions
             childId={child.id}
@@ -98,21 +137,60 @@ export default async function HomePage() {
             suggestions={foods}
             lastNursingSide={nursingSide}
           />
+          <NachtragSheet childId={child.id} timezone={ctx.timezone} />
 
-          <section>
-            <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              Der Tag im Kreis
-            </h2>
-            <DayClockSection
-              childId={child.id}
-              initialSegments={clock.segments}
-              initialPlanned={clock.planned}
-              initialNowMinutes={clock.nowMinutes}
-              initialLabel={clock.label}
-            />
-          </section>
+          {clock && (
+            <section>
+              <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                Der Tag im Kreis
+              </h2>
+              <DayClockSection
+                childId={child.id}
+                initialSegments={clock.segments}
+                initialPlanned={clock.planned}
+                initialNowMinutes={clock.nowMinutes}
+                initialLabel={clock.label}
+              />
+            </section>
+          )}
 
-          <DayGoalCard analysis={analysis} />
+          {wochenbett && (
+            <Link href="/protokoll" className="block">
+              <Card className="transition-colors hover:border-primary">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <ClipboardList className="size-4 text-primary" aria-hidden />
+                      Stillprotokoll
+                    </CardTitle>
+                    <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                  </div>
+                  <CardDescription>
+                    Die letzten Tage auf einen Blick – für den Besuch der Hebamme.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          )}
+
+          {fieber && (
+            <Link href="/gesundheit/fieber" className="block">
+              <Card className="transition-colors hover:border-primary">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Thermometer className="size-4 text-primary" aria-hidden />
+                      Fieberverlauf
+                    </CardTitle>
+                    <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+                  </div>
+                  <CardDescription>{fieber.zusammenfassung}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          )}
+
+          {analysis && <SleepTodayCard analysis={analysis} />}
 
           <section>
             <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
@@ -143,7 +221,7 @@ export default async function HomePage() {
               childId={child.id}
               suggestions={foods}
               showDayHeadings={false}
-              emptyHint="Tippe oben auf eine Schnellaktion – der erste Eintrag ist in zwei Sekunden erledigt."
+              emptyHint="Für heute noch nichts eingetragen."
             />
           </section>
         </>

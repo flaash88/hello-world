@@ -90,7 +90,7 @@ test.describe('Einstellungen', () => {
     await page.getByLabel('Name').fill('Marlene')
     await page.getByLabel('Errechneter Termin (bei Frühgeburt)').fill(dateInput(-32))
     await page.getByRole('button', { name: 'Speichern' }).click()
-    await expect(page.getByText('Gespeichert')).toBeVisible()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 
     await page.reload()
     // Vier Wochen zu früh: Das korrigierte Alter liegt vier Wochen zurück.
@@ -136,7 +136,7 @@ test.describe('Einstellungen', () => {
     await page.getByRole('button', { name: 'Abpumpen' }).click()
     await page.getByRole('button', { name: 'Verlauf' }).click()
     await page.getByRole('button', { name: 'Speichern', exact: true }).click()
-    await expect(page.getByText('Gespeichert')).toBeVisible()
+    await expect(page.getByText('Gespeichert', { exact: true })).toBeVisible()
 
     // Die Wurzel leitet jetzt auf den Verlauf.
     await page.goto('/')
